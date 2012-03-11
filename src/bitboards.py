@@ -14,18 +14,18 @@ Functions and classes for manipulating bitboards.
 # East corresponds to adding 1 to an index (right shifting a bb by 1).
 # West corresponds to subtracting 1 from an index (left shifting a bb by 1).
 #
-#         a  b  c  d  e  f  g  h
-#      +-------------------------+
-#     8| 56 57 58 59 60 61 62 63 |8
-#     7| 48                   55 |7
-#     6| 40                   47 |6
-#     5| 32                   39 |5
-#     4| 24                   31 |4
-#     3| 16                   23 |3
-#     2|  8                   15 |2
-#     1|  0  1  2  3  4  5  6  7 |1
-#      +-------------------------+
-#         a  b  c  d  e  f  g  h
+#          a  b  c  d  e  f  g  h
+#       +-------------------------+
+#     8 | 56 57 58 59 60 61 62 63 | 8
+#     7 | 48                   55 | 7
+#     6 | 40                   47 | 6
+#     5 | 32                   39 | 5
+#     4 | 24                   31 | 4
+#     3 | 16                   23 | 3
+#     2 | 08                   15 | 2
+#     1 | 00 01 02 03 04 05 06 07 | 1
+#       +-------------------------+
+#          a  b  c  d  e  f  g  h
 #
 #-----------------------------------------------------------------------------
 
@@ -52,6 +52,7 @@ _dir_to_edge_and_shift = {
         'W': (FILEA, -1),
         }
 def _move_dir(board, dir):
+    dir = dir.upper()
     EDGE, shift = _dir_to_edge_and_shift[dir]
     moveable = board & ~EDGE
     if shift > 0:
