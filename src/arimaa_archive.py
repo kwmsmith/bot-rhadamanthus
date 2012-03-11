@@ -35,6 +35,8 @@ FIELDS = [
             'events',
 ]
 
+EMPTY_BOARD = ' ' * 64
+
 #-----------------------------------------------------------------------------
 # Utility functions to convert a string field to correct representation.
 #-----------------------------------------------------------------------------
