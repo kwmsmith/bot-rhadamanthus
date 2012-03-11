@@ -29,28 +29,24 @@ Functions and classes for manipulating bitboards.
 #
 #-----------------------------------------------------------------------------
 
-RANK8 = 0
-for i in range(56, 64):
-    RANK8 |= (1<<i)
+#-----------------------------------------------------------------------------
+# --- Legal pieces
 
-RANK1 = 0
-for i in range(0, 8):
-    RANK1 |= (1<<i)
+PIECES = 'rcdhmeRCDHME'
+COLUMNS = 'abcdefgh'
+ROWS = range(1, 8+1)
+ACTIONS = 'NSEWX' # The 'X' is for capturing a piece.
 
-FILEH = 0
-for i in range(7, 64, 8):
-    FILEH |= (1<<i)
+def set_board(board, col_rows):
+    for c,r in col_rows:
+        board |= (_bbpsn_from_col_row(c, int(r)))
+    return board
 
-FILEA = 0
-for i in range(0, 64, 8):
-    FILEA |= (1<<i)
+col_to_num = dict(zip(COLUMNS, range(8)))
+def _bbpsn_from_col_row(col, row):
+    ''' col is in COLUMNS; row is in [1..8].'''
+    return 1<<((row-1) * 8 + col_to_num[col])
 
-_dir_to_edge_and_shift = {
-        'N': (RANK8, 8),
-        'S': (RANK1, -8),
-        'E': (FILEH, 1),
-        'W': (FILEA, -1),
-        }
 def _move_dir(board, dir):
     dir = dir.upper()
     EDGE, shift = _dir_to_edge_and_shift[dir]
@@ -74,6 +70,49 @@ def move_east(board):
 
 def move_west(board):
     return _move_dir(board, 'W')
+
+def apply_step(stepstr, bboards):
+    piece, col, row, action = stepstr
+    row = int(row)
+    action = action.upper()
+    if piece not in PIECES:
+        raise ValueError('piece "{}" not one of "{}".'.format(piece, PIECES))
+    if col not in COLUMNS:
+        raise ValueError('column "{}" not one of "{}".'.format(col, COLUMNS))
+    if row not in ROWS:
+        raise ValueError('row "{}" not one of "{}".'.format(row, ROWS))
+    if action not in ACTIONS:
+        raise ValueError('action "{}" not one of "{}".'.format(action, ACTIONS))
+    bbpsn = _bbpsn_from_col_row(col, row)
+    color = 'w' if piece.isupper() else 'b'
+    bbpiece = piece.lower()
+
+    # action == 'X' case:
+    if action == 'X' and not bbpsn & TRAPS:
+        msg = 'Action is "{}" but position is "{}" and is not on a trap'.format
+        raise ValueError(msg(action, col+row))
+
+    if action == 'X':
+        num_color = _num_pieces(bboards[color])
+        num_piece = _num_pieces(bboards[bbpiece])
+        bboards[color] &= ~bbpsn
+        bboards[bbpiece] &= ~bbpsn
+        assert num_color - 1 == _num_pieces(bboards[color])
+        assert num_piece - 1== _num_pieces(bboards[bbpiece])
+        return
+
+    # Action in 'NSEW':
+    num_color = _num_pieces(bboards[color])
+    num_piece = _num_pieces(bboards[bbpiece])
+    bboards[color] &= ~bbpsn
+    bboards[color] |= _move_dir(bbpsn, action)
+    bboards[bbpiece] &= ~bbpsn
+    bboards[bbpiece] |= _move_dir(bbpsn, action)
+    assert num_color == _num_pieces(bboards[color])
+    assert num_piece == _num_pieces(bboards[bbpiece])
+
+def _num_pieces(bboard):
+    return len(board_to_posns(bboard))
 
 def _reverse_str(s):
     return ''.join(reversed(s))
@@ -138,12 +177,25 @@ def bboards_from_char_state(ch_board):
         piece_posns[color] = piece_posns.get(color, 0) | board_idx
     return piece_posns
 
+def is_goal(bboards):
+    brabbits = bboards['b'] & bboards['r']
+    wrabbits = bboards['w'] & bboards['r']
+    if brabbits & RANK1:
+        return 'b'
+    elif wrabbits & RANK8:
+        return 'w'
+    else:
+        return ''
+
 def char_state_from_bboards(bboards, empty=' '):
     ''' Given a dictionary of <piece label> => <position bboard> entries,
     returns a standard notation Arimaa board.
     '''
     ch_board = [empty] * 64
-    wps = bboards.get('w', 0) # white / gold pieces
+    try:
+        wps = bboards.get('w', 0) # white / gold pieces
+    except AttributeError:
+        import pdb; pdb.set_trace()
     bps = bboards.get('b', 0) # black / silver pieces
     for piece in 'rcdhme':
         # get the white / black piece for the piece type.
@@ -161,3 +213,32 @@ def char_state_from_bboards(bboards, empty=' '):
                 assert ch_board[idx] == empty
                 ch_board[idx] = piece
     return ''.join(reversed(ch_board))
+
+#-----------------------------------------------------------------------------
+# Position constants
+#-----------------------------------------------------------------------------
+
+RANK8 = 0
+for i in range(56, 64):
+    RANK8 |= (1<<i)
+
+RANK1 = 0
+for i in range(0, 8):
+    RANK1 |= (1<<i)
+
+FILEH = 0
+for i in range(7, 64, 8):
+    FILEH |= (1<<i)
+
+FILEA = 0
+for i in range(0, 64, 8):
+    FILEA |= (1<<i)
+
+TRAPS = set_board(0, ['c3', 'f3', 'c6', 'f6'])
+
+_dir_to_edge_and_shift = {
+        'N': (RANK8, 8),
+        'S': (RANK1, -8),
+        'E': (FILEH, 1),
+        'W': (FILEA, -1),
+        }

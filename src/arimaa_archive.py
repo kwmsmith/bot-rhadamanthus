@@ -1,3 +1,4 @@
+import bitboards
 import tarfile
 
 #-----------------------------------------------------------------------------
@@ -146,6 +147,24 @@ def game_from_game_string(fields, game_string):
     for field, ss in game.items():
         game[field] = FIELD_CONVERTERS[field](ss)
     return game
+
+def play_archive_game(allmoves):
+    '''
+    allmoves is a list starting with 1w, 1b (the game setup moves), followed by
+    2w, 2b and following (the move playouts).
+
+    '''
+
+    if len(allmoves) < 2:
+        return bitboards.bboards_from_char_state(EMPTY_BOARD)
+    wmove1, bmove1 = allmoves[:2]
+    board = game_setup_from_move_1(wmove1, bmove1)
+    bbs = bitboards.bboards_from_char_state(board)
+    for move in allmoves[2:]:
+        label, steps = move[0], move[1:]
+        for step in steps:
+            bitboards.apply_step(step, bbs)
+    return bbs
 
 def game_setup_from_move_1(wmove1, bmove1):
 
