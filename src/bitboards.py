@@ -8,7 +8,7 @@ Functions and classes for manipulating bitboards.
 #
 # The most sig. bit of a bitboard corresponds to square h8 of an Arimaa board.
 # The least sig. bit of a bitboard corresponds to squard a1 of an Arimaa board.
-# 
+#
 # North corresponds to adding 8 to an index (left shifting a bb by 8).
 # South corresponds to subtracting 8 from an index(right shifting a bb by 8).
 # East corresponds to adding 1 to an index (right shifting a bb by 1).
@@ -31,11 +31,19 @@ Functions and classes for manipulating bitboards.
 
 #-----------------------------------------------------------------------------
 # --- Legal pieces
+#-----------------------------------------------------------------------------
+WPIECES = "RCDHME"
+BPIECES = WPIECES.lower()
+PIECES = BPIECES + WPIECES
 
-PIECES = 'rcdhmeRCDHME'
 COLUMNS = 'abcdefgh'
 ROWS = range(1, 8+1)
-ACTIONS = 'NSEWX' # The 'X' is for capturing a piece.
+
+# NSEW - move a piece in that direction (with White at South, Black at North)
+# 'X' - capture a piece.
+ACTIONS = 'NSEWX'
+
+EMPTY_BOARD = 0
 
 def set_board(board, col_rows):
     for c,r in col_rows:
@@ -48,13 +56,58 @@ def _bbpsn_from_col_row(col, row):
     return 1<<((row-1) * 8 + col_to_num[col])
 
 def _move_dir(board, dir):
-    dir = dir.upper()
     EDGE, shift = _dir_to_edge_and_shift[dir]
     moveable = board & ~EDGE
     if shift > 0:
         return (board & EDGE) | (moveable << shift)
     else:
         return (board & EDGE) | (moveable >> -shift)
+
+def _remove_piece(psn, color, piece, bboards):
+    ''' Remove piece at psn from the board.  Checks that psn is on one of the
+    trap squares.
+
+    psn -- bb position.
+    color -- 'w' or 'b'.
+    piece -- one of 'rcdhme'.
+    bboards -- dict of <color or piece> => <bitboard> mappings.
+
+    '''
+    if not psn & TRAPS:
+        msg = 'Action is "X" but position is "{}" and is not on a trap'.format
+        raise ValueError(msg(psn))
+
+    num_color = _num_pieces(bboards[color])
+    num_piece = _num_pieces(bboards[piece])
+    bboards[color] &= ~psn
+    bboards[piece] &= ~psn
+    assert num_color - 1 == _num_pieces(bboards[color])
+    assert num_piece - 1== _num_pieces(bboards[piece])
+
+def _move_piece(psn, color, piece, bboards, direction):
+    ''' Move piece at psn in direction `direction`.
+
+    psn -- bb position.
+    color -- 'w' or 'b'.
+    piece -- one of 'rcdhme'.
+    bboards -- dict of <color or piece> => <bitboard> mappings.
+    direction -- one of 'NSEW'.
+
+    '''
+    num_color = _num_pieces(bboards[color])
+    num_piece = _num_pieces(bboards[piece])
+
+    _move_piece_fast(psn, color, piece, bboards, direction)
+
+    assert num_color == _num_pieces(bboards[color])
+    assert num_piece == _num_pieces(bboards[piece])
+
+def _move_piece_fast(psn, color, piece, bboards, direction):
+    moved = _move_dir(psn, direction)
+    bboards[color] &= ~psn
+    bboards[color] |= moved
+    bboards[piece] &= ~psn
+    bboards[piece] |= moved
 
 def move_north(board):
     ''' Move every piece on board north.
@@ -83,33 +136,18 @@ def apply_step(stepstr, bboards):
         raise ValueError('row "{}" not one of "{}".'.format(row, ROWS))
     if action not in ACTIONS:
         raise ValueError('action "{}" not one of "{}".'.format(action, ACTIONS))
+
     bbpsn = _bbpsn_from_col_row(col, row)
-    color = 'w' if piece.isupper() else 'b'
+    color = 'w' if piece in WPIECES else 'b'
     bbpiece = piece.lower()
 
-    # action == 'X' case:
-    if action == 'X' and not bbpsn & TRAPS:
-        msg = 'Action is "{}" but position is "{}" and is not on a trap'.format
-        raise ValueError(msg(action, col+row))
-
     if action == 'X':
-        num_color = _num_pieces(bboards[color])
-        num_piece = _num_pieces(bboards[bbpiece])
-        bboards[color] &= ~bbpsn
-        bboards[bbpiece] &= ~bbpsn
-        assert num_color - 1 == _num_pieces(bboards[color])
-        assert num_piece - 1== _num_pieces(bboards[bbpiece])
-        return
+        _remove_piece(bbpsn, color, bbpiece, bboards)
+    elif action in 'NSEW':
+        _move_piece(bbpsn, color, bbpiece, bboards, action)
+    else:
+        raise ValueError("Invalid action, given '{}'".format(action))
 
-    # Action in 'NSEW':
-    num_color = _num_pieces(bboards[color])
-    num_piece = _num_pieces(bboards[bbpiece])
-    bboards[color] &= ~bbpsn
-    bboards[color] |= _move_dir(bbpsn, action)
-    bboards[bbpiece] &= ~bbpsn
-    bboards[bbpiece] |= _move_dir(bbpsn, action)
-    assert num_color == _num_pieces(bboards[color])
-    assert num_piece == _num_pieces(bboards[bbpiece])
 
 def _num_pieces(bboard):
     return len(board_to_posns(bboard))
@@ -149,7 +187,7 @@ def _char_state_iter(ch_board):
     return res
 
 def bboards_from_char_state(ch_board):
-    ''' Given a standard notation Arimaa board, returns a dictionary of 
+    ''' Given a standard notation Arimaa board, returns a dictionary of
     <piece label> => <position bboard> entries.
 
     Parameters
@@ -192,11 +230,8 @@ def char_state_from_bboards(bboards, empty=' '):
     returns a standard notation Arimaa board.
     '''
     ch_board = [empty] * 64
-    try:
-        wps = bboards.get('w', 0) # white / gold pieces
-    except AttributeError:
-        import pdb; pdb.set_trace()
-    bps = bboards.get('b', 0) # black / silver pieces
+    wps = bboards.get('w', EMPTY_BOARD) # white / gold pieces
+    bps = bboards.get('b', EMPTY_BOARD) # black / silver pieces
     for piece in 'rcdhme':
         # get the white / black piece for the piece type.
         bbb = bboards.get(piece, 0) & bps
@@ -207,7 +242,7 @@ def char_state_from_bboards(bboards, empty=' '):
             for idx in board_to_posns(board):
                 # FIXME: refactor these lines
                 # Necessary to correct the column index.
-                row, col = divmod(idx, 8) 
+                row, col = divmod(idx, 8)
                 col = -col + 7
                 idx = 8 * row + col
                 assert ch_board[idx] == empty
