@@ -134,8 +134,6 @@ def apply_step(stepstr, bboards):
         raise ValueError('column "{}" not one of "{}".'.format(col, COLUMNS))
     if row not in ROWS:
         raise ValueError('row "{}" not one of "{}".'.format(row, ROWS))
-    if action not in ACTIONS:
-        raise ValueError('action "{}" not one of "{}".'.format(action, ACTIONS))
 
     bbpsn = _bbpsn_from_col_row(col, row)
     color = 'w' if piece in WPIECES else 'b'
@@ -146,7 +144,7 @@ def apply_step(stepstr, bboards):
     elif action in 'NSEW':
         _move_piece(bbpsn, color, bbpiece, bboards, action)
     else:
-        raise ValueError("Invalid action, given '{}'".format(action))
+        raise ValueError('action "{}" not one of "{}".'.format(action, ACTIONS))
 
 
 def _num_pieces(bboard):
