@@ -41,7 +41,8 @@ ROWS = range(1, 8+1)
 
 # NSEW - move a piece in that direction (with White at South, Black at North)
 # 'X' - capture a piece.
-ACTIONS = 'NSEWX'
+DIRECTIONS = 'NSEW'
+ACTIONS = DIRECTIONS + 'X'
 
 EMPTY_BOARD = 0
 
@@ -55,7 +56,7 @@ def _bbpsn_from_col_row(col, row):
     ''' col is in COLUMNS; row is in [1..8].'''
     return 1<<((row-1) * 8 + col_to_num[col])
 
-def _move_dir(board, dir):
+def _step_dir(board, dir):
     EDGE, shift = _dir_to_edge_and_shift[dir]
     moveable = board & ~EDGE
     if shift > 0:
@@ -103,7 +104,7 @@ def _move_piece(psn, color, piece, bboards, direction):
     assert num_piece == _num_pieces(bboards[piece])
 
 def _move_piece_fast(psn, color, piece, bboards, direction):
-    moved = _move_dir(psn, direction)
+    moved = _step_dir(psn, direction)
     bboards[color] &= ~psn
     bboards[color] |= moved
     bboards[piece] &= ~psn
@@ -113,16 +114,16 @@ def move_north(board):
     ''' Move every piece on board north.
     Pieces at top of board will stay put.
     '''
-    return _move_dir(board, 'N')
+    return _step_dir(board, 'N')
 
 def move_south(board):
-    return _move_dir(board, 'S')
+    return _step_dir(board, 'S')
 
 def move_east(board):
-    return _move_dir(board, 'E')
+    return _step_dir(board, 'E')
 
 def move_west(board):
-    return _move_dir(board, 'W')
+    return _step_dir(board, 'W')
 
 def apply_step(stepstr, bboards):
     piece, col, row, action = stepstr
@@ -141,14 +142,92 @@ def apply_step(stepstr, bboards):
 
     if action == 'X':
         _remove_piece(bbpsn, color, bbpiece, bboards)
-    elif action in 'NSEW':
+    elif action in DIRECTIONS:
         _move_piece(bbpsn, color, bbpiece, bboards, action)
     else:
         raise ValueError('action "{}" not one of "{}".'.format(action, ACTIONS))
 
+def gen_action(color_to_move, stepscompl, bboards):
+    '''
+    Generates and returns a list of all valid actions that can be taken by
+    `color_to_move`.  An action is a sequence of simple steps or captures that
+    together comprise a logical change to the board state.  These actions can
+    be:
+    
+      * a push (2 steps), 
+      * a pull (2 steps),
+      * a simple step (1 step, no push/pull), or
+      * a capture (0 steps).
+      
+    If one or more captures result from a push, pull or simple step, those
+    captures will be included in the action list returned.
+
+    Parameters
+    ----------
+    color_to_move -- either 'w' or 'b'
+    stepscompl -- integer, 0..3.  The number of steps already completed.
+      If stepscompl is 3, only single steps and resulting captures can be
+      generated (no pushes or pulls).
+    bboards -- dict of <color or piece> => <bit board> mapping.
+
+    Returns
+    -------
+    A list of all valid actions that can be taken by side `color_to_move`.
+    Each action is specified as a list of named tuples:
+    
+      (position, action)
+
+    Where position is a bitboard position (1<<0, 1<<1, 1<<2, ..., 1<<63) and
+    action is in 'NSEWX'.
+
+    '''
+    assert 0 <= stepscompl <= 3
+
+    actions = []
+
+    if stepscompl < 3:
+        # generate all pushes.
+        actions += _gen_pushes(color_to_move, bboards)
+        # generate all pulls.
+        actions += _gen_pulls(color_to_move, bboards)
+    # generate all simple steps.
+    actions += _gen_simple_steps(color_to_move, bboards)
+    return actions
+
+def _gen_pushes(color_to_move, bboards):
+    raise NotImplementedError("finish me!!!")
+
+def _gen_pulls(color_to_move, bboards):
+    raise NotImplementedError("finish me!!!")
+
+def _gen_simple_steps(color_to_move, bboards):
+    # A piece p can take a simple step in direction dir iff:
+    #  * p is not frozen.
+    #  * there exists an adjacent square in dir direction and it is empty.
+    simp_steps = []
+    not_occupied = ~(bboards['w'] | bboards['b'])
+    # find all unfrozen pieces of color_to_move
+    unfrozen = _get_unfrozen(bboards)
+    for dir in DIRECTIONS:
+        # get the opposite direction
+        odir = _opp_from_dir[dir]
+        # step all unoccupied squares in the opposite direction
+        steps = _step_dir(not_occupied, odir)
+        # find where steps overlap with the unfrozen pieces.
+        psns = unfrozen & steps
+        for psn in board_to_posns(psns):
+            simp_steps.append([(psn, dir)])
+            raise NotImplementedError("captures!!!")
+    return simp_steps
+
+def _gen_capture(bboards, (psn, dir)):
+    raise NotImplementedError("finish me!!!")
+
+def _get_unfrozen(bboards):
+    raise NotImplementedError("finish me!!!")
 
 def _num_pieces(bboard):
-    return len(board_to_posns(bboard))
+    return len(board_to_idxs(bboard))
 
 def _reverse_str(s):
     return ''.join(reversed(s))
@@ -167,6 +246,9 @@ def bb_repr(board, N=8):
     return '\n'.join(reversed(res))
 
 def board_to_posns(board):
+    return [(1<<i) for i in range(64) if (board & (1<<i))]
+
+def board_to_idxs(board):
     ''' Given a bitboard, returns a list of 1D board indexes.
     '''
     return [i for i in range(64) if (board & (1<<i))]
@@ -237,7 +319,7 @@ def char_state_from_bboards(bboards, empty=' '):
         # iterate over (piece label, piece locations) tuples.
         for piece, board in ((piece.lower(), bbb),
                              (piece.upper(), wbb)):
-            for idx in board_to_posns(board):
+            for idx in board_to_idxs(board):
                 # FIXME: refactor these lines
                 # Necessary to correct the column index.
                 row, col = divmod(idx, 8)
@@ -268,6 +350,13 @@ for i in range(0, 64, 8):
     FILEA |= (1<<i)
 
 TRAPS = set_board(0, ['c3', 'f3', 'c6', 'f6'])
+
+_opp_from_dir = {
+        'N': 'S',
+        'S': 'N',
+        'E': 'W',
+        'W': 'E',
+}
 
 _dir_to_edge_and_shift = {
         'N': (RANK8, 8),

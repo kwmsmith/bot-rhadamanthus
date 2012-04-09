@@ -81,13 +81,13 @@ class TestBitboards(unittest.TestCase):
 
     def test_board_to_positions(self):
         bd = (1)
-        self.assertEquals(bb.board_to_posns(bd), [0])
+        self.assertEquals(bb.board_to_idxs(bd), [0])
         for i in range(64):
-            self.assertEquals(bb.board_to_posns((1<<i)), [i])
+            self.assertEquals(bb.board_to_idxs((1<<i)), [i])
             if not i:
                 continue
             for j in range(i):
-                self.assertEquals(bb.board_to_posns((1<<i) | (1<<j)), [j, i])
+                self.assertEquals(bb.board_to_idxs((1<<i) | (1<<j)), [j, i])
                 
 
     def test_bb_to_from_ch_state(self):
