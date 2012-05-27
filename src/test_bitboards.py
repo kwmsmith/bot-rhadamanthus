@@ -10,6 +10,12 @@ class TestBitboards(unittest.TestCase):
             board |= (1<<i)
         self.diag_board = board
 
+    def _test_move_bug(self):
+        # TODO: if move south, the north rank must be empty.
+        # Test for ~RANK8, ~RANK1; the bit-flip does weird stuff with two's
+        # compliment / neg numbers.
+        pass
+
     def test_move_north(self):
         self.assertEquals(bb.move_north(bb.RANK8), bb.RANK8)
 
@@ -94,7 +100,7 @@ class TestBitboards(unittest.TestCase):
         # corner case: empty board.
         ch_state = ' ' * 64
         psns = bb.bboards_from_char_state(ch_state)
-        self.assertFalse(psns)
+        self.assertEquals(psns, dict((ch, 0) for ch in 'wbemhdcr'))
         self.assertEquals(ch_state, bb.char_state_from_bboards(psns))
 
         # test all piece types.
@@ -102,6 +108,27 @@ class TestBitboards(unittest.TestCase):
         pieces = 'rcdhmeRCDHME'
         for idx, p in enumerate(pieces, 10):
             ch_state[idx] = p
-        ch_state = ''.join(ch_state)
         psns = bb.bboards_from_char_state(ch_state)
-        self.assertEquals(ch_state, bb.char_state_from_bboards(psns))
+        self.assertEquals(''.join(ch_state), bb.char_state_from_bboards(psns))
+
+class TestGen(unittest.TestCase):
+
+    def setUp(self):
+        ch_state = [' '] * 64
+        ch_state[0] = 'e'
+        self.ch_state = ch_state
+        self.bbds = bb.bboards_from_char_state(ch_state)
+
+    def test_adjacent(self):
+        empties = bb._get_empties(self.bbds)
+        adj = bb._adjacent_with_dir(empties, self.bbds['b'])
+        self.assertTrue(adj['S'])
+        self.assertTrue(adj['E'])
+        self.assertFalse(adj['N'])
+        self.assertFalse(adj['W'])
+
+    def test_gen_simple_steps(self):
+        loc = (1<<56)
+        self.assertTrue(loc & bb._free_pieces('b', self.bbds))
+        dir_to_psns = dict(S=loc, E=loc, N=0, W=0)
+        self.assertEquals(dir_to_psns, bb._allowed_steps('b', self.bbds))

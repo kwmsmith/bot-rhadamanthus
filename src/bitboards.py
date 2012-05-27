@@ -57,12 +57,12 @@ def _bbpsn_from_col_row(col, row):
     return 1<<((row-1) * 8 + col_to_num[col])
 
 def _step_dir(board, dir):
-    EDGE, shift = _dir_to_edge_and_shift[dir]
+    EDGE, OEDGE, shift = _dir_to_edge_and_shift[dir]
     moveable = board & ~EDGE
     if shift > 0:
-        return (board & EDGE) | (moveable << shift)
+        return ~OEDGE & ((board & EDGE) | (moveable << shift))
     else:
-        return (board & EDGE) | (moveable >> -shift)
+        return ~OEDGE & ((board & EDGE) | (moveable >> -shift))
 
 def _remove_piece(psn, color, piece, bboards):
     ''' Remove piece at psn from the board.  Checks that psn is on one of the
@@ -207,24 +207,95 @@ def _gen_simple_steps(color_to_move, bboards):
     simp_steps = []
     not_occupied = ~(bboards['w'] | bboards['b'])
     # find all unfrozen pieces of color_to_move
-    unfrozen = _get_unfrozen(bboards)
-    for dir in DIRECTIONS:
-        # get the opposite direction
-        odir = _opp_from_dir[dir]
-        # step all unoccupied squares in the opposite direction
-        steps = _step_dir(not_occupied, odir)
-        # find where steps overlap with the unfrozen pieces.
-        psns = unfrozen & steps
+    unfrozen = _get_unfrozen(color_to_move, bboards)
+    empty_map = _empty_adjacent(not_occupied, unfrozen)
+    for dir, psns in empty_map.values():
         for psn in board_to_posns(psns):
             simp_steps.append([(psn, dir)])
-            raise NotImplementedError("captures!!!")
+    for steps in simp_steps:
+        raise NotImplementedError("captures!!!")
     return simp_steps
 
 def _gen_capture(bboards, (psn, dir)):
     raise NotImplementedError("finish me!!!")
 
-def _get_unfrozen(bboards):
-    raise NotImplementedError("finish me!!!")
+def _adjacent_with_dir(positions, pieces):
+    '''
+    Returns a mapping of direction => pieces.  The pieces are adjacent to the
+    positions by moving in the direction indicated.
+
+    '''
+    ret = {}
+    for dir in DIRECTIONS:
+        odir = _opp_from_dir[dir]
+        steps = _step_dir(positions, odir)
+        adj_pieces = pieces & steps
+        ret[dir] = adj_pieces
+    return ret
+
+def _adjacent(positions, pieces):
+    '''
+    Returns the subset of pieces that are adjacent to the given positions.
+
+    '''
+    ret = EMPTY_BOARD
+    for adj in _adjacent_with_dir(positions, pieces).values():
+        ret |= adj
+    return ret
+
+def _empty_adjacent(empties, board):
+    return _adjacent_with_dir(empties, board)
+
+def _free_pieces(color_to_move, bboards):
+    unfrozen = EMPTY_BOARD
+    color = color_to_move
+    ocolor = 'b' if color_to_move == 'w' else 'w'
+    empties = ~(bboards['w'] | bboards['b'])
+    all_stronger = EMPTY_BOARD
+    frozen = EMPTY_BOARD
+    e = bboards[color] & bboards['e']
+    # FIXME: shouldn't have to special case elephants...
+    if _adjacent(empties, e):
+        unfrozen |= e
+    for piece, stronger in zip('mhdcr', 'emhdc'):
+        # all_stronger accumulates the stronger pieces; the
+        # positions of all stronger pieces of opposite color.
+        opp_stronger = bboards[ocolor] & bboards[stronger]
+        all_stronger |= opp_stronger
+        these_pieces = bboards[color] & bboards[piece]
+        frozen |= _adjacent(all_stronger, these_pieces)
+    unfrozen |= bboards[color] & ~frozen
+    return unfrozen
+
+
+def _allowed_steps(color_to_move, bboards):
+    '''
+    returns a mapping of direction => positions-of-color-allowed-to-move-in-direction.
+
+    '''
+    empties = ~(bboards['w'] | bboards['b'])
+    free = _free_pieces(color_to_move, bboards)
+    return _adjacent_with_dir(empties, free)
+
+def _get_empties(bboards):
+    return ~(bboards['w'] | bboards['b'])
+
+def _get_unfrozen(color_to_move, bboards):
+    '''
+    An unfrozen piece is not adjacent to a stronger enemy piece.
+
+    '''
+    unfrozen = EMPTY_BOARD
+    color = color_to_move
+    ocolor = 'b' if color_to_move == 'w' else 'w'
+    empties = ~(bboards['w'] | bboards['b'])
+    all_stronger = EMPTY_BOARD
+    e = bboards[color] & bboards['e']
+    # FIXME: shouldn't have to special case elephants...
+    if any(_empty_adjacent(empties, e).values()):
+        unfrozen |= e
+    for piece, stronger in zip('mhdcr', 'emhdc'):
+        raise NotImplementedError("finish me!!!")
 
 def _num_pieces(bboard):
     return len(board_to_idxs(bboard))
@@ -272,8 +343,9 @@ def bboards_from_char_state(ch_board):
 
     Parameters
     ----------
-    ch_board -- str containing a valid Arimaa position.
-        Squares are given in the order a8-h8, a7-h7, ..., a1-h1.
+    ch_board -- list of characters, or str.  List will be joined.  contains a
+        valid Arimaa position.  Squares are given in the order a8-h8, a7-h7, ...,
+        a1-h1.
 
     Returns
     -------
@@ -281,7 +353,9 @@ def bboards_from_char_state(ch_board):
     bitboard representing position of resp. type.
 
     '''
-    piece_posns = {}
+    if isinstance(ch_board, (list, tuple)):
+        ch_board = ''.join(ch_board)
+    piece_posns = dict((ch, 0) for ch in 'wbemhdcr')
     for i, ch in enumerate(_char_state_iter(ch_board)):
         if ch not in ('rcdhmeRCDHME'):
             continue
@@ -359,8 +433,8 @@ _opp_from_dir = {
 }
 
 _dir_to_edge_and_shift = {
-        'N': (RANK8, 8),
-        'S': (RANK1, -8),
-        'E': (FILEH, 1),
-        'W': (FILEA, -1),
+        'N': (RANK8, RANK1, 8),
+        'S': (RANK1, RANK8, -8),
+        'E': (FILEH, FILEA, 1),
+        'W': (FILEA, FILEH, -1),
         }
