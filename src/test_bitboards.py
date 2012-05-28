@@ -151,3 +151,29 @@ class TestGen(unittest.TestCase):
                 self.assertTrue(loc & bb._free_pieces('b', bbds))
                 dir_to_psns = dict((ch, loc) for ch in dirs)
                 self.assertEquals(dir_to_psns, bb._allowed_steps('b', bbds))
+
+    def test_gen_steps_frozen(self):
+        camel_loc = (1<<32)
+        dog_loc = (1<<33)
+        bbds = bb.empty_bboards()
+        bbds['m'] = bbds['w'] = camel_loc
+        bbds['d'] = bbds['b'] = dog_loc
+
+        self.assertFalse(bb._free_pieces('b', bbds))
+        self.assertTrue(camel_loc & bb._free_pieces('w', bbds))
+
+        self.assertEquals(bb._allowed_steps('b', bbds),
+                          dict((ch, 0) for ch in 'NSEW'))
+        self.assertEquals(bb._allowed_steps('w', bbds),
+                          dict(N=camel_loc, S=camel_loc, E=0, W=0))
+
+    def test_gen_steps_rabbits(self):
+        from random import randrange
+        for color, dir in ('wS', 'bN'):
+            bbds = bb.empty_bboards()
+            for _ in range(10):
+                rabbit_loc = (1<<randrange(64))
+                bbds['r'] |= rabbit_loc
+                bbds[color] |= rabbit_loc
+            r_steps = bb._allowed_steps(color, bbds)
+            self.assertFalse(r_steps[dir])

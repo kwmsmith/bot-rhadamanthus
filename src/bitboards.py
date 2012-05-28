@@ -267,35 +267,23 @@ def _free_pieces(color_to_move, bboards):
     unfrozen |= bboards[color] & ~frozen
     return unfrozen
 
-
 def _allowed_steps(color_to_move, bboards):
     '''
-    returns a mapping of direction => positions-of-color-allowed-to-move-in-direction.
+    returns a mapping of direction =>
+    positions-of-color-allowed-to-move-in-direction.
 
     '''
-    empties = ~(bboards['w'] | bboards['b'])
+    empties = _get_empties(bboards)
     free = _free_pieces(color_to_move, bboards)
-    return _adjacent_with_dir(empties, free)
+    dir_to_pieces = _adjacent_with_dir(empties, free)
+    # correct for rabbits.
+    excluded_dir = 'N' if color_to_move == 'b' else 'S'
+    rabbits = bboards[color_to_move] & bboards['r']
+    dir_to_pieces[excluded_dir] &= ~rabbits
+    return dir_to_pieces
 
 def _get_empties(bboards):
     return ~(bboards['w'] | bboards['b'])
-
-def _get_unfrozen(color_to_move, bboards):
-    '''
-    An unfrozen piece is not adjacent to a stronger enemy piece.
-
-    '''
-    unfrozen = EMPTY_BOARD
-    color = color_to_move
-    ocolor = 'b' if color_to_move == 'w' else 'w'
-    empties = ~(bboards['w'] | bboards['b'])
-    all_stronger = EMPTY_BOARD
-    e = bboards[color] & bboards['e']
-    # FIXME: shouldn't have to special case elephants...
-    if any(_empty_adjacent(empties, e).values()):
-        unfrozen |= e
-    for piece, stronger in zip('mhdcr', 'emhdc'):
-        raise NotImplementedError("finish me!!!")
 
 def _num_pieces(bboard):
     return len(board_to_idxs(bboard))
