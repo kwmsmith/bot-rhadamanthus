@@ -337,6 +337,9 @@ def _char_state_iter(ch_board):
         res.extend(row)
     return res
 
+def empty_bboards():
+    return dict((ch, 0) for ch in 'wbemhdcr')
+
 def bboards_from_char_state(ch_board):
     ''' Given a standard notation Arimaa board, returns a dictionary of
     <piece label> => <position bboard> entries.
@@ -355,7 +358,7 @@ def bboards_from_char_state(ch_board):
     '''
     if isinstance(ch_board, (list, tuple)):
         ch_board = ''.join(ch_board)
-    piece_posns = dict((ch, 0) for ch in 'wbemhdcr')
+    piece_posns = empty_bboards()
     for i, ch in enumerate(_char_state_iter(ch_board)):
         if ch not in ('rcdhmeRCDHME'):
             continue

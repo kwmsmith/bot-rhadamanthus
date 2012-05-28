@@ -127,8 +127,27 @@ class TestGen(unittest.TestCase):
         self.assertFalse(adj['N'])
         self.assertFalse(adj['W'])
 
-    def test_gen_simple_steps(self):
-        loc = (1<<56)
-        self.assertTrue(loc & bb._free_pieces('b', self.bbds))
-        dir_to_psns = dict(S=loc, E=loc, N=0, W=0)
-        self.assertEquals(dir_to_psns, bb._allowed_steps('b', self.bbds))
+    def test_gen_simple_steps_corner(self):
+        # all the corner positions.
+        locs = (1<<56, 1<<63, 1<<7, 1)
+        # the free directions from each corner.
+        dirs = ('SE', 'SW', 'NW', 'NE')
+        for loc, dd in zip(locs, dirs):
+            bbds = bb.empty_bboards()
+            bbds['e'] = bbds['b'] = loc
+            self.assertTrue(loc & bb._free_pieces('b', bbds))
+            dir_to_psns = dict((ch, 0) for ch in 'NSEW')
+            for d in dd:
+                dir_to_psns[d] = loc
+            self.assertEquals(dir_to_psns, bb._allowed_steps('b', bbds))
+
+    def test_gen_simple_steps_middle(self):
+        for j in range(1, 7):
+            for i in range(1, 7):
+                loc = (1<<((8*j)+i))
+                dirs = 'NSEW'
+                bbds = bb.empty_bboards()
+                bbds['e'] = bbds['b'] = loc
+                self.assertTrue(loc & bb._free_pieces('b', bbds))
+                dir_to_psns = dict((ch, loc) for ch in dirs)
+                self.assertEquals(dir_to_psns, bb._allowed_steps('b', bbds))
