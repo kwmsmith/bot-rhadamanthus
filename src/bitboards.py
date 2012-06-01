@@ -195,7 +195,16 @@ def gen_action(color_to_move, stepscompl, bboards):
     return actions
 
 def _gen_pushes(color_to_move, bboards):
-    raise NotImplementedError("finish me!!!")
+    # find all pieces of color-to-move that are free to move.
+    free = _free_pieces(color_to_move, bboards)
+
+    # for each direction d, find all pieces of color-to-move that are adjacent
+    # to weaker enemy pieces in direction d.
+
+    # for each direction d and for each weaker enemy piece p, determine whether
+    # the square in direction d adjacent to p is empty.
+    raise NotImplementedError("pushes!!!")
+
 
 def _gen_pulls(color_to_move, bboards):
     raise NotImplementedError("finish me!!!")
@@ -246,17 +255,11 @@ def _adjacent(positions, pieces):
 def _empty_adjacent(empties, board):
     return _adjacent_with_dir(empties, board)
 
-def _free_pieces(color_to_move, bboards):
-    unfrozen = EMPTY_BOARD
-    color = color_to_move
-    ocolor = 'b' if color_to_move == 'w' else 'w'
-    empties = ~(bboards['w'] | bboards['b'])
+def _frozen_by_stronger(color, bboards):
+    ocolor = ('b' if color == 'w' else 'w')
     all_stronger = EMPTY_BOARD
     frozen = EMPTY_BOARD
     e = bboards[color] & bboards['e']
-    # FIXME: shouldn't have to special case elephants...
-    if _adjacent(empties, e):
-        unfrozen |= e
     for piece, stronger in zip('mhdcr', 'emhdc'):
         # all_stronger accumulates the stronger pieces; the
         # positions of all stronger pieces of opposite color.
@@ -264,6 +267,17 @@ def _free_pieces(color_to_move, bboards):
         all_stronger |= opp_stronger
         these_pieces = bboards[color] & bboards[piece]
         frozen |= _adjacent(all_stronger, these_pieces)
+    return frozen
+
+def _free_pieces(color_to_move, bboards):
+    unfrozen = EMPTY_BOARD
+    color = color_to_move
+    e = bboards[color] & bboards['e']
+    empties = _get_empties(bboards)
+    # FIXME: shouldn't have to special case elephants...
+    if _adjacent(empties, e):
+        unfrozen |= e
+    frozen = _frozen_by_stronger_pieces(color, bboards)
     unfrozen |= bboards[color] & ~frozen
     return unfrozen
 
