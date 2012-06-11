@@ -277,7 +277,7 @@ def _free_pieces(color_to_move, bboards):
     # FIXME: shouldn't have to special case elephants...
     if _adjacent(empties, e):
         unfrozen |= e
-    frozen = _frozen_by_stronger_pieces(color, bboards)
+    frozen = _frozen_by_stronger(color, bboards)
     unfrozen |= bboards[color] & ~frozen
     return unfrozen
 
