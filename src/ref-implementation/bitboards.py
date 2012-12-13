@@ -186,6 +186,10 @@ def gen_action(color_to_move, stepscompl, bboards):
     actions = []
 
     if stepscompl < 3:
+
+        # a list of (stonger_pos, weaker_pos, direction-from-stronger-to-weaker) tuples?
+        stronger_weaker_adj = _get_stronger_adjacent_to_weaker(stronger_color, bboards)
+        
         # generate all pushes.
         actions += _gen_pushes(color_to_move, bboards)
         # generate all pulls.
