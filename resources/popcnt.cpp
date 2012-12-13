@@ -110,6 +110,18 @@ static inline int popcount_fbsd1(unsigned *buf, int n)
   return cnt;
 }
 
+#include <smmintrin.h>
+
+static inline int popcount_intrinsic(unsigned *buf, int n)
+{
+  int cnt=0;
+  do {
+    unsigned v = *buf++;
+    cnt += _mm_popcnt_u32(v);
+  } while(--n);
+  return cnt;
+}
+
 static inline int popcount_fbsd2(unsigned *buf, int n)
 {
   int cnt=0;
@@ -913,6 +925,8 @@ int main()
   benchmark<unsigned>(popcount_7words,      "Bitslice(7)");
   benchmark<unsigned>(popcount_24words,     "Bitslice(24)");
   benchmark<unsigned>(popcount_lauradoux,   "Lauradoux");
+
+  benchmark<unsigned>(popcount_intrinsic,   "intrinsic");
 
 #if defined(__GNUC__) && defined(__SSE2__)
   benchmark<unsigned>(popcount_sse2_8bit,   "SSE2 8-bit");
