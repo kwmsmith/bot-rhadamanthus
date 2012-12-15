@@ -9,8 +9,13 @@ struct Board {
 
     public:
 
-       Board();
-       Board(unsigned long board);
+        Board();
+        Board(unsigned long);
+        void add(unsigned long);
+        void update(unsigned long *vals, unsigned int n);
+        // unsigned long __contains__(unsigned long);
+        bool contains(unsigned long);
+        void remove(unsigned long);
 
-      unsigned long _board;
+        unsigned long _board;
 };

@@ -8,7 +8,7 @@ class TestBoard(unittest.TestCase):
         'Is this a 64-bit Python?'
         self.assertEqual(sys.maxint, (1<<63) - 1)
 
-    def test_board(self):
+    def test_board_value_range(self):
         '''Can all values 2**i for i in range(64) be held in the board?'''
         b = board.Board()
         for i in range(64):
@@ -22,3 +22,35 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(b._board, sys.maxint)
         b._board = 1<<64
         self.assertEqual(b._board, 0)
+
+    def test_set_value(self):
+        'Can we set each value and test for containment?'
+        for i in range(64):
+            b = board.Board()
+            b.add(i)
+            self.assertTrue(b.contains(i), (b._board, i))
+
+    def test_add_everything(self):
+        b = board.Board()
+        for i in range(64):
+            b.add(i)
+        self.assertEqual(b._board, (1<<64)-1, (bin(b._board),))
+
+    def test_remove_value(self):
+        b = board.Board()
+        b.add(5)
+        b.remove(5)
+        self.assertEqual(b._board, 0)
+
+    def test_add_remove_all(self):
+        b = board.Board()
+        for i in range(64):
+            b.add(i)
+        for i in range(64):
+            b.remove(i)
+        self.assertEqual(b._board, 0)
+
+    def test_update(self):
+        b = board.Board()
+        b.update(range(64))
+        self.assertEqual(b._board, (1<<64)-1)
