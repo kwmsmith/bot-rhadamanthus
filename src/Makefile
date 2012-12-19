@@ -12,4 +12,4 @@ python:
 	python setup.py build_ext --inplace
 
 clean:
-	rm -r build sipboardBoard.cpp sipboardcmodule.cpp sipAPIboard.h *.so *.o *.pyc
+	rm -r build sipboardBoard.cpp sipboardcmodule.cpp sipAPIboard.h *.so *.o *.pyc *.x
