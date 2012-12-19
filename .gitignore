@@ -1,2 +1,5 @@
 *.so
 build
+*.o
+*.x
+a.out
