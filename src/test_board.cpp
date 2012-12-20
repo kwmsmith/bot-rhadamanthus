@@ -154,4 +154,3 @@ TEST(BoardTest, Instantiate) {
 // Did you notice that we didn't register the tests?  The
 // RUN_ALL_TESTS() macro magically knows about all the tests we
 // defined.  Isn't this convenient?
-
