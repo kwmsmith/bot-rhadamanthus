@@ -1,5 +1,27 @@
 #include "gamestate.h"
 
+void GameState::add_piece_at(int p, int c, unsigned int idx)
+{
+    _boards[p] = _boards[p] | idx;
+    Board color = (c == W ? _white : _black);
+    color = color | idx;
+}
+
+bool GameState::init_from_string(const std::string& s)
+{
+    int p = 0, c = 0;
+    if (s.length() != 64)
+        return false;
+    for(unsigned int i=0; i < s.length(); ++i) {
+        p = piece_from_char(s[i]);
+        c = color_from_char(s[i]);
+        if (p == kInvalidPiece || c == kInvalidPiece)
+            continue;
+        add_piece_at(p, c, i);
+    }
+    return true;
+}
+
 Board GameState::mobile_pieces(Color c) const
 {
     Board mobile_pieces;
