@@ -1,10 +1,20 @@
 #include "gamestate.h"
+#include <cstdio>
 
 void GameState::add_piece_at(int p, int c, unsigned int idx)
 {
-    _boards[p] = _boards[p] | idx;
-    Board color = (c == W ? _white : _black);
-    color = color | idx;
+    _boards[p] |= idx;
+    Board &color = (c == W ? _white : _black);
+    color |= idx;
+}
+
+bool GameState::is_empty() const
+{
+    Board b(_white);
+    b |= _black;
+    for(int i=R; i < nPieces; ++i)
+        b |= _boards[i];
+    return b == 0;
 }
 
 bool GameState::init_from_string(const std::string& s)
@@ -32,9 +42,9 @@ Board GameState::mobile_pieces(Color c) const
     // ...  enemy_stronger_than[R] is a Board of the C,D,H,M,E enemy positions.
 
     // for each direction
-        // move all pieces of this color in that direction
-        // select moved-to squares that are empty or
-        //    that are not stronger enemy
+    // move all pieces of this color in that direction
+    // select moved-to squares that are empty or
+    //    that are not stronger enemy
     return mobile_pieces;
 }
 

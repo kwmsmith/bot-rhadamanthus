@@ -39,11 +39,14 @@ TEST(GameState, Instantiation) {
 
 TEST(GameState, init_from_string) {
     GameState gb = GameState();
-    gb.init_from_string("---------------------------------------------------------------");
+    EXPECT_TRUE(gb.init_from_string("----------------------------------------------------------------"));
+    EXPECT_TRUE(gb.is_empty());
+    EXPECT_TRUE(gb.init_from_string("R--------------------------------------------------------------R"));
+    EXPECT_FALSE(gb.is_empty());
 }
 
 TEST(GameState, MobilePieces) {
     GameState gb2 = GameState();
     Board b = gb2.mobile_pieces(W);
-    EXPECT_EQ(b._board, 0ULL);
+    EXPECT_EQ(b, 0ULL);
 }

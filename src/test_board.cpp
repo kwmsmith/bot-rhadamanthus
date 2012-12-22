@@ -73,7 +73,7 @@
 
 TEST(BoardTest, Instantiate) {
     Board b;
-    EXPECT_EQ(b._board, 0ULL);
+    EXPECT_EQ(b, 0ULL);
 }
 
 // Tests Factorial().

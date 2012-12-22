@@ -24,7 +24,7 @@ test_board.x: test_board.cpp board.o libgtest.a
 test_gamestate.x: test_gamestate.cpp gamestate.o libgtest.a
 	$(CXX) -I${GTEST_INC} $^ -o $@
 
-test_all.x : $(OBJS) $(TEST_SRC) libgtest.a
+test_all.x : $(OBJS) $(TEST_SRC) libgtest.a board.h
 	$(CXX) -I$(GTEST_INC) $^ -o $@
 
 test: test_all.x
@@ -32,3 +32,7 @@ test: test_all.x
 
 clean:
 	rm -r build sipboard*.cpp sipAPIboard.h *.so *.o *.pyc *.x
+
+cleanall: clean
+	rm libgtest.a
+

@@ -89,20 +89,40 @@ struct Board {
             return Board(_board | other._board);
         }
 
+        void operator|=(const Board& other) {
+            _board |= other._board;
+        }
+
         Board operator&(Board other) const {
             return Board(_board & other._board);
+        }
+
+        void operator&=(const Board& other) {
+            _board &= other._board;
         }
 
         Board operator^(Board other) const {
             return Board(_board ^ other._board);
         }
 
+        void operator^=(const Board& other) {
+            _board ^= other._board;
+        }
+
         Board operator~() const {
             return Board(~_board);
         }
 
-        uint64_t _board;
+        bool operator==(const Board& other) const {
+            return _board == other._board;
+        }
+
+        bool operator==(uint64_t o) const {
+            return _board == o;
+        }
+
     private:
 
+        uint64_t _board;
         const static uint64_t U64_ONE = 1;
 };

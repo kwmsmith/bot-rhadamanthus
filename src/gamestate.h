@@ -107,6 +107,8 @@ class GameState {
 
         Board *pieces_weaker(Color for_color) const;
 
+        bool is_empty() const;
+
     private:
         Board _white;
         Board _black;
