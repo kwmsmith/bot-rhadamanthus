@@ -1,10 +1,10 @@
 #include "gamestate.h"
 #include <cstdio>
 
-void GameState::add_piece_at(int p, int c, unsigned int idx)
+void GameState::add_piece_at(int piece, int c, unsigned int idx)
 {
-    _boards[p] |= idx;
     Board &color = (c == W ? _white : _black);
+    _boards[piece] |= idx;
     color |= idx;
 }
 
@@ -54,7 +54,7 @@ Board GameState::frozen_pieces(Color c) const
     Board enemies_stronger[nPieces];
     pieces_stronger(other_color(c), enemies_stronger);
     for(int p = R; p < nPieces; ++p) {
-
+        exit(0);
     }
     return frozen_pieces;
 }
@@ -62,9 +62,9 @@ Board GameState::frozen_pieces(Color c) const
 void GameState::pieces_stronger(Color for_color, Board pieces_stronger[nPieces]) const
 {
     Board color_pieces = (for_color == W ? _white : _black);
-    Board stronger_accum;
+    Board stronger_accum(0);
     for(int p = E; p >= R; --p) {
         pieces_stronger[p] = stronger_accum;
-        stronger_accum = stronger_accum | _boards[p];
+        stronger_accum |= _boards[p] & color_pieces;
     }
 }

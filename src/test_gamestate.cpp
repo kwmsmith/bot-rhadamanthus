@@ -45,6 +45,11 @@ TEST(GameState, init_from_string) {
     EXPECT_FALSE(gb.is_empty());
 }
 
+TEST(GameState, pieces_stronger) {
+    GameState gs = GameState();
+    gs.init_from_string("R--------------------------------------------------------------R");
+}
+
 TEST(GameState, MobilePieces) {
     GameState gb2 = GameState();
     Board b = gb2.mobile_pieces(W);

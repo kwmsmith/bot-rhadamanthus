@@ -1,5 +1,6 @@
 #include <inttypes.h>
 #include <iostream>
+#include <algorithm>
 
 #ifdef NDEBUG
 #undef NDEBUG
@@ -33,18 +34,66 @@
  * 
  * --------------------------------------------------------------------------*/
 
+enum Direction { NORTH, SOUTH, EAST, WEST, kNumDirections };
+
 struct Board {
 
     public:
 
         Board() : _board(0) {}
 
-        Board(uint64_t board) : _board(board) {}
+        explicit Board(uint64_t board) : _board(board) {}
+
+        /**
+         * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
+         */
+        explicit Board(const std::string& s) :_board(0) {
+            size_t lim = std::min(s.length(), (size_t)64);
+            for(unsigned int i=0; i < lim; ++i) {
+                if(s[i] == '0')
+                    continue;
+                _board |= (U64_ONE<<i);
+            }
+        }
 
         Board(const Board &b) 
         { 
             std::cout << "Board copying " << std::endl;
             _board = b._board;
+        }
+
+        /**
+         * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
+         */
+        std::string to_string() const {
+            std::string s;
+            for(unsigned int i=0; i < 64; ++i) {
+                s += (this->contains(i) ? "1" : "0");
+            }
+            return s;
+        }
+
+        Board& add(uint64_t v) 
+        {
+            assert(v >= 0 && v < 64);
+            _board |= U64_ONE<<v;
+            return *this;
+        }
+
+        void remove(uint64_t v)
+        {
+            assert(v >= 0 && v < 64);
+            _board &= ~(U64_ONE<<v);
+        }
+
+        bool contains(uint64_t v) const 
+        { 
+            assert(v >= 0 && v < 64);
+            return _board & U64_ONE<<v;
+        }
+
+        Board mask(Board m) const {
+            return *this & m;
         }
 
         Board& operator=(const Board &b)
@@ -56,57 +105,16 @@ struct Board {
             return *this;
         }
 
-        void add(uint64_t v) 
-        {
-            assert(v >= 0 && v < 64);
-            _board |= U64_ONE<<v;
-        }
-
-        bool contains(uint64_t v) const 
-        { 
-            assert(v >= 0 && v < 64);
-            return _board & U64_ONE<<v;
-        }
-
-        void remove(uint64_t v)
-        {
-            assert(v >= 0 && v < 64);
-            _board &= ~(U64_ONE<<v);
-        }
-
-        void update(const uint64_t * const vals, unsigned int n)
-        {
-            for(unsigned int i = 0; i < n; i++) {
-                add(vals[i]);
-            }
-        }
-
-        Board mask(Board m) const {
-            return *this & m;
-        }
-
         Board operator|(Board other) const {
             return Board(_board | other._board);
-        }
-
-        void operator|=(const Board& other) {
-            _board |= other._board;
         }
 
         Board operator&(Board other) const {
             return Board(_board & other._board);
         }
 
-        void operator&=(const Board& other) {
-            _board &= other._board;
-        }
-
         Board operator^(Board other) const {
             return Board(_board ^ other._board);
-        }
-
-        void operator^=(const Board& other) {
-            _board ^= other._board;
         }
 
         Board operator~() const {
@@ -119,6 +127,19 @@ struct Board {
 
         bool operator==(uint64_t o) const {
             return _board == o;
+        }
+
+        Board move(Direction d) const {
+            switch(d) {
+                case NORTH:
+                    return Board(_board << 8);
+                case SOUTH:
+                    return Board(_board >> 8);
+                case EAST:
+                    return Board(_board << 1);
+                case WEST:
+                    return Board(_board >> 1);
+            }
         }
 
     private:

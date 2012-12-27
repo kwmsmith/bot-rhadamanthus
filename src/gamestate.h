@@ -76,6 +76,9 @@ class GameState {
 
         GameState() : _white(0), _black(0) {}
 
+        /**
+         * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
+         */
         bool init_from_string(const std::string& s);
 
         void add_piece_at(int p, int c, unsigned int idx);
