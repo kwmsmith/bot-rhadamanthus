@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -O3 -Wall -pedantic
+CXXFLAGS = -O3 -Wall -pedantic -Wno-format
 
 OBJS = board.o gamestate.o
 TESTS = test_gamestate.x test_board.x
@@ -35,4 +35,3 @@ clean:
 
 cleanall: clean
 	rm libgtest.a
-

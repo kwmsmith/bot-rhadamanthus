@@ -4,8 +4,8 @@
 void GameState::add_piece_at(int piece, int c, unsigned int idx)
 {
     Board &color = (c == W ? _white : _black);
-    _boards[piece] |= idx;
-    color |= idx;
+    color.add(idx);
+    _boards[piece].add(idx);
 }
 
 bool GameState::is_empty() const

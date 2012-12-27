@@ -1,5 +1,11 @@
+#ifndef BOARD_H_
+#define BOARD_H_
+
 #include <inttypes.h>
-#include <iostream>
+#include <string>
+#include <vector>
+// #include <iostream>
+#include <cstdio>
 #include <algorithm>
 
 #ifdef NDEBUG
@@ -44,6 +50,12 @@ struct Board {
 
         explicit Board(uint64_t board) : _board(board) {}
 
+        explicit Board(const std::vector<uint64_t>& vec) {
+            for(std::vector<uint64_t>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
+                add(*it);
+            }
+        }
+
         /**
          * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
          */
@@ -58,9 +70,32 @@ struct Board {
 
         Board(const Board &b) 
         { 
-            std::cout << "Board copying " << std::endl;
+            printf("Board copying \n");
             _board = b._board;
         }
+
+        static Board file_n(unsigned int n)
+        {
+            assert(n >= 1 && n <= 8);
+            Board b;
+            for(int i=n-1; i < 64; i+=8)
+                b.add(i);
+            return b;
+        }
+
+        static Board rank_n(unsigned int n)
+        {
+            assert(n >= 1 && n <= 8);
+            Board b;
+            for(unsigned int i=(n-1)*8; i < n * 8; i++)
+                b.add(i);
+            return b;
+        }
+
+        const static Board RANK8;
+        const static Board RANK1;
+        const static Board FILE1;
+        const static Board FILE8;
 
         /**
          * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
@@ -73,11 +108,40 @@ struct Board {
             return s;
         }
 
-        Board& add(uint64_t v) 
+        void add(uint64_t v) 
         {
             assert(v >= 0 && v < 64);
             _board |= U64_ONE<<v;
-            return *this;
+        }
+
+        void add(uint64_t v0, uint64_t v1)
+        {
+            add(v0);
+            add(v1);
+        }
+
+        void add(uint64_t v0, uint64_t v1, uint64_t v2)
+        {
+            add(v0);
+            add(v1);
+            add(v2);
+        }
+
+        void add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3)
+        {
+            add(v0);
+            add(v1);
+            add(v2);
+            add(v3);
+        }
+
+        void add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3, uint64_t v4)
+        {
+            add(v0);
+            add(v1);
+            add(v2);
+            add(v3);
+            add(v4);
         }
 
         void remove(uint64_t v)
@@ -99,22 +163,34 @@ struct Board {
         Board& operator=(const Board &b)
         {
             if (this != &b) {
-                std::cout << "Board assignment " << b._board << std::endl;
+                printf("Board assignment: %llu\n", b._board);
                 _board = b._board;
             }
             return *this;
         }
 
-        Board operator|(Board other) const {
+        Board operator|(const Board& other) const {
             return Board(_board | other._board);
         }
 
-        Board operator&(Board other) const {
+        void operator|=(const Board& other) {
+            _board |= other._board;
+        }
+
+        Board operator&(const Board& other) const {
             return Board(_board & other._board);
         }
 
-        Board operator^(Board other) const {
+        void operator&=(const Board& other) {
+            _board &= other._board;
+        }
+
+        Board operator^(const Board& other) const {
             return Board(_board ^ other._board);
+        }
+
+        void operator^=(const Board& other) {
+            _board ^= other._board;
         }
 
         Board operator~() const {
@@ -147,3 +223,5 @@ struct Board {
         uint64_t _board;
         const static uint64_t U64_ONE = 1;
 };
+
+#endif

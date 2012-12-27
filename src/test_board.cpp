@@ -24,10 +24,49 @@ TEST(BoardTest, size) {
 }
 
 TEST(BoardTest, move) {
-    Board b("1");
+    Board b;
+    b.add(0);
     Board c = b.move(NORTH);
     EXPECT_TRUE(c.contains(8));
+    c.add(0);
+    c = c.move(NORTH);
+    Board d;
+    d.add(8, 16);
+    EXPECT_EQ(c, d);
 }
+
+TEST(BoardTest, move_north_edge) {
+    Board b;
+    for(int i=64-8; i < 64; i++)
+        b.add(i);
+    b = b.move(NORTH);
+    EXPECT_EQ(b, 0);
+}
+
+TEST(BoardTest, move_south_edge) {
+    Board b;
+    for(int i=0; i < 8; i++)
+        b.add(i);
+    b = b.move(SOUTH);
+    EXPECT_EQ(b, 0);
+}
+
+TEST(BoardTest, move_east_edge) {
+    Board b;
+    for(int i=7; i < 64; i+=8)
+        b.add(i);
+    b = b.move(EAST);
+    EXPECT_EQ(b, 0);
+}
+
+TEST(BoardTest, move_west_edge) {
+    Board b;
+    for(int i=0; i < 64; i+=8)
+        b.add(i);
+    b = b.move(WEST);
+    EXPECT_EQ(b, 0);
+}
+
 
 // Tests Factorial().
 

@@ -1,3 +1,6 @@
+#ifndef GAMESTATE_H_
+#define GAMESTATE_H_
+
 #include "board.h"
 #include <iostream>
 
@@ -117,3 +120,5 @@ class GameState {
         Board _black;
         Board _boards[nPieces];
 };
+
+#endif
