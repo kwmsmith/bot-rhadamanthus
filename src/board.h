@@ -92,11 +92,6 @@ struct Board {
             return b;
         }
 
-        const static Board RANK8;
-        const static Board RANK1;
-        const static Board FILE1;
-        const static Board FILE8;
-
         /**
          * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
          */
@@ -197,6 +192,10 @@ struct Board {
             return Board(~_board);
         }
 
+        Board flip() const {
+            return Board(~_board);
+        }
+
         bool operator==(const Board& other) const {
             return _board == other._board;
         }
@@ -206,15 +205,21 @@ struct Board {
         }
 
         Board move(Direction d) const {
+            const static Board not_file_8 = file_n(8).flip();
+            const static Board not_file_1 = file_n(1).flip();
             switch(d) {
                 case NORTH:
                     return Board(_board << 8);
+                    break;
                 case SOUTH:
                     return Board(_board >> 8);
+                    break;
                 case EAST:
-                    return Board(_board << 1);
+                    return Board((_board & not_file_8._board) << 1);
+                    break;
                 case WEST:
-                    return Board(_board >> 1);
+                    return Board((_board & not_file_1._board) >> 1);
+                    break;
             }
         }
 

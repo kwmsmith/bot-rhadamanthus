@@ -67,6 +67,29 @@ TEST(BoardTest, move_west_edge) {
     EXPECT_EQ(b, 0);
 }
 
+TEST(BoardTest, move_files_east) {
+    for(int i=1; i < 8; ++i) {
+        EXPECT_EQ(Board::file_n(i).move(EAST), Board::file_n(i+1));
+    }
+}
+
+TEST(BoardTest, move_files_west) {
+    for(int i=8; i > 1; --i) {
+        EXPECT_EQ(Board::file_n(i).move(WEST), Board::file_n(i-1));
+    }
+}
+
+TEST(BoardTest, move_ranks_north) {
+    for(int i=1; i < 8; ++i) {
+        EXPECT_EQ(Board::rank_n(i).move(NORTH), Board::rank_n(i+1));
+    }
+}
+
+TEST(BoardTest, move_ranks_south) {
+    for(int i=2; i <= 8; ++i) {
+        EXPECT_EQ(Board::rank_n(i).move(SOUTH), Board::rank_n(i-1));
+    }
+}
 
 // Tests Factorial().
 
