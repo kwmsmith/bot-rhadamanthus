@@ -36,35 +36,19 @@ TEST(BoardTest, move) {
 }
 
 TEST(BoardTest, move_north_edge) {
-    Board b;
-    for(int i=64-8; i < 64; i++)
-        b.add(i);
-    b = b.move(NORTH);
-    EXPECT_EQ(b, 0);
+    EXPECT_EQ(Board::rank_n(8).move(NORTH), 0);
 }
 
 TEST(BoardTest, move_south_edge) {
-    Board b;
-    for(int i=0; i < 8; i++)
-        b.add(i);
-    b = b.move(SOUTH);
-    EXPECT_EQ(b, 0);
+    EXPECT_EQ(Board::rank_n(1).move(SOUTH), 0);
 }
 
 TEST(BoardTest, move_east_edge) {
-    Board b;
-    for(int i=7; i < 64; i+=8)
-        b.add(i);
-    b = b.move(EAST);
-    EXPECT_EQ(b, 0);
+    EXPECT_EQ(Board::file_n(8).move(EAST), 0);
 }
 
 TEST(BoardTest, move_west_edge) {
-    Board b;
-    for(int i=0; i < 64; i+=8)
-        b.add(i);
-    b = b.move(WEST);
-    EXPECT_EQ(b, 0);
+    EXPECT_EQ(Board::file_n(1).move(WEST), 0);
 }
 
 TEST(BoardTest, move_files_east) {
