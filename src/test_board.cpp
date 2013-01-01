@@ -8,6 +8,11 @@ TEST(BoardTest, Instantiate) {
     EXPECT_EQ(b, 0ULL);
 }
 
+TEST(Direction, order) {
+    EXPECT_TRUE(NORTH < SOUTH && SOUTH < EAST && EAST < WEST);
+    EXPECT_EQ(WEST - NORTH, 3);
+}
+
 TEST(BoardTest, init_from_string) {
     Board b("1001");
     EXPECT_TRUE(b.contains(0) && b.contains(3) && !b.contains(1) && !b.contains(2) && !b.contains(4));

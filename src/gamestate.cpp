@@ -50,11 +50,14 @@ Board GameState::mobile_pieces(Color c) const
 
 Board GameState::frozen_pieces(Color c) const
 {
-    Board frozen_pieces;
+    Board frozen_pieces, these_pieces;
     Board enemies_stronger[nPieces];
+    const Board& color_board = get_color_board(c);
     pieces_stronger(other_color(c), enemies_stronger);
     for(int p = R; p < nPieces; ++p) {
-        exit(0);
+        these_pieces = _boards[p] & color_board;
+        for(int direction = NORTH; direction < kNumDirections; ++direction)
+            frozen_pieces |= enemies_stronger[p].move(direction) & these_pieces;
     }
     return frozen_pieces;
 }

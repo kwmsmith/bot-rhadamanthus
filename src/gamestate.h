@@ -86,6 +86,14 @@ class GameState {
 
         void add_piece_at(int p, int c, unsigned int idx);
 
+        const Board& get_color_board(Color c) const {
+            return (c == B ? _black : _white);
+        }
+
+        const Board& get_piece_board(Piece p) const {
+            return _boards[p];
+        }
+
         /**
          * Pieces of color `c` that can move without pushing / pulling.
          */

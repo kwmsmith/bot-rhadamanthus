@@ -204,10 +204,10 @@ struct Board {
             return _board == o;
         }
 
-        Board move(Direction d) const {
+        Board move(int direction) const {
             const static Board not_file_8 = file_n(8).flip();
             const static Board not_file_1 = file_n(1).flip();
-            switch(d) {
+            switch(direction) {
                 case NORTH:
                     return Board(_board << 8);
                     break;
