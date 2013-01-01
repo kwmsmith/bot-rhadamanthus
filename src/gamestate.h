@@ -84,6 +84,13 @@ class GameState {
          */
         bool init_from_string(const std::string& s);
 
+        void clear() {
+            _white.clear();
+            _black.clear();
+            for(int i=R; i<nPieces; ++i)
+                _boards[i].clear();
+        }
+
         void add_piece_at(int p, int c, unsigned int idx);
 
         const Board& get_color_board(Color c) const {

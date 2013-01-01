@@ -42,6 +42,41 @@ TEST(GameState, piece_enum) {
     EXPECT_EQ(E - R, 5);
 }
 
+TEST(GameState, frozen_pieces) {
+    // Implement tests for frozen_pieces()
+    GameState gs = GameState();
+    EXPECT_EQ(gs.frozen_pieces(B), 0);
+    EXPECT_EQ(gs.frozen_pieces(W), 0);
+
+    gs.add_piece_at(R, B, 0);
+    gs.add_piece_at(R, W, 1);
+    gs.add_piece_at(E, W, 8);
+    EXPECT_EQ(gs.frozen_pieces(W), 0);
+    EXPECT_EQ(gs.frozen_pieces(B), 1);
+
+    gs.clear();
+
+    gs.add_piece_at(E, B, 19);
+    gs.add_piece_at(M, W, 20);
+    gs.add_piece_at(H, W, 18);
+    gs.add_piece_at(H, W, 11);
+    gs.add_piece_at(D, W, 27);
+    EXPECT_EQ(gs.frozen_pieces(B), 0);
+    Board w_frozen = gs.frozen_pieces(W);
+    EXPECT_TRUE(w_frozen.contains(20));
+    EXPECT_TRUE(w_frozen.contains(18));
+    EXPECT_TRUE(w_frozen.contains(11));
+    EXPECT_TRUE(w_frozen.contains(27));
+    EXPECT_FALSE(w_frozen.contains(28));
+
+    gs.clear();
+
+    gs.add_piece_at(E, B, 19);
+    gs.add_piece_at(E, W, 20);
+    EXPECT_EQ(gs.frozen_pieces(B), 0);
+    EXPECT_EQ(gs.frozen_pieces(W), 0);
+}
+
 TEST(GameState, init_from_string) {
     GameState gb = GameState();
     EXPECT_TRUE(gb.init_from_string("----------------------------------------------------------------"));

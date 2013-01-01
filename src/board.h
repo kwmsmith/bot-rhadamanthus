@@ -139,6 +139,10 @@ struct Board {
             add(v4);
         }
 
+        void clear() {
+            _board = 0;
+        }
+
         void remove(uint64_t v)
         {
             assert(v >= 0 && v < 64);
