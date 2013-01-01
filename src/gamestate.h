@@ -100,9 +100,15 @@ class GameState {
             return _boards[p];
         }
 
-        Board adjacent_stronger(Color c) const;
+        Board has_adjacent_enemy_le(Color c) const;
 
-        Board adjacent_friendly(Color c) const;
+        Board has_adjacent_enemy_lt(Color c) const;
+
+        Board has_adjacent_enemy_gt(Color c) const;
+
+        Board has_adjacent_enemy_ge(Color c) const;
+
+        Board has_adjacent_friendly(Color c) const;
 
         /**
          * Pieces of color `c` that can move without pushing / pulling.
@@ -124,16 +130,16 @@ class GameState {
          */
         Board frozen_pieces(Color c) const;
 
-        /**
-         * 
-         */
-        void pieces_stronger(Color for_color, Board pieces_stronger[nPieces]) const;
-
         Board *pieces_weaker(Color for_color) const;
 
         bool is_empty() const;
 
     private:
+
+        GameState(const GameState& gs);
+        GameState& operator=(const GameState& gs);
+
+
         Board _white;
         Board _black;
         Board _boards[nPieces];

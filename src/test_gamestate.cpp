@@ -34,7 +34,7 @@ TEST(Helpers, color_from_char) {
 }
 
 TEST(GameState, Instantiation) {
-    GameState gb = GameState();
+    GameState gb;
 }
 
 TEST(GameState, piece_enum) {
@@ -44,7 +44,7 @@ TEST(GameState, piece_enum) {
 
 TEST(GameState, frozen_pieces) {
     // Implement tests for frozen_pieces()
-    GameState gs = GameState();
+    GameState gs;
     EXPECT_EQ(gs.frozen_pieces(B), 0);
     EXPECT_EQ(gs.frozen_pieces(W), 0);
 
@@ -78,7 +78,7 @@ TEST(GameState, frozen_pieces) {
 }
 
 TEST(GameState, init_from_string) {
-    GameState gb = GameState();
+    GameState gb;
     EXPECT_TRUE(gb.init_from_string("----------------------------------------------------------------"));
     EXPECT_TRUE(gb.is_empty());
     EXPECT_TRUE(gb.init_from_string("R--------------------------------------------------------------R"));
@@ -86,12 +86,12 @@ TEST(GameState, init_from_string) {
 }
 
 TEST(GameState, pieces_stronger) {
-    GameState gs = GameState();
+    GameState gs;
     gs.init_from_string("R--------------------------------------------------------------R");
 }
 
 TEST(GameState, MobilePieces) {
-    GameState gb2 = GameState();
+    GameState gb2;
     Board b = gb2.mobile_pieces(W);
     EXPECT_EQ(b, 0ULL);
 }

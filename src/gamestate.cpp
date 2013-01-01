@@ -48,7 +48,7 @@ Board GameState::mobile_pieces(Color c) const
     return mobile_pieces;
 }
 
-Board GameState::adjacent_friendly(Color c) const
+Board GameState::has_adjacent_friendly(Color c) const
 {
     Board adjacent_friendly;
     const Board& color_board = get_color_board(c);
@@ -57,31 +57,63 @@ Board GameState::adjacent_friendly(Color c) const
     return adjacent_friendly;
 }
 
-Board GameState::adjacent_stronger(Color c) const
+Board GameState::has_adjacent_enemy_le(Color for_color) const
 {
-    Board these_pieces, adjacent_stronger;
-    Board enemies_stronger[nPieces];
-    const Board& color_board = get_color_board(c);
-    pieces_stronger(other_color(c), enemies_stronger);
+    Board adj_le, enemy_le, these_pieces;
+    const Board& color_board = get_color_board(for_color);
+    const Board& enemy_color = get_color_board(other_color(for_color));
+    for(int p = R; p < nPieces; ++p) {
+        enemy_le |= _boards[p] & enemy_color;
+        these_pieces = _boards[p] & color_board;
+        for(int direction = NORTH; direction < kNumDirections; ++direction)
+            adj_le |= enemy_le.move(direction) & these_pieces;
+    }
+    return adj_le;
+}
+
+Board GameState::has_adjacent_enemy_lt(Color for_color) const
+{
+    Board adj_lt, enemy_lt, these_pieces;
+    const Board& color_board = get_color_board(for_color);
+    const Board& enemy_color = get_color_board(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
         these_pieces = _boards[p] & color_board;
         for(int direction = NORTH; direction < kNumDirections; ++direction)
-            adjacent_stronger |= enemies_stronger[p].move(direction) & these_pieces;
+            adj_lt |= enemy_lt.move(direction) & these_pieces;
+        enemy_lt |= _boards[p] & enemy_color;
     }
-    return adjacent_stronger;
+    return adj_lt;
+}
+
+Board GameState::has_adjacent_enemy_gt(Color for_color) const
+{
+    Board adj_gt, enemy_gt, these_pieces;
+    const Board& color_board = get_color_board(for_color);
+    const Board& enemy_color = get_color_board(other_color(for_color));
+    for(int p = E; p >= R; --p) {
+        these_pieces = _boards[p] & color_board;
+        for(int direction = NORTH; direction < kNumDirections; ++direction)
+            adj_gt |= enemy_gt.move(direction) & these_pieces;
+        enemy_gt |= _boards[p] & enemy_color;
+    }
+    return adj_gt;
+}
+
+Board GameState::has_adjacent_enemy_ge(Color for_color) const
+{
+    Board adj_ge, enemy_ge, these_pieces;
+    const Board& color_board = get_color_board(for_color);
+    const Board& enemy_color = get_color_board(other_color(for_color));
+    for(int p = E; p >= R; --p) {
+        enemy_ge |= _boards[p] & enemy_color;
+        these_pieces = _boards[p] & color_board;
+        for(int direction = NORTH; direction < kNumDirections; ++direction)
+            adj_ge |= enemy_ge.move(direction) & these_pieces;
+    }
+    return adj_ge;
 }
 
 Board GameState::frozen_pieces(Color c) const
 {
-    return adjacent_stronger(c) & ~adjacent_friendly(c);
-}
-
-void GameState::pieces_stronger(Color for_color, Board pieces_stronger[nPieces]) const
-{
-    Board color_pieces = get_color_board(for_color);
-    Board stronger_accum(0);
-    for(int p = E; p >= R; --p) {
-        pieces_stronger[p] = stronger_accum;
-        stronger_accum |= _boards[p] & color_pieces;
-    }
+    return has_adjacent_enemy_gt(c) & ~has_adjacent_friendly(c);
 }
