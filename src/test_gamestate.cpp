@@ -37,6 +37,11 @@ TEST(GameState, Instantiation) {
     GameState gb = GameState();
 }
 
+TEST(GameState, piece_enum) {
+    EXPECT_TRUE(R < C && C < D && D < H && H < M && M < E);
+    EXPECT_EQ(E - R, 5);
+}
+
 TEST(GameState, init_from_string) {
     GameState gb = GameState();
     EXPECT_TRUE(gb.init_from_string("----------------------------------------------------------------"));
