@@ -40,6 +40,18 @@ TEST(BoardTest, move) {
     EXPECT_EQ(c, d);
 }
 
+TEST(BoardTest, add_file_rank) {
+    Board b;
+    b.add_file_rank('C', 3);
+    EXPECT_TRUE(b.contains(18));
+    b.add_file_rank('F', 3);
+    EXPECT_TRUE(b.contains(21));
+    b.add_file_rank('C', 6);
+    EXPECT_TRUE(b.contains(42));
+    b.add_file_rank('F', 6);
+    EXPECT_TRUE(b.contains(45));
+}
+
 TEST(BoardTest, move_north_edge) {
     EXPECT_EQ(Board::rank_n(8).move(NORTH), 0);
 }

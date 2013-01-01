@@ -85,8 +85,7 @@ class GameState {
         bool init_from_string(const std::string& s);
 
         void clear() {
-            _white.clear();
-            _black.clear();
+            _white.clear(); _black.clear();
             for(int i=R; i<nPieces; ++i)
                 _boards[i].clear();
         }
@@ -100,6 +99,10 @@ class GameState {
         const Board& get_piece_board(Piece p) const {
             return _boards[p];
         }
+
+        Board adjacent_stronger(Color c) const;
+
+        Board adjacent_friendly(Color c) const;
 
         /**
          * Pieces of color `c` that can move without pushing / pulling.

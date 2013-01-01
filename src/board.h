@@ -139,6 +139,12 @@ struct Board {
             add(v4);
         }
 
+        void add_file_rank(char file, int rank) {
+            assert(file >= 'A' && file <= 'H');
+            assert(rank >= 1 && rank <= 8);
+            add((rank-1)*8 + (file - 'A'));
+        }
+
         void clear() {
             _board = 0;
         }
