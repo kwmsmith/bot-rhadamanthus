@@ -92,6 +92,16 @@ class GameState {
 
         void add_piece_at(int p, int c, unsigned int idx);
 
+        void add_piece_at(int p, int c, char file, int rank) {
+            assert(file >= 'A' && file <= 'H');
+            assert(rank >= 1 && rank <= 8);
+            add_piece_at(p, c, (rank - 1) * 8 + (file - 'A'));
+        }
+
+        void remove_piece_at(int p, int c, unsigned int idx);
+
+        int move_piece(int p, int c, unsigned int from, unsigned int to);
+
         const Board& get_color_board(Color c) const {
             return (c == B ? _black : _white);
         }
@@ -100,15 +110,23 @@ class GameState {
             return _boards[p];
         }
 
+        bool contains_at(int p, Color c, unsigned int idx) const {
+            const Board& color = get_color_board(c);
+            return color.contains(idx) && _boards[p].contains(idx);
+        }
+
+
+        Board has_adjacent_empty(Color c) const;
+
+        Board has_adjacent_friendly(Color c) const;
+
         Board has_adjacent_enemy_le(Color c) const;
 
         Board has_adjacent_enemy_lt(Color c) const;
 
-        Board has_adjacent_enemy_gt(Color c) const;
-
         Board has_adjacent_enemy_ge(Color c) const;
 
-        Board has_adjacent_friendly(Color c) const;
+        Board has_adjacent_enemy_gt(Color c) const;
 
         /**
          * Pieces of color `c` that can move without pushing / pulling.
@@ -130,8 +148,6 @@ class GameState {
          */
         Board frozen_pieces(Color c) const;
 
-        Board *pieces_weaker(Color for_color) const;
-
         bool is_empty() const;
 
     private:
@@ -139,10 +155,10 @@ class GameState {
         GameState(const GameState& gs);
         GameState& operator=(const GameState& gs);
 
-
         Board _white;
         Board _black;
         Board _boards[nPieces];
 };
 
 #endif
+

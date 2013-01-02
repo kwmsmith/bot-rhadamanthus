@@ -8,6 +8,34 @@ void GameState::add_piece_at(int piece, int c, unsigned int idx)
     _boards[piece].add(idx);
 }
 
+void GameState::remove_piece_at(int piece, int c, unsigned int idx)
+{
+    Board &color = (c == W ? _white : _black);
+    color.remove(idx);
+    _boards[piece].remove(idx);
+}
+
+/**
+ * Safe move.  Returns 0 on failure, 1 on success.
+ */
+int GameState::move_piece(int piece, int c, unsigned int from, unsigned int to)
+{
+    Board all_pieces = _white | _black;
+    if(all_pieces.contains(to)) // destination is occupied.
+        return 0;
+    Board &color = (c == W ? _white : _black);
+    if(!(_boards[piece] & color).contains(from)) // specified piece is not here.
+        return 0;
+    int diff = abs(from - to);
+    if(!(diff == 1 || diff == 8)) // not moved in a canonical direction.
+        return 0;
+
+    // now we can move the piece.
+    remove_piece_at(piece, c, from);
+    add_piece_at(piece, c, to);
+    return 1;
+}
+
 bool GameState::is_empty() const
 {
     Board b(_white);
@@ -34,18 +62,17 @@ bool GameState::init_from_string(const std::string& s)
 
 Board GameState::mobile_pieces(Color c) const
 {
-    Board mobile_pieces;
+    return has_adjacent_empty(c) & ~frozen_pieces(c);
+}
 
-    // Define Board array "enemies_weaker" such that
-    // enemies_weaker[R] is an empty board,
-    // enemies_weaker[C] is a Board of the M,E positions,
-    // ...  enemy_stronger_than[R] is a Board of the C,D,H,M,E enemy positions.
-
-    // for each direction
-    // move all pieces of this color in that direction
-    // select moved-to squares that are empty or
-    //    that are not stronger enemy
-    return mobile_pieces;
+Board GameState::has_adjacent_empty(Color c) const
+{
+    Board adj_empty;
+    const Board empties = ~(_white | _black);
+    const Board& color_board = get_color_board(c);
+    for(int direction = NORTH; direction < kNumDirections; ++direction)
+        adj_empty |= empties.move(direction) & color_board;
+    return adj_empty;
 }
 
 Board GameState::has_adjacent_friendly(Color c) const

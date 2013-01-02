@@ -91,7 +91,31 @@ TEST(GameState, pieces_stronger) {
 }
 
 TEST(GameState, MobilePieces) {
-    GameState gb2;
-    Board b = gb2.mobile_pieces(W);
-    EXPECT_EQ(b, 0ULL);
+    // TODO: test edge cases.
+    GameState gs;
+
+    EXPECT_EQ(gs.mobile_pieces(B), 0);
+    EXPECT_EQ(gs.mobile_pieces(W), 0);
+
+    gs.add_piece_at(E, B, 'A', 1);
+    EXPECT_TRUE(gs.mobile_pieces(B).contains(0));
+
+    gs.add_piece_at(R, W, 'A', 2);
+    gs.add_piece_at(R, W, 'B', 1);
+
+    EXPECT_EQ(gs.mobile_pieces(B), 0);
+    EXPECT_EQ(gs.mobile_pieces(W), 0);
+}
+
+TEST(GameState, move_piece) {
+    // TODO: Test edge cases.
+    GameState gs;
+
+    gs.add_piece_at(E, B, 32);
+    EXPECT_TRUE(gs.contains_at(E, B, 32));
+
+    EXPECT_EQ(gs.move_piece(E, B, 32, 33), 1);
+
+    EXPECT_FALSE(gs.contains_at(E, B, 32));
+    EXPECT_TRUE(gs.contains_at(E, B, 33));
 }
