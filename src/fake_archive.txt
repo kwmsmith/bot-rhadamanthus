@@ -1,0 +1,2 @@
+id	wplayerid	bplayerid	wusername	busername	wtitle	btitle	wcountry	bcountry	wrating	brating	wratingk	bratingk	wtype	btype	event	site	timecontrol	postal	startts	endts	result	termination	plycount	mode	rated	corrupt	movelist	events
+

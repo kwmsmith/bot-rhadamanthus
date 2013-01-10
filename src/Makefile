@@ -1,9 +1,11 @@
+BOOST_INCL = $(HOME)/Devel/boost_1_52_0
+INCLUDE = -I$(BOOST_INCL)
 CXX = g++
-CXXFLAGS = -O3 -Wall -pedantic -Wno-format
+CXXFLAGS = -O3 -Wall -pedantic -Wno-format $(INCLUDE)
 
-OBJS = board.o gamestate.o
+OBJS = board.o gamestate.o arimaa_archive.o
 TESTS = test_gamestate.x test_board.x
-TEST_SRC = test_board.cpp test_gamestate.cpp
+TEST_SRC = test_board.cpp test_gamestate.cpp test_archive.cpp
 
 GTEST_DIR = ../gtest
 GTEST_INC = $(GTEST_DIR)/include
