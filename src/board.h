@@ -70,7 +70,6 @@ struct Board {
 
         Board(const Board &b) 
         { 
-            printf("Board copying \n");
             _board = b._board;
         }
 
@@ -168,7 +167,6 @@ struct Board {
         Board& operator=(const Board &b)
         {
             if (this != &b) {
-                printf("Board assignment: %llu\n", b._board);
                 _board = b._board;
             }
             return *this;
@@ -231,6 +229,7 @@ struct Board {
                     return Board((_board & not_file_1._board) >> 1);
                     break;
             }
+            assert(0);
         }
 
     private:

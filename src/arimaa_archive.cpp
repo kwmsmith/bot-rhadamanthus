@@ -3,9 +3,10 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
-#include <boost/unordered_map.hpp>
 
 using namespace std;
+
+static bool get_line(FILE *fp, string &line); // proto
 
 vector<string> ArimaaArchive::canonical_columns()
 {
@@ -38,19 +39,31 @@ vector<string> ArimaaArchive::canonical_columns()
         "rated",
         "corrupt",
         "movelist",
-        "events"
+        "events",
     };
+    // FIXME: remove the `29` in the line below.
     static vector<string> columns(columns_, columns_ + 29);
     return columns;
 }
 
-vector<string> ArimaaArchive::get_record()
+map_ss ArimaaArchive::get_record()
 {
+    typedef vector<string>::iterator vsit;
     string line = "";
-    vector<string> record;
-    if(!get_line(archive_fh_, line))
-        return record;
-    record = split(line, '\t');
+    if(!get_line(archive_fh_, line)) {
+        return map_ss();
+    }
+    vector<string> values = split(line, '\t');
+    if(values.size() != get_num_columns()) {
+        return map_ss();
+    }
+    vector<string> canon = canonical_columns();
+    map_ss mp;
+    for(vsit key_it = canon.begin(), val_it = values.begin() ;
+            key_it != canon.end(), val_it != values.end() ;
+            ++key_it, ++val_it)
+        mp[*key_it] = *val_it;
+    return mp;
 }
 
 int ArimaaArchive::init(const char *fname)
@@ -60,7 +73,7 @@ int ArimaaArchive::init(const char *fname)
         return 0;
     }
     archive_fh_ = fh;
-    return 1;
+    return read_and_validate_header();
 }
 
 ArimaaArchive::~ArimaaArchive()
@@ -70,7 +83,7 @@ ArimaaArchive::~ArimaaArchive()
     archive_fh_ = NULL;
 }
 
-int ArimaaArchive::read_header()
+int ArimaaArchive::read_and_validate_header()
 {
     string header = "";
     if(!get_line(archive_fh_, header))
@@ -99,7 +112,7 @@ vector<string> split(const string &s, const char delim)
     return split(s, delim, elems);
 }
 
-bool get_line(FILE *fp, string &line)
+static bool get_line(FILE *fp, string &line)
 {
     char buf[256];
     if (fp == NULL)
@@ -107,8 +120,8 @@ bool get_line(FILE *fp, string &line)
     line.clear();
     size_t olen=0, delta=0;
     while(1) {
-        if(fgets(buf, 256, fp) == NULL)
-            break;
+        if(fgets(buf, 256, fp) == NULL || feof(fp) || ferror(fp))
+            return false;
         olen = line.length();
         line += buf;
         delta = line.length() - olen;

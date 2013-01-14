@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <string>
 #include <vector>
+#include "boost/unordered_map.hpp"
+
+typedef boost::unordered_map<std::string, std::string> map_ss;
 
 class ArimaaArchive 
 {
@@ -15,13 +18,17 @@ class ArimaaArchive
 
         int init(const char *fname);
 
-        std::vector<std::string> canonical_columns();
+        static std::vector<std::string> canonical_columns();
 
-        int read_header();
+        const static unsigned int get_num_columns() {
+            return canonical_columns().size();
+        }
 
-        std::vector<std::string> get_record();
+        map_ss get_record();
 
     private:
+
+        int read_and_validate_header();
 
         FILE *archive_fh_;
 
@@ -29,8 +36,6 @@ class ArimaaArchive
         ArimaaArchive(const ArimaaArchive&);
         ArimaaArchive& operator=(const ArimaaArchive&);
 };
-
-bool get_line(FILE *fp, std::string &line);
 
 std::vector<std::string> &split(const std::string &s, const char delim, std::vector<std::string> &elems);
 std::vector<std::string> split(const std::string &s, const char delim);
