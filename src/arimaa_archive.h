@@ -5,8 +5,16 @@
 #include <string>
 #include <vector>
 #include "boost/unordered_map.hpp"
+#include "boost/scoped_ptr.hpp"
+#include "gamestate.h"
 
 typedef boost::unordered_map<std::string, std::string> map_ss;
+
+std::vector<std::string> &split(const std::string &, const char, std::vector<std::string> &);
+std::vector<std::string> &split(const std::string &, const std::string &, std::vector<std::string> &);
+std::vector<std::string> split(const std::string &, const char);
+
+std::vector<std::string> get_record_setup(const map_ss& record, int color);
 
 class ArimaaArchive 
 {
@@ -37,7 +45,24 @@ class ArimaaArchive
         ArimaaArchive& operator=(const ArimaaArchive&);
 };
 
-std::vector<std::string> &split(const std::string &s, const char delim, std::vector<std::string> &elems);
-std::vector<std::string> split(const std::string &s, const char delim);
+class ArchiveGame
+{
+
+    public:
+        explicit ArchiveGame(const map_ss&);
+
+        unsigned int get_plycount() const;
+
+    private:
+
+        unsigned int plycount_;
+        boost::scoped_ptr<std::vector<std::string> > setup_white_;
+        boost::scoped_ptr<std::vector<std::string> > setup_black_;
+        boost::scoped_ptr<std::vector<std::string> > movelist_;
+
+        ArchiveGame(const ArchiveGame&);
+        ArchiveGame& operator=(const ArchiveGame&);
+};
+
 
 #endif // ARIMAA_ARCHIVE_H_

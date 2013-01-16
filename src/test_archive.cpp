@@ -1,5 +1,9 @@
 #include "arimaa_archive.h"
 #include "gtest/gtest.h"
+#include <vector>
+#include <string>
+
+using namespace std;
 
 TEST(ArimaaArchive, init) {
     ArimaaArchive a;
@@ -19,6 +23,22 @@ TEST(ArimaaArchive, get_record) {
     std::vector<std::string> canon = ArimaaArchive::canonical_columns();
     EXPECT_EQ(canon.size(), 29);
     for (std::vector<std::string>::iterator it = canon.begin();
-            it != canon.end(); ++it)
+            it != canon.end(); ++it) {
         EXPECT_EQ(mp.count(*it), 1);
+    }
+}
+
+TEST(ArimaaArchive, get_record_setup) {
+    ArimaaArchive a;
+    EXPECT_EQ(a.init("fake_archive.txt"), 1);
+    const map_ss mp = a.get_record();
+    // vector<string> moves = get_record_setup(mp, B);
+    // EXPECT_EQ(moves.size(), 1);
+}
+
+TEST(ArimaaArchive, make_archive_game) {
+    ArimaaArchive a;
+    EXPECT_EQ(a.init("fake_archive.txt"), 1);
+    ArchiveGame g(a.get_record());
+    EXPECT_EQ(g.get_plycount(), 65);
 }

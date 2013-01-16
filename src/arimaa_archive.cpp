@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <cstdlib>
 
 using namespace std;
 
@@ -96,6 +97,19 @@ int ArimaaArchive::read_and_validate_header()
     return 1;
 }
 
+vector<string> &split(const string &s, const string &delim, vector<string> &elems)
+{
+    size_t start = 0, stop = 0;
+
+    stop = s.find(delim, start);
+    while(stop != string::npos) {
+        elems.push_back(s.substr(start, stop-start));
+        start = stop + delim.length();
+        stop = s.find(delim, start);
+    }
+    return elems;
+}
+
 vector<string> &split(const string &s, const char delim, vector<string> &elems) 
 {
     stringstream ss(s);
@@ -131,4 +145,42 @@ static bool get_line(FILE *fp, string &line)
     // remove the newline from the end.
     line.erase(line.end()-1);
     return true;
+}
+
+vector<string> get_record_setup(const map_ss& record, int color)
+{
+    typedef vector<string>::iterator vsit;
+    vector<string> ret;
+    if (record.count("movelist") != 1)
+        return ret;
+    vector<string> all_moves;
+    split(record.at("movelist"), "\\n", all_moves);
+    vector<string> placement_white, placement_black;
+    split(all_moves[0], ' ', placement_white);
+    split(all_moves[1], ' ', placement_black);
+    return (color == W ? placement_white : placement_black);
+}
+
+ArchiveGame::ArchiveGame(const map_ss& record)
+    : plycount_(0),
+      setup_white_(new vector<string>),
+      setup_black_(new vector<string>),
+      movelist_(new vector<string>)
+{
+    plycount_ = strtoul(record.at("plycount").c_str(), NULL, 0);
+
+    vector<string> all_moves;
+    split(record.at("movelist"), "\\n", all_moves);
+
+    split(all_moves[0], ' ', *setup_white_);
+    split(all_moves[1], ' ', *setup_black_);
+
+    for (vector<string>::iterator it=all_moves.begin()+2; it != all_moves.end(); ++it)
+        movelist_->push_back(*it);
+    assert(movelist_->size() == (plycount_-1) * 2 || movelist_->size() == (plycount_-1) * 2 - 1);
+}
+
+unsigned int ArchiveGame::get_plycount() const
+{
+    return plycount_;
 }
