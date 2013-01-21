@@ -45,24 +45,26 @@ class ArimaaArchive
         ArimaaArchive& operator=(const ArimaaArchive&);
 };
 
-class ArchiveGame
+class ArchivedGame
 {
 
     public:
-        explicit ArchiveGame(const map_ss&);
+
+        explicit ArchivedGame(const map_ss&);
 
         unsigned int get_plycount() const;
+
+        bool verify() const;
 
     private:
 
         unsigned int plycount_;
         boost::scoped_ptr<std::vector<std::string> > setup_white_;
         boost::scoped_ptr<std::vector<std::string> > setup_black_;
-        boost::scoped_ptr<std::vector<std::string> > movelist_;
+        boost::scoped_ptr<std::vector<std::vector<std::string> > > movelist_;
 
-        ArchiveGame(const ArchiveGame&);
-        ArchiveGame& operator=(const ArchiveGame&);
+        ArchivedGame(const ArchivedGame&);
+        ArchivedGame& operator=(const ArchivedGame&);
 };
-
 
 #endif // ARIMAA_ARCHIVE_H_

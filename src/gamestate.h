@@ -160,5 +160,57 @@ class GameState {
         Board _boards[nPieces];
 };
 
-#endif
 
+inline unsigned int invalid_position() { return 100;}
+inline unsigned int invalid_action() { return 100;}
+
+int action_from_char(const char ch);
+
+bool parse_action_str(const std::string& ss, unsigned char *position, unsigned char *action);
+
+class Step
+{
+    public:
+
+        explicit Step(const std::string& ss)
+            :position_(0),
+            action_(NORTH) {
+                assert(parse_action_str(ss, &position_, &action_));
+            }
+
+        Step(unsigned char position, unsigned char action)
+            :position_(position),
+             action_(action) {}
+
+        Step(const Step &m)
+            :position_(m.position_),
+             action_(m.action_) {}
+
+        Step &operator=(const Step &other) {
+            position_ = other.position_;
+            action_ = other.action_;
+            return *this;
+        }
+
+        bool is_move() const {
+            return (action_ == NORTH || action_ == SOUTH || action_ == EAST || action_ == WEST);
+        }
+
+        bool is_capture() const {
+            return action_ == CAPTURE;
+        }
+
+        bool is_placement() const {
+            return action_ == ADD;
+        }
+
+        unsigned char get_position() const {
+            return position_;
+        }
+
+    private:
+        unsigned char position_;
+        unsigned char action_;
+};
+
+#endif

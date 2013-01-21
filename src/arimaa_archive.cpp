@@ -161,11 +161,11 @@ vector<string> get_record_setup(const map_ss& record, int color)
     return (color == W ? placement_white : placement_black);
 }
 
-ArchiveGame::ArchiveGame(const map_ss& record)
+ArchivedGame::ArchivedGame(const map_ss& record)
     : plycount_(0),
       setup_white_(new vector<string>),
       setup_black_(new vector<string>),
-      movelist_(new vector<string>)
+      movelist_(new vector<vector<string> >)
 {
     plycount_ = strtoul(record.at("plycount").c_str(), NULL, 0);
 
@@ -175,12 +175,30 @@ ArchiveGame::ArchiveGame(const map_ss& record)
     split(all_moves[0], ' ', *setup_white_);
     split(all_moves[1], ' ', *setup_black_);
 
-    for (vector<string>::iterator it=all_moves.begin()+2; it != all_moves.end(); ++it)
-        movelist_->push_back(*it);
-    assert(movelist_->size() == (plycount_-1) * 2 || movelist_->size() == (plycount_-1) * 2 - 1);
+    assert(setup_white_->at(0) == "1w");
+    assert(setup_black_->at(0) == "1b");
+
+    setup_white_->erase(setup_white_->begin());
+    setup_black_->erase(setup_black_->begin());
+
+    for (vector<string>::iterator it=all_moves.begin()+2; it != all_moves.end(); ++it) {
+        vector<string> steps;
+        split(*it, ' ', steps);
+        steps.erase(steps.begin());
+        assert(steps.size() >= 1 && steps.size() <= 8);
+        movelist_->push_back(steps);
+    }
+    assert(    movelist_->size() == (plycount_-1) * 2 
+            || movelist_->size() == (plycount_-1) * 2 - 1);
 }
 
-unsigned int ArchiveGame::get_plycount() const
+unsigned int ArchivedGame::get_plycount() const
 {
     return plycount_;
+}
+
+bool ArchivedGame::verify() const
+{
+    assert(0);
+    return false;
 }

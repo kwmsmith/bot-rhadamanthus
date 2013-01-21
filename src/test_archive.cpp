@@ -39,6 +39,6 @@ TEST(ArimaaArchive, get_record_setup) {
 TEST(ArimaaArchive, make_archive_game) {
     ArimaaArchive a;
     EXPECT_EQ(a.init("fake_archive.txt"), 1);
-    ArchiveGame g(a.get_record());
+    ArchivedGame g(a.get_record());
     EXPECT_EQ(g.get_plycount(), 65);
 }

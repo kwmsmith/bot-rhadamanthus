@@ -70,7 +70,7 @@ Board GameState::has_adjacent_empty(Color c) const
     Board adj_empty;
     const Board empties = ~(_white | _black);
     const Board& color_board = get_color_board(c);
-    for(int direction = NORTH; direction < kNumDirections; ++direction)
+    for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         adj_empty |= empties.move(direction) & color_board;
     return adj_empty;
 }
@@ -79,7 +79,7 @@ Board GameState::has_adjacent_friendly(Color c) const
 {
     Board adjacent_friendly;
     const Board& color_board = get_color_board(c);
-    for(int direction = NORTH; direction < kNumDirections; ++direction)
+    for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         adjacent_friendly |= color_board.move(direction) & color_board;
     return adjacent_friendly;
 }
@@ -92,7 +92,7 @@ Board GameState::has_adjacent_enemy_le(Color for_color) const
     for(int p = R; p < nPieces; ++p) {
         enemy_le |= _boards[p] & enemy_color;
         these_pieces = _boards[p] & color_board;
-        for(int direction = NORTH; direction < kNumDirections; ++direction)
+        for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_le |= enemy_le.move(direction) & these_pieces;
     }
     return adj_le;
@@ -105,7 +105,7 @@ Board GameState::has_adjacent_enemy_lt(Color for_color) const
     const Board& enemy_color = get_color_board(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
         these_pieces = _boards[p] & color_board;
-        for(int direction = NORTH; direction < kNumDirections; ++direction)
+        for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_lt |= enemy_lt.move(direction) & these_pieces;
         enemy_lt |= _boards[p] & enemy_color;
     }
@@ -119,7 +119,7 @@ Board GameState::has_adjacent_enemy_gt(Color for_color) const
     const Board& enemy_color = get_color_board(other_color(for_color));
     for(int p = E; p >= R; --p) {
         these_pieces = _boards[p] & color_board;
-        for(int direction = NORTH; direction < kNumDirections; ++direction)
+        for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_gt |= enemy_gt.move(direction) & these_pieces;
         enemy_gt |= _boards[p] & enemy_color;
     }
@@ -134,7 +134,7 @@ Board GameState::has_adjacent_enemy_ge(Color for_color) const
     for(int p = E; p >= R; --p) {
         enemy_ge |= _boards[p] & enemy_color;
         these_pieces = _boards[p] & color_board;
-        for(int direction = NORTH; direction < kNumDirections; ++direction)
+        for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_ge |= enemy_ge.move(direction) & these_pieces;
     }
     return adj_ge;
@@ -143,4 +143,55 @@ Board GameState::has_adjacent_enemy_ge(Color for_color) const
 Board GameState::frozen_pieces(Color c) const
 {
     return has_adjacent_enemy_gt(c) & ~has_adjacent_friendly(c);
+}
+
+int action_from_char(const char ch)
+{
+    switch(ch) {
+        case 'n':
+        case 'N':
+            return NORTH;
+        case 's':
+        case 'S':
+            return SOUTH;
+        case 'e':
+        case 'E':
+            return EAST;
+        case 'w':
+        case 'W':
+            return WEST;
+        case 'x':
+        case 'X':
+            return CAPTURE;
+        case 'a':
+        case 'A':
+            return ADD;
+        default:
+            return (int)invalid_action();
+    }
+    assert(0); // should never get here.
+}
+
+bool parse_action_str(const std::string& ss, unsigned char *position, unsigned char *action) 
+{
+    *position = invalid_position();
+    *action = invalid_action();
+
+    if (ss.length() < 3) return false;
+    if (piece_from_char(ss[0]) == kInvalidPiece) return false;
+    if (ss[1] < 'a' || ss[1] > 'h') return false;
+    if (ss[2] < '1' || ss[2] > '8') return false;
+
+    *position = (ss[2] - '1') * 8 + (ss[1] - 'a');
+    if (*position > 63) return false;
+
+    if (ss.length() == 3) {
+        *action = ADD;
+        return true; // a placement action.
+    }
+
+    if (ss.length() != 4) return false;
+    *action = action_from_char(ss[3]);
+    if (*action == invalid_action()) return false;
+    return true;
 }

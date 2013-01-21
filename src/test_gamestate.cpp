@@ -119,3 +119,12 @@ TEST(GameState, move_piece) {
     EXPECT_FALSE(gs.contains_at(E, B, 32));
     EXPECT_TRUE(gs.contains_at(E, B, 33));
 }
+
+TEST(GameState, make_step) {
+    EXPECT_TRUE(Step("Rb1n").is_move());
+    EXPECT_TRUE(Step("rb1n").is_move());
+    EXPECT_TRUE(Step("eb8").is_placement());
+    EXPECT_TRUE(Step("dc3x").is_capture());
+
+    EXPECT_FALSE(Step("qc3n").is_valid());
+}

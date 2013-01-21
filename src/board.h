@@ -40,7 +40,11 @@
  * 
  * --------------------------------------------------------------------------*/
 
-enum Direction { NORTH, SOUTH, EAST, WEST, kNumDirections };
+enum Action {NORTH, SOUTH, EAST, WEST, ADD, CAPTURE};
+
+unsigned int num_directions();
+
+int direction_from_char(const char ch);
 
 struct Board {
 
