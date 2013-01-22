@@ -172,12 +172,6 @@ class Step
 {
     public:
 
-        explicit Step(const std::string& ss)
-            :position_(0),
-            action_(NORTH) {
-                assert(parse_action_str(ss, &position_, &action_));
-            }
-
         Step(unsigned char position, unsigned char action)
             :position_(position),
              action_(action) {}
@@ -204,6 +198,10 @@ class Step
             return action_ == ADD;
         }
 
+        bool is_valid() const {
+            return (action_ != invalid_action() && position_ != invalid_position());
+        }
+
         unsigned char get_position() const {
             return position_;
         }
@@ -212,5 +210,13 @@ class Step
         unsigned char position_;
         unsigned char action_;
 };
+
+inline Step make_step(const std::string& ss)
+{
+    unsigned char pos = invalid_position(), action = invalid_action();
+    parse_action_str(ss, &pos, &action);
+    return Step(pos, action);
+}
+
 
 #endif
