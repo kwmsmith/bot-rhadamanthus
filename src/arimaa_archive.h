@@ -58,10 +58,7 @@ class ArchivedGame
 
     private:
 
-        unsigned int plycount_;
-        boost::scoped_ptr<std::vector<std::string> > setup_white_;
-        boost::scoped_ptr<std::vector<std::string> > setup_black_;
-        boost::scoped_ptr<std::vector<std::vector<std::string> > > movelist_;
+        boost::scoped_ptr<std::vector<std::vector<Step> > > movelist_;
 
         ArchivedGame(const ArchivedGame&);
         ArchivedGame& operator=(const ArchivedGame&);

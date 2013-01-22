@@ -161,40 +161,44 @@ vector<string> get_record_setup(const map_ss& record, int color)
     return (color == W ? placement_white : placement_black);
 }
 
-ArchivedGame::ArchivedGame(const map_ss& record)
-    : plycount_(0),
-      setup_white_(new vector<string>),
-      setup_black_(new vector<string>),
-      movelist_(new vector<vector<string> >)
+bool vecstep_from_vecstr(const vector<string>& vecstr, vector<Step> *vecstep, int skip = 0)
 {
-    plycount_ = strtoul(record.at("plycount").c_str(), NULL, 0);
+    for(vector<string>::const_iterator it=vecstr.begin()+skip;
+        it != vecstr.end(); ++it) {
+        Step step = make_step(*it);
+        if (!step.is_valid()) return false;
+        vecstep->push_back(step);
+    }
+    return true;
+}
+
+ArchivedGame::ArchivedGame(const map_ss& record)
+    : movelist_(new vector<vector<Step> >)
+{
+    unsigned long plycount_ = strtoul(record.at("plycount").c_str(), NULL, 0);
 
     vector<string> all_moves;
     split(record.at("movelist"), "\\n", all_moves);
 
-    split(all_moves[0], ' ', *setup_white_);
-    split(all_moves[1], ' ', *setup_black_);
+    bool res = false;
 
-    assert(setup_white_->at(0) == "1w");
-    assert(setup_black_->at(0) == "1b");
-
-    setup_white_->erase(setup_white_->begin());
-    setup_black_->erase(setup_black_->begin());
-
-    for (vector<string>::iterator it=all_moves.begin()+2; it != all_moves.end(); ++it) {
-        vector<string> steps;
-        split(*it, ' ', steps);
-        steps.erase(steps.begin());
-        assert(steps.size() >= 1 && steps.size() <= 8);
+    for (vector<string>::iterator it=all_moves.begin();
+            it != all_moves.end(); ++it) {
+        vector<string> steps_str;
+        split(*it, ' ', steps_str);
+        assert(steps_str.size() >= 1);
+        vector<Step> steps;
+        res = vecstep_from_vecstr(steps_str, &steps, 1);
+        assert(res);
         movelist_->push_back(steps);
     }
-    assert(    movelist_->size() == (plycount_-1) * 2 
-            || movelist_->size() == (plycount_-1) * 2 - 1);
+    assert(    movelist_->size() == (plycount_) * 2 
+            || movelist_->size() == (plycount_) * 2 - 1);
 }
 
 unsigned int ArchivedGame::get_plycount() const
 {
-    return plycount_;
+    return (movelist_->size() % 2 ? movelist_->size() / 2 + 1 : movelist_->size() / 2);
 }
 
 bool ArchivedGame::verify() const
