@@ -6,6 +6,8 @@
 #include <vector>
 #include "boost/unordered_map.hpp"
 #include "boost/scoped_ptr.hpp"
+
+#include "step.h"
 #include "gamestate.h"
 
 typedef boost::unordered_map<std::string, std::string> map_ss;

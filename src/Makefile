@@ -3,14 +3,11 @@ INCLUDE = -I$(BOOST_INCL)
 CXX = g++
 CXXFLAGS = -O3 -Wall -pedantic -Wno-format $(INCLUDE)
 
-OBJS = board.o gamestate.o arimaa_archive.o
-TESTS = test_gamestate.x test_board.x
-TEST_SRC = test_board.cpp test_gamestate.cpp test_archive.cpp
+OBJS = board.o step.o gamestate.o arimaa_archive.o
+TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp
 
 GTEST_DIR = ../gtest
 GTEST_INC = $(GTEST_DIR)/include
-
-all: $(OBJS) $(TESTS)
 
 python:
 	python setup.py build_ext --inplace
@@ -26,7 +23,7 @@ test_board.x: test_board.cpp board.o libgtest.a
 test_gamestate.x: test_gamestate.cpp gamestate.o libgtest.a
 	$(CXX) -I${GTEST_INC} $^ -o $@
 
-test_all.x : $(OBJS) $(TEST_SRC) libgtest.a board.h
+test_all.x : $(OBJS) $(TEST_SRC) libgtest.a board.h step.h
 	$(CXX) $(INCLUDE) -I$(GTEST_INC) $^ -o $@
 
 test: test_all.x

@@ -48,19 +48,19 @@ TEST(GameState, frozen_pieces) {
     EXPECT_EQ(gs.frozen_pieces(B), 0);
     EXPECT_EQ(gs.frozen_pieces(W), 0);
 
-    gs.add_piece_at(R, B, 0);
-    gs.add_piece_at(R, W, 1);
-    gs.add_piece_at(E, W, 8);
+    gs.add_piece_at(B, R, 0);
+    gs.add_piece_at(W, R, 1);
+    gs.add_piece_at(W, E, 8);
     EXPECT_EQ(gs.frozen_pieces(W), 0);
     EXPECT_EQ(gs.frozen_pieces(B), 1);
 
     gs.clear();
 
-    gs.add_piece_at(E, B, 19);
-    gs.add_piece_at(M, W, 20);
-    gs.add_piece_at(H, W, 18);
-    gs.add_piece_at(H, W, 11);
-    gs.add_piece_at(D, W, 27);
+    gs.add_piece_at(B, E, 19);
+    gs.add_piece_at(W, M, 20);
+    gs.add_piece_at(W, H, 18);
+    gs.add_piece_at(W, H, 11);
+    gs.add_piece_at(W, D, 27);
     EXPECT_EQ(gs.frozen_pieces(B), 0);
     Board w_frozen = gs.frozen_pieces(W);
     EXPECT_TRUE(w_frozen.contains(20));
@@ -97,11 +97,11 @@ TEST(GameState, MobilePieces) {
     EXPECT_EQ(gs.mobile_pieces(B), 0);
     EXPECT_EQ(gs.mobile_pieces(W), 0);
 
-    gs.add_piece_at(E, B, 'A', 1);
+    gs.add_piece_at(B, E, 'A', 1);
     EXPECT_TRUE(gs.mobile_pieces(B).contains(0));
 
-    gs.add_piece_at(R, W, 'A', 2);
-    gs.add_piece_at(R, W, 'B', 1);
+    gs.add_piece_at(W, R, 'A', 2);
+    gs.add_piece_at(W, R, 'B', 1);
 
     EXPECT_EQ(gs.mobile_pieces(B), 0);
     EXPECT_EQ(gs.mobile_pieces(W), 0);
@@ -111,21 +111,11 @@ TEST(GameState, move_piece) {
     // TODO: Test edge cases.
     GameState gs;
 
-    gs.add_piece_at(E, B, 32);
-    EXPECT_TRUE(gs.contains_at(E, B, 32));
+    gs.add_piece_at(B, E, 32);
+    EXPECT_TRUE(gs.contains_at(B, E, 32));
 
-    EXPECT_EQ(gs.move_piece(E, B, 32, 33), 1);
+    EXPECT_EQ(gs.move_piece(B, E, 32, 33), 1);
 
-    EXPECT_FALSE(gs.contains_at(E, B, 32));
-    EXPECT_TRUE(gs.contains_at(E, B, 33));
-}
-
-#include <cstdio>
-
-TEST(GameState, make_step) {
-    EXPECT_TRUE(make_step("Rb1n").is_move());
-    EXPECT_TRUE(make_step("rb1n").is_move());
-    EXPECT_TRUE(make_step("eb8").is_placement());
-    EXPECT_TRUE(make_step("dc3x").is_capture());
-    EXPECT_FALSE(make_step("qc5x").is_valid());
+    EXPECT_FALSE(gs.contains_at(B, E, 32));
+    EXPECT_TRUE(gs.contains_at(B, E, 33));
 }

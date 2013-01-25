@@ -1,39 +1,65 @@
 #include "gamestate.h"
 #include <cstdio>
 
-void GameState::add_piece_at(int piece, int c, unsigned int idx)
+bool GameState::take_step(const Step &s)
 {
-    Board &color = (c == W ? _white : _black);
-    color.add(idx);
-    _boards[piece].add(idx);
+    if (!s.is_valid())
+        return false;
+
+    const int c = s.get_color(), p = s.get_piece(), pos = s.get_position();
+
+    switch(s.get_action()) {
+        case NORTH:
+            return move_piece(c, p, pos, pos+8);
+        case SOUTH:
+            return move_piece(c, p, pos, pos-8);
+        case EAST:
+            return move_piece(c, p, pos, pos+1);
+        case WEST:
+            return move_piece(c, p, pos, pos-1);
+        case ADD:
+            return add_piece_at(c, p, pos);
+        case CAPTURE:
+            return remove_piece_at(c, p, pos);
+    }
+    assert(0); // should never get here.
+    return false;
 }
 
-void GameState::remove_piece_at(int piece, int c, unsigned int idx)
+bool GameState::add_piece_at(const int c, const int piece, const unsigned int idx)
+{
+    if ((_white | _black).contains(idx)) {
+        return false; // position already occupied.
+    }
+    Board &color = (c == W ? _white : _black);
+    add_piece_at_fast(color, piece, idx);
+    return true;
+}
+
+bool GameState::remove_piece_at(const int c, const int piece, const unsigned int idx)
 {
     Board &color = (c == W ? _white : _black);
-    color.remove(idx);
-    _boards[piece].remove(idx);
+    if (!(_boards[piece] & get_color_board(c)).contains(idx)) {
+        return false; // idx does not contain the right piece.
+    }
+    remove_piece_at_fast(color, piece, idx);
+    return true;
 }
 
 /**
- * Safe move.  Returns 0 on failure, 1 on success.
+ * Safe move.  Returns false on failure, true on success.
  */
-int GameState::move_piece(int piece, int c, unsigned int from, unsigned int to)
+bool GameState::move_piece(const int c, const int piece, const unsigned int from, const unsigned int to)
 {
-    Board all_pieces = _white | _black;
-    if(all_pieces.contains(to)) // destination is occupied.
-        return 0;
-    Board &color = (c == W ? _white : _black);
-    if(!(_boards[piece] & color).contains(from)) // specified piece is not here.
-        return 0;
-    int diff = abs(from - to);
+    // TODO: Test for move off of board?
+    const int diff = abs(from - to);
     if(!(diff == 1 || diff == 8)) // not moved in a canonical direction.
-        return 0;
+        return false;
 
     // now we can move the piece.
-    remove_piece_at(piece, c, from);
-    add_piece_at(piece, c, to);
-    return 1;
+    remove_piece_at(c, piece, from);
+    add_piece_at(c, piece, to);
+    return true;
 }
 
 bool GameState::is_empty() const
@@ -55,7 +81,7 @@ bool GameState::init_from_string(const std::string& s)
         c = color_from_char(s[i]);
         if (p == kInvalidPiece || c == kInvalidPiece)
             continue;
-        add_piece_at(p, c, i);
+        add_piece_at(c, p, i);
     }
     return true;
 }
@@ -143,55 +169,4 @@ Board GameState::has_adjacent_enemy_ge(Color for_color) const
 Board GameState::frozen_pieces(Color c) const
 {
     return has_adjacent_enemy_gt(c) & ~has_adjacent_friendly(c);
-}
-
-int action_from_char(const char ch)
-{
-    switch(ch) {
-        case 'n':
-        case 'N':
-            return NORTH;
-        case 's':
-        case 'S':
-            return SOUTH;
-        case 'e':
-        case 'E':
-            return EAST;
-        case 'w':
-        case 'W':
-            return WEST;
-        case 'x':
-        case 'X':
-            return CAPTURE;
-        case 'a':
-        case 'A':
-            return ADD;
-        default:
-            return (int)invalid_action();
-    }
-    assert(0); // should never get here.
-}
-
-bool parse_action_str(const std::string& ss, unsigned char *position, unsigned char *action) 
-{
-    *position = invalid_position();
-    *action = invalid_action();
-
-    if (ss.length() < 3) return false;
-    if (piece_from_char(ss[0]) == kInvalidPiece) return false;
-    if (ss[1] < 'a' || ss[1] > 'h') return false;
-    if (ss[2] < '1' || ss[2] > '8') return false;
-
-    *position = (ss[2] - '1') * 8 + (ss[1] - 'a');
-    if (*position > 63) return false;
-
-    if (ss.length() == 3) {
-        *action = ADD;
-        return true; // a placement action.
-    }
-
-    if (ss.length() != 4) return false;
-    *action = action_from_char(ss[3]);
-    if (*action == invalid_action()) return false;
-    return true;
 }

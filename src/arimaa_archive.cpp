@@ -198,7 +198,8 @@ ArchivedGame::ArchivedGame(const map_ss& record)
 
 unsigned int ArchivedGame::get_plycount() const
 {
-    return (movelist_->size() % 2 ? movelist_->size() / 2 + 1 : movelist_->size() / 2);
+    const unsigned int sz = movelist_->size();
+    return (sz % 2 ? sz / 2 + 1 : sz / 2);
 }
 
 bool ArchivedGame::verify() const

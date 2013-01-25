@@ -29,10 +29,10 @@
  *        +-------------------------+
  *      8 | 56 57 58 59 60 61 62 63 | 8
  *      7 | 48                   55 | 7
- *      6 | 40                   47 | 6
+ *      6 | 40    42       45    47 | 6
  *      5 | 32                   39 | 5
  *      4 | 24                   31 | 4
- *      3 | 16                   23 | 3
+ *      3 | 16    18       21    23 | 3
  *      2 | 08                   15 | 2
  *      1 | 00 01 02 03 04 05 06 07 | 1
  *        +-------------------------+
@@ -40,7 +40,78 @@
  * 
  * --------------------------------------------------------------------------*/
 
+enum Piece { R, C, D, H, M, E, nPieces };
+
+const static int kInvalidPiece = -1;
+
+enum Color { W, B };
+
+inline Color other_color(Color c) {
+    return c == W ? B : W;
+}
+
+
 enum Action {NORTH, SOUTH, EAST, WEST, ADD, CAPTURE};
+
+/**
+ * Takes a display integer (0 -> square h1, 63 -> square a8), and converts it
+ * to its internal index.
+ */
+inline int internal_idx_from_display(int d)
+{
+    int row =  - d / 8 + 7;
+    int col = d % 8;
+    return 8 * row + col;
+}
+
+inline int color_from_char(char ch)
+{
+    switch(ch) {
+        case 'R':
+        case 'C':
+        case 'D':
+        case 'H':
+        case 'M':
+        case 'E':
+            return W;
+        case 'r':
+        case 'c':
+        case 'd':
+        case 'h':
+        case 'm':
+        case 'e':
+            return B;
+        default:
+            return kInvalidPiece;
+    }
+}
+
+inline int piece_from_char(char ch)
+{
+    switch(ch) {
+        case 'R':
+        case 'r':
+            return R;
+        case 'C':
+        case 'c':
+            return C;
+        case 'D':
+        case 'd':
+            return D;
+        case 'H':
+        case 'h':
+            return H;
+        case 'M':
+        case 'm':
+            return M;
+        case 'E':
+        case 'e':
+            return E;
+        default:
+            return kInvalidPiece;
+    }
+}
+
 
 unsigned int num_directions();
 
@@ -83,6 +154,13 @@ struct Board {
             Board b;
             for(int i=n-1; i < 64; i+=8)
                 b.add(i);
+            return b;
+        }
+
+        static Board capture_squares()
+        {
+            Board b;
+            b.add(18, 21, 42, 45);
             return b;
         }
 

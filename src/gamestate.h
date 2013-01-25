@@ -2,76 +2,8 @@
 #define GAMESTATE_H_
 
 #include "board.h"
+#include "step.h"
 #include <iostream>
-
-const static int kInvalidPiece = -1;
-
-enum Piece { R, C, D, H, M, E, nPieces };
-
-enum Color { W, B };
-
-inline Color other_color(Color c) {
-    return c == W ? B : W;
-}
-
-/**
- * Takes a display integer (0 -> square h1, 63 -> square a8), and converts it
- * to its internal index.
- */
-inline int internal_idx_from_display(int d)
-{
-    int row =  - d / 8 + 7;
-    int col = d % 8;
-    return 8 * row + col;
-}
-
-inline int color_from_char(char ch)
-{
-    switch(ch) {
-        case 'R':
-        case 'C':
-        case 'D':
-        case 'H':
-        case 'M':
-        case 'E':
-            return W;
-        case 'r':
-        case 'c':
-        case 'd':
-        case 'h':
-        case 'm':
-        case 'e':
-            return B;
-        default:
-            return kInvalidPiece;
-    }
-}
-
-inline int piece_from_char(char ch)
-{
-    switch(ch) {
-        case 'R':
-        case 'r':
-            return R;
-        case 'C':
-        case 'c':
-            return C;
-        case 'D':
-        case 'd':
-            return D;
-        case 'H':
-        case 'h':
-            return H;
-        case 'M':
-        case 'm':
-            return M;
-        case 'E':
-        case 'e':
-            return E;
-        default:
-            return kInvalidPiece;
-    }
-}
 
 class GameState {
 
@@ -90,19 +22,11 @@ class GameState {
                 _boards[i].clear();
         }
 
-        void add_piece_at(int p, int c, unsigned int idx);
+        bool take_step(const Step &s);
 
-        void add_piece_at(int p, int c, char file, int rank) {
-            assert(file >= 'A' && file <= 'H');
-            assert(rank >= 1 && rank <= 8);
-            add_piece_at(p, c, (rank - 1) * 8 + (file - 'A'));
-        }
+        bool move_piece(const int c, const int p, const unsigned int from, const unsigned int to);
 
-        void remove_piece_at(int p, int c, unsigned int idx);
-
-        int move_piece(int p, int c, unsigned int from, unsigned int to);
-
-        const Board& get_color_board(Color c) const {
+        const Board& get_color_board(const int c) const {
             return (c == B ? _black : _white);
         }
 
@@ -110,7 +34,7 @@ class GameState {
             return _boards[p];
         }
 
-        bool contains_at(int p, Color c, unsigned int idx) const {
+        bool contains_at(Color c, int p, unsigned int idx) const {
             const Board& color = get_color_board(c);
             return color.contains(idx) && _boards[p].contains(idx);
         }
@@ -150,73 +74,36 @@ class GameState {
 
         bool is_empty() const;
 
+        bool add_piece_at(const int c, const int p, const unsigned int idx);
+
+        void add_piece_at(int c, int p, char file, int rank) {
+            assert(file >= 'A' && file <= 'H');
+            assert(rank >= 1 && rank <= 8);
+            add_piece_at(p, c, (rank - 1) * 8 + (file - 'A'));
+        }
+
+        bool remove_piece_at(const int c, const int p, const unsigned int idx);
+
     private:
 
         GameState(const GameState& gs);
         GameState& operator=(const GameState& gs);
 
+
+
+        void add_piece_at_fast(Board& color, const int piece, const unsigned int idx) {
+            color.add(idx);
+            _boards[piece].add(idx);
+        }
+
+        void remove_piece_at_fast(Board& color, const int piece, const unsigned int idx) {
+            color.remove(idx);
+            _boards[piece].remove(idx);
+        }
+
         Board _white;
         Board _black;
         Board _boards[nPieces];
 };
-
-
-inline unsigned int invalid_position() { return 100;}
-inline unsigned int invalid_action() { return 100;}
-
-int action_from_char(const char ch);
-
-bool parse_action_str(const std::string& ss, unsigned char *position, unsigned char *action);
-
-class Step
-{
-    public:
-
-        Step(unsigned char position, unsigned char action)
-            :position_(position),
-             action_(action) {}
-
-        Step(const Step &m)
-            :position_(m.position_),
-             action_(m.action_) {}
-
-        Step &operator=(const Step &other) {
-            position_ = other.position_;
-            action_ = other.action_;
-            return *this;
-        }
-
-        bool is_move() const {
-            return (action_ == NORTH || action_ == SOUTH || action_ == EAST || action_ == WEST);
-        }
-
-        bool is_capture() const {
-            return action_ == CAPTURE;
-        }
-
-        bool is_placement() const {
-            return action_ == ADD;
-        }
-
-        bool is_valid() const {
-            return (action_ != invalid_action() && position_ != invalid_position());
-        }
-
-        unsigned char get_position() const {
-            return position_;
-        }
-
-    private:
-        unsigned char position_;
-        unsigned char action_;
-};
-
-inline Step make_step(const std::string& ss)
-{
-    unsigned char pos = invalid_position(), action = invalid_action();
-    parse_action_str(ss, &pos, &action);
-    return Step(pos, action);
-}
-
 
 #endif
