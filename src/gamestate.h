@@ -10,9 +10,7 @@ class GameState {
     public:
 
         GameState() {
-            _color[W].clear(); _color[B].clear();
-            for(int i=R; i<nPieces; ++i)
-                _pieces[i].clear();
+            clear();
         }
 
         /**

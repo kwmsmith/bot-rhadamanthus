@@ -223,10 +223,11 @@ bool setup_archive_game(const ArchivedGame& ag, GameState *gs)
         const vector<Step> &full_move = ag.get_move(idx);
         for (vector<Step>::const_iterator it=full_move.begin();
                 it != full_move.end(); ++it) {
-            gs->take_step(*it);
+            if (!gs->take_step(*it))
+                return false;
         }
     }
-    return false;
+    return true;
 }
 
 bool play_archive_game(const ArchivedGame& ag, GameState *gs)
@@ -238,9 +239,10 @@ bool play_archive_game(const ArchivedGame& ag, GameState *gs)
         const vector<Step> &full_move = ag.get_move(idx);
         for (vector<Step>::const_iterator it=full_move.begin();
                 it != full_move.end(); ++it) {
-            gs->take_step(*it);
+            if (!gs->take_step(*it))
+                return false;
         }
         std::cout << gs->to_std_string() << std::endl;
     }
-    return false;
+    return true;
 }

@@ -49,10 +49,9 @@ TEST(ArimaaArchive, play_archive_game) {
     a.init("fake_archive.txt");
     ArchivedGame g(a.get_record());
     GameState gs;
-    // EXPECT_TRUE(play_archive_game(g, &gs));
-    setup_archive_game(g, &gs);
+    EXPECT_TRUE(setup_archive_game(g, &gs));
     std::cout << gs.to_std_string() << std::endl;
-    play_archive_game(g, &gs);
-    // gs.to_string();
+    gs.clear();
+    EXPECT_TRUE(play_archive_game(g, &gs));
     std::cout << gs.to_std_string() << std::endl;
 }
