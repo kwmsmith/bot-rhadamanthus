@@ -56,9 +56,9 @@ bool GameState::take_step(const Step &s)
         return false;
 
     const int c = s.get_color(), p = s.get_piece(), pos = s.get_position();
-    
+
     assert(c == W || c == B);
-    
+
     switch(s.get_action()) {
         case NORTH:
             return move_piece(c, p, pos, pos+8);
@@ -82,7 +82,7 @@ bool GameState::add_piece_at(const int c, const int piece, const unsigned int id
     assert(c == W || c == B);
     assert(piece >= R && piece <= E);
     assert(idx >= 0 && idx < 64);
-    if ((_color[W] | _color[B]).contains(idx)) {
+    if (get_all_const().contains(idx)) {
         return false; // position already occupied.
     }
     add_piece_at_fast(c, piece, idx);
@@ -110,7 +110,7 @@ bool GameState::move_piece(const int c, const int piece, const unsigned int from
     // TODO: Test for move off of board?
     // const int diff = abs(from - to);
     // if(!(diff == 1 || diff == 8)) // not moved in a canonical direction.
-        // return false;
+    // return false;
 
     // now we can move the piece.
     remove_piece_at(c, piece, from);
@@ -120,7 +120,7 @@ bool GameState::move_piece(const int c, const int piece, const unsigned int from
 
 bool GameState::is_empty() const
 {
-    Board b(_color[W] | _color[B]);
+    Board b(get_all_const());
     for(int i=R; i < nPieces; ++i)
         b |= _pieces[i];
     return b == 0;
@@ -149,7 +149,7 @@ Board GameState::mobile_pieces(Color c) const
 Board GameState::has_adjacent_empty(Color c) const
 {
     Board adj_empty;
-    const Board empties = ~(_color[W] | _color[B]);
+    const Board empties = ~get_all_const();
     const Board& color_board = get_color_board_const(c);
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         adj_empty |= empties.move(direction) & color_board;

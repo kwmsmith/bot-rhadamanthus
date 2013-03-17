@@ -35,6 +35,10 @@ class GameState {
             return _color[c];
         }
 
+        const Board get_all_const() const {
+            return _color[W] | _color[B];
+        }
+
         const Board& get_piece_board(Piece p) const {
             return _pieces[p];
         }
@@ -90,7 +94,7 @@ class GameState {
         bool remove_piece_at(const int c, const int p, const unsigned int idx);
 
         std::string to_oneline_string() const;
-        
+
         std::string to_std_string() const;
 
     private:
@@ -99,23 +103,16 @@ class GameState {
         GameState& operator=(const GameState& gs);  // noncopyable
 
         void add_piece_at_fast(const int c, const int piece, const unsigned int idx) {
-            if (c == W) {
-                _color[W].add(idx);
-                assert(_color[W].contains(idx));
-            } else {
-                _color[B].add(idx);
-                assert(_color[B].contains(idx));
-            }
+            assert (c == W || c == B);
+            _color[c].add(idx);
+            assert(_color[c].contains(idx));
             _pieces[piece].add(idx);
             assert(_pieces[piece].contains(idx));
         }
 
         void remove_piece_at_fast(const int c, const int piece, const unsigned int idx) {
-            if (c == W) {
-                _color[W].remove(idx);
-            } else {
-                _color[B].remove(idx);
-            }
+            assert (c == W || c == B);
+            _color[c].remove(idx);
             _pieces[piece].remove(idx);
         }
 
