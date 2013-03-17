@@ -71,8 +71,8 @@ TEST(GameState, frozen_pieces) {
 
     gs.clear();
 
-    gs.add_piece_at(E, B, 19);
-    gs.add_piece_at(E, W, 20);
+    gs.add_piece_at(B, E, 19);
+    gs.add_piece_at(W, E, 20);
     EXPECT_EQ(gs.frozen_pieces(B), 0);
     EXPECT_EQ(gs.frozen_pieces(W), 0);
 }

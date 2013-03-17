@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include <vector>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -40,5 +41,18 @@ TEST(ArimaaArchive, make_archive_game) {
     ArimaaArchive a;
     EXPECT_EQ(a.init("fake_archive.txt"), 1);
     ArchivedGame g(a.get_record());
-    EXPECT_EQ(g.get_plycount(), 65);
+    EXPECT_EQ(g.get_numply(), 129);
+}
+
+TEST(ArimaaArchive, play_archive_game) {
+    ArimaaArchive a;
+    a.init("fake_archive.txt");
+    ArchivedGame g(a.get_record());
+    GameState gs;
+    // EXPECT_TRUE(play_archive_game(g, &gs));
+    setup_archive_game(g, &gs);
+    std::cout << gs.to_std_string() << std::endl;
+    play_archive_game(g, &gs);
+    // gs.to_string();
+    std::cout << gs.to_std_string() << std::endl;
 }

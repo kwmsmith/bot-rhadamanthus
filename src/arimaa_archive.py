@@ -43,7 +43,10 @@ EMPTY_BOARD = ' ' * 64
 #-----------------------------------------------------------------------------
 
 def _noop(arg):
-    return arg
+    return unicode(arg)
+
+def _convert_to_int(ss):
+    return int(ss)
 
 def _convert_to_pos_int(ss):
     ii = int(ss)
@@ -56,16 +59,18 @@ def _convert_to_boolean(ss):
     return b
 
 def convert_movelist(ml):
-    moves = ml.split('\\n')
+    ml = unicode(ml)
+    moves = ml.split(u'\\n')
     moves = [m.split() for m in moves]
     return moves
 
 def convert_events(evts):
+    evts = unicode(evts)
     return evts.split('\\n')
 
 def convert_result(r):
-    if r not in 'bw':
-        msg = "Result must be 'b' (black/silver) or 'w' (white/gold), but got '{}'."
+    if r not in 'bwud':
+        msg = "Result must be 'b' (black/silver), 'w' (white/gold), 'u', or 'd', but got '{}'."
         raise ValueError(msg.format(r))
     return r
 
@@ -90,8 +95,8 @@ FIELD_CONVERTERS = {
             'bcountry': _noop,
             'wrating': _convert_to_pos_int,
             'brating': _convert_to_pos_int,
-            'wratingk': _convert_to_pos_int,
-            'bratingk': _convert_to_pos_int,
+            'wratingk': _convert_to_int,
+            'bratingk': _convert_to_int,
             'wtype': convert_type,
             'btype': convert_type,
             'event': _noop,
@@ -114,25 +119,32 @@ FIELD_CONVERTERS = {
 # Public API.
 #-----------------------------------------------------------------------------
 
-def fields_from_compressed(tgzfile):
-    ''' Given a tgz'd Arimaa gamefile, returns the fields for the game DB.
+def get_fh(fname):
+    try:
+        fh = tarfile.open(fname, 'r:gz').fileobj
+    except tarfile.ReadError:
+        fh = open(fname, 'r')
+    return fh
+
+def fields_from_archive(fname):
+    ''' Given an Arimaa gamefile, returns the fields for the game DB.
     '''
-    tf = tarfile.open(tgzfile, 'r:gz')
-    raw_header = tf.fileobj.readline()
+    fh = get_fh(fname)
+    raw_header = fh.readline()
     header = raw_header.split() 
     if header != FIELDS:
         msg = "Fields from file '{}' not equal to expected fields.".format
-        raise ValueError(msg(tgzfile))
+        raise ValueError(msg(fname))
     return header
 
-def games_from_compressed(tgzfile):
+def games_from_archive(fname):
     ''' Given a tgz'd Arimaa gamefile, returns an iterator over the games in a file.
     '''
-    fields = fields_from_compressed(tgzfile)
-    tf = tarfile.open(tgzfile, 'r:gz')
+    fields = fields_from_archive(fname)
+    fh = get_fh(fname)
     # skip the header line
-    tf.fileobj.readline()
-    for game_string in tf.fileobj:
+    fh.readline()
+    for game_string in fh:
         if set(game_string) == {'\x00'}:
             break
         yield game_from_game_string(fields, game_string)

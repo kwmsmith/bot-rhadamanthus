@@ -56,6 +56,16 @@ class Step
                     action_ == invalid_action()) {
                 return false;
             }
+            
+            if (!(color_ == W || color_ == B))
+                return false;
+            if (piece_ > E)
+                return false;
+            if (position_ > 63)
+                return false;
+            if (action_ > CAPTURE)
+                return false;
+            
             switch(action_) {
                 case NORTH:
                     if (Board::rank_n(8).contains(position_))

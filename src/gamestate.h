@@ -26,16 +26,33 @@ class GameState {
 
         bool move_piece(const int c, const int p, const unsigned int from, const unsigned int to);
 
-        const Board& get_color_board(const int c) const {
-            return (c == B ? _black : _white);
+        const Board& get_color_board_const(const int c) const {
+            assert(c == B || c == W);
+            if (c == B) {
+                return _black;
+            } else {
+                return _white;
+            }
+            // if (c == W) {
+                // return _white;
+            // } else {
+                // return _black;
+            // }
         }
+
+        // Board& get_color_board(const int c) {
+        // if (c == B)
+        // return _black;
+        // else
+        // return _white;
+        // }
 
         const Board& get_piece_board(Piece p) const {
             return _boards[p];
         }
 
         bool contains_at(Color c, int p, unsigned int idx) const {
-            const Board& color = get_color_board(c);
+            const Board& color = get_color_board_const(c);
             return color.contains(idx) && _boards[p].contains(idx);
         }
 
@@ -61,7 +78,7 @@ class GameState {
          * Pieces of color `c` that are not frozen but blockaded.
          */
         Board blockaded_pieces(Color c) const;
-        
+
         /**
          * Union of blockaded and frozen pieces.
          */
@@ -76,28 +93,41 @@ class GameState {
 
         bool add_piece_at(const int c, const int p, const unsigned int idx);
 
-        void add_piece_at(int c, int p, char file, int rank) {
+        void add_piece_at(const int c, const int p, const char file, const int rank) {
             assert(file >= 'A' && file <= 'H');
             assert(rank >= 1 && rank <= 8);
-            add_piece_at(p, c, (rank - 1) * 8 + (file - 'A'));
+            add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
         }
 
         bool remove_piece_at(const int c, const int p, const unsigned int idx);
 
+        std::string to_oneline_string() const;
+        
+        std::string to_std_string() const;
+
     private:
 
-        GameState(const GameState& gs);
-        GameState& operator=(const GameState& gs);
+        GameState(const GameState& gs);  // noncopyable
+        GameState& operator=(const GameState& gs);  // noncopyable
 
-
-
-        void add_piece_at_fast(Board& color, const int piece, const unsigned int idx) {
-            color.add(idx);
+        void add_piece_at_fast(const int c, const int piece, const unsigned int idx) {
+            if (c == W) {
+                _white.add(idx);
+                assert(_white.contains(idx));
+            } else {
+                _black.add(idx);
+                assert(_black.contains(idx));
+            }
             _boards[piece].add(idx);
+            assert(_boards[piece].contains(idx));
         }
 
-        void remove_piece_at_fast(Board& color, const int piece, const unsigned int idx) {
-            color.remove(idx);
+        void remove_piece_at_fast(const int c, const int piece, const unsigned int idx) {
+            if (c == W) {
+                _white.remove(idx);
+            } else {
+                _black.remove(idx);
+            }
             _boards[piece].remove(idx);
         }
 

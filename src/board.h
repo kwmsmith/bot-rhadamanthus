@@ -242,6 +242,15 @@ struct Board {
             return _board & U64_ONE<<v;
         }
 
+        std::vector<unsigned char> psns_from_board() const {
+            std::vector<unsigned char> psns;
+            for(unsigned int i=0; i < 64; ++i) {
+                if (this->contains(i))
+                    psns.push_back(i);
+            }
+            return psns;
+        }
+        
         Board mask(Board m) const {
             return *this & m;
         }

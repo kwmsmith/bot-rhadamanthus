@@ -54,9 +54,11 @@ class ArchivedGame
 
         explicit ArchivedGame(const map_ss&);
 
-        unsigned int get_plycount() const;
+        unsigned int get_numply() const;
 
         bool verify() const;
+
+        const std::vector<Step> &get_move(unsigned int idx) const;
 
     private:
 
@@ -65,5 +67,8 @@ class ArchivedGame
         ArchivedGame(const ArchivedGame&);
         ArchivedGame& operator=(const ArchivedGame&);
 };
+
+bool play_archive_game(const ArchivedGame& ag, GameState *gs);
+bool setup_archive_game(const ArchivedGame& ag, GameState *gs);
 
 #endif // ARIMAA_ARCHIVE_H_

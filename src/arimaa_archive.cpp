@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
@@ -196,14 +197,50 @@ ArchivedGame::ArchivedGame(const map_ss& record)
             || movelist_->size() == (plycount_) * 2 - 1);
 }
 
-unsigned int ArchivedGame::get_plycount() const
+unsigned int ArchivedGame::get_numply() const
 {
-    const unsigned int sz = movelist_->size();
-    return (sz % 2 ? sz / 2 + 1 : sz / 2);
+    // NOTE: NOT the same as the "plycount" entry in the game archive!
+    // This is the total number of plies, where a single ply is one full move
+    // by black or white.
+    return movelist_->size();
 }
 
 bool ArchivedGame::verify() const
 {
     assert(0);
+    return false;
+}
+
+const vector<Step> &ArchivedGame::get_move(unsigned int idx) const
+{
+    return movelist_->at(idx);
+}
+
+bool setup_archive_game(const ArchivedGame& ag, GameState *gs)
+{
+
+    for (unsigned int idx=0; idx < 2; ++idx) {
+        const vector<Step> &full_move = ag.get_move(idx);
+        for (vector<Step>::const_iterator it=full_move.begin();
+                it != full_move.end(); ++it) {
+            gs->take_step(*it);
+        }
+    }
+    return false;
+}
+
+bool play_archive_game(const ArchivedGame& ag, GameState *gs)
+{
+
+    const unsigned int numply = ag.get_numply();
+
+    for (unsigned int idx=0; idx < numply; ++idx) {
+        const vector<Step> &full_move = ag.get_move(idx);
+        for (vector<Step>::const_iterator it=full_move.begin();
+                it != full_move.end(); ++it) {
+            gs->take_step(*it);
+        }
+        std::cout << gs->to_std_string() << std::endl;
+    }
     return false;
 }
