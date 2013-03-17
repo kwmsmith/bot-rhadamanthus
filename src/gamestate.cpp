@@ -88,7 +88,6 @@ bool GameState::add_piece_at(const int c, const int piece, const unsigned int id
     add_piece_at_fast(c, piece, idx);
     assert(_pieces[piece].contains(idx));
     assert(get_color_board_const(c).contains(idx));
-    // assert((_pieces[piece] & get_color_board_const(c)).contains(idx));
     return true;
 }
 
@@ -108,9 +107,6 @@ bool GameState::remove_piece_at(const int c, const int piece, const unsigned int
 bool GameState::move_piece(const int c, const int piece, const unsigned int from, const unsigned int to)
 {
     // TODO: Test for move off of board?
-    // const int diff = abs(from - to);
-    // if(!(diff == 1 || diff == 8)) // not moved in a canonical direction.
-    // return false;
 
     // now we can move the piece.
     remove_piece_at(c, piece, from);

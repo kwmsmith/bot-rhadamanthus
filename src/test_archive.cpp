@@ -33,8 +33,6 @@ TEST(ArimaaArchive, get_record_setup) {
     ArimaaArchive a;
     EXPECT_EQ(a.init("fake_archive.txt"), 1);
     const map_ss mp = a.get_record();
-    // vector<string> moves = get_record_setup(mp, B);
-    // EXPECT_EQ(moves.size(), 1);
 }
 
 TEST(ArimaaArchive, make_archive_game) {
