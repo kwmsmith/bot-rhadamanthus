@@ -2,6 +2,27 @@
 #include <cstdio>
 #include <vector>
 
+bool gamestate_from_string(const std::string& str, GameState *gs)
+{
+    if (str.length() != 64)
+        return false;
+    int color;
+    int piece;
+    for (unsigned int idx=0; idx < str.length(); idx++) {
+        if (str[idx] == 'x' || str[idx] == 'X' ||
+                str[idx] == ' ' || str[idx] == '.')
+            continue;
+        color = color_from_char(str[idx]);
+        piece = piece_from_char(str[idx]);
+        if (color == kInvalidPiece || piece == kInvalidPiece)
+            return false;
+        if (!gs->add_piece_at(color, piece, idx))
+            return false;
+    }
+    // FIXME: Validation!!!
+    return true;
+}
+
 std::string GameState::to_std_string() const
 {
     const std::string &oneline = to_oneline_string();
@@ -120,21 +141,6 @@ bool GameState::is_empty() const
     for(int i=R; i < nPieces; ++i)
         b |= _pieces[i];
     return b == 0;
-}
-
-bool GameState::init_from_string(const std::string& s)
-{
-    int p = 0, c = 0;
-    if (s.length() != 64)
-        return false;
-    for(unsigned int i=0; i < s.length(); ++i) {
-        p = piece_from_char(s[i]);
-        c = color_from_char(s[i]);
-        if (p == kInvalidPiece || c == kInvalidPiece)
-            continue;
-        add_piece_at(c, p, i);
-    }
-    return true;
 }
 
 Board GameState::mobile_pieces(Color c) const

@@ -37,6 +37,20 @@ TEST(GameState, Instantiation) {
     GameState gb;
 }
 
+TEST(GameState, init_from_string) {
+    GameState gs;
+    std::string ss;
+    ss += "RRRRRRRR";
+    ss += "CCDDHHME";
+    ss += "..x..x..";
+    ss += "........";
+    ss += "........";
+    ss += "..x..x..";
+    ss += "ccddhhme";
+    ss += "rrrrrrrr";
+    EXPECT_TRUE(gamestate_from_string(ss, &gs));
+}
+
 TEST(GameState, piece_enum) {
     EXPECT_TRUE(R < C && C < D && D < H && H < M && M < E);
     EXPECT_EQ(E - R, 5);
@@ -75,19 +89,6 @@ TEST(GameState, frozen_pieces) {
     gs.add_piece_at(W, E, 20);
     EXPECT_EQ(gs.frozen_pieces(B), 0);
     EXPECT_EQ(gs.frozen_pieces(W), 0);
-}
-
-TEST(GameState, init_from_string) {
-    GameState gb;
-    EXPECT_TRUE(gb.init_from_string("----------------------------------------------------------------"));
-    EXPECT_TRUE(gb.is_empty());
-    EXPECT_TRUE(gb.init_from_string("R--------------------------------------------------------------R"));
-    EXPECT_FALSE(gb.is_empty());
-}
-
-TEST(GameState, pieces_stronger) {
-    GameState gs;
-    gs.init_from_string("R--------------------------------------------------------------R");
 }
 
 TEST(GameState, MobilePieces) {

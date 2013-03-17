@@ -13,11 +13,6 @@ class GameState {
             clear();
         }
 
-        /**
-         * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
-         */
-        bool init_from_string(const std::string& s);
-
         void clear() {
             _color[W].clear(); _color[B].clear();
             for(int i=R; i<nPieces; ++i)
@@ -32,13 +27,13 @@ class GameState {
             assert(c == B || c == W);
             return _color[c];
         }
+        
+        const Board& get_piece_board_const(Piece p) const {
+            return _pieces[p];
+        }
 
         const Board get_all_const() const {
             return _color[W] | _color[B];
-        }
-
-        const Board& get_piece_board(Piece p) const {
-            return _pieces[p];
         }
 
         bool contains_at(Color c, int p, unsigned int idx) const {
@@ -130,5 +125,12 @@ class GameState {
         Board _color[2];
         Board _pieces[nPieces];
 };
+
+
+/* Expects a 64-character string, beginning with a1, ending with h8.  Piece
+ * characters are rcdhme / RCDHME.  Empty characters are '.', ' ', '~' and are
+ * ignored.  Trap characters ('x' or 'X') are ignored.
+ */
+bool gamestate_from_string(const std::string& str, GameState *gs);
 
 #endif
