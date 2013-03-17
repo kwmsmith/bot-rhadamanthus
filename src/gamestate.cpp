@@ -32,7 +32,7 @@ std::string GameState::to_oneline_string() const
     const char white_char[] = { 'R', 'C', 'D', 'H', 'M', 'E'};
     const char black_char[] = { 'r', 'c', 'd', 'h', 'm', 'e'};
     for(int p=R; p < nPieces; p++) {
-        const Board &b = _white & _boards[p];
+        const Board &b = _color[W] & _pieces[p];
         const std::vector<unsigned char> &psns = b.psns_from_board();
         for (std::vector<unsigned char>::const_iterator it=psns.begin();
                 it != psns.end(); ++it) {
@@ -40,7 +40,7 @@ std::string GameState::to_oneline_string() const
         }
     }
     for(int p=R; p < nPieces; p++) {
-        const Board &b = _black & _boards[p];
+        const Board &b = _color[B] & _pieces[p];
         const std::vector<unsigned char> &psns = b.psns_from_board();
         for (std::vector<unsigned char>::const_iterator it=psns.begin();
                 it != psns.end(); ++it) {
@@ -82,23 +82,23 @@ bool GameState::add_piece_at(const int c, const int piece, const unsigned int id
     assert(c == W || c == B);
     assert(piece >= R && piece <= E);
     assert(idx >= 0 && idx < 64);
-    if ((_white | _black).contains(idx)) {
+    if ((_color[W] | _color[B]).contains(idx)) {
         return false; // position already occupied.
     }
     add_piece_at_fast(c, piece, idx);
-    assert(_boards[piece].contains(idx));
+    assert(_pieces[piece].contains(idx));
     assert(get_color_board_const(c).contains(idx));
-    // assert((_boards[piece] & get_color_board_const(c)).contains(idx));
+    // assert((_pieces[piece] & get_color_board_const(c)).contains(idx));
     return true;
 }
 
 bool GameState::remove_piece_at(const int c, const int piece, const unsigned int idx)
 {
-    if (!(_boards[piece] & get_color_board_const(c)).contains(idx)) {
+    if (!(_pieces[piece] & get_color_board_const(c)).contains(idx)) {
         return false; // idx does not contain the right piece.
     }
     remove_piece_at_fast(c, piece, idx);
-    assert(!(_boards[piece] & get_color_board_const(c)).contains(idx));
+    assert(!(_pieces[piece] & get_color_board_const(c)).contains(idx));
     return true;
 }
 
@@ -120,10 +120,9 @@ bool GameState::move_piece(const int c, const int piece, const unsigned int from
 
 bool GameState::is_empty() const
 {
-    Board b(_white);
-    b |= _black;
+    Board b(_color[W] | _color[B]);
     for(int i=R; i < nPieces; ++i)
-        b |= _boards[i];
+        b |= _pieces[i];
     return b == 0;
 }
 
@@ -150,7 +149,7 @@ Board GameState::mobile_pieces(Color c) const
 Board GameState::has_adjacent_empty(Color c) const
 {
     Board adj_empty;
-    const Board empties = ~(_white | _black);
+    const Board empties = ~(_color[W] | _color[B]);
     const Board& color_board = get_color_board_const(c);
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         adj_empty |= empties.move(direction) & color_board;
@@ -172,8 +171,8 @@ Board GameState::has_adjacent_enemy_le(Color for_color) const
     const Board& color_board = get_color_board_const(for_color);
     const Board& enemy_color = get_color_board_const(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
-        enemy_le |= _boards[p] & enemy_color;
-        these_pieces = _boards[p] & color_board;
+        enemy_le |= _pieces[p] & enemy_color;
+        these_pieces = _pieces[p] & color_board;
         for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_le |= enemy_le.move(direction) & these_pieces;
     }
@@ -186,10 +185,10 @@ Board GameState::has_adjacent_enemy_lt(Color for_color) const
     const Board& color_board = get_color_board_const(for_color);
     const Board& enemy_color = get_color_board_const(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
-        these_pieces = _boards[p] & color_board;
+        these_pieces = _pieces[p] & color_board;
         for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_lt |= enemy_lt.move(direction) & these_pieces;
-        enemy_lt |= _boards[p] & enemy_color;
+        enemy_lt |= _pieces[p] & enemy_color;
     }
     return adj_lt;
 }
@@ -200,10 +199,10 @@ Board GameState::has_adjacent_enemy_gt(Color for_color) const
     const Board& color_board = get_color_board_const(for_color);
     const Board& enemy_color = get_color_board_const(other_color(for_color));
     for(int p = E; p >= R; --p) {
-        these_pieces = _boards[p] & color_board;
+        these_pieces = _pieces[p] & color_board;
         for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_gt |= enemy_gt.move(direction) & these_pieces;
-        enemy_gt |= _boards[p] & enemy_color;
+        enemy_gt |= _pieces[p] & enemy_color;
     }
     return adj_gt;
 }
@@ -214,8 +213,8 @@ Board GameState::has_adjacent_enemy_ge(Color for_color) const
     const Board& color_board = get_color_board_const(for_color);
     const Board& enemy_color = get_color_board_const(other_color(for_color));
     for(int p = E; p >= R; --p) {
-        enemy_ge |= _boards[p] & enemy_color;
-        these_pieces = _boards[p] & color_board;
+        enemy_ge |= _pieces[p] & enemy_color;
+        these_pieces = _pieces[p] & color_board;
         for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
             adj_ge |= enemy_ge.move(direction) & these_pieces;
     }

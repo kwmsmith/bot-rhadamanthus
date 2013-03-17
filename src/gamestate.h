@@ -9,7 +9,11 @@ class GameState {
 
     public:
 
-        GameState() : _white(0), _black(0) {}
+        GameState() {
+            _color[W].clear(); _color[B].clear();
+            for(int i=R; i<nPieces; ++i)
+                _pieces[i].clear();
+        }
 
         /**
          * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
@@ -17,9 +21,9 @@ class GameState {
         bool init_from_string(const std::string& s);
 
         void clear() {
-            _white.clear(); _black.clear();
+            _color[W].clear(); _color[B].clear();
             for(int i=R; i<nPieces; ++i)
-                _boards[i].clear();
+                _pieces[i].clear();
         }
 
         bool take_step(const Step &s);
@@ -28,32 +32,16 @@ class GameState {
 
         const Board& get_color_board_const(const int c) const {
             assert(c == B || c == W);
-            if (c == B) {
-                return _black;
-            } else {
-                return _white;
-            }
-            // if (c == W) {
-                // return _white;
-            // } else {
-                // return _black;
-            // }
+            return _color[c];
         }
 
-        // Board& get_color_board(const int c) {
-        // if (c == B)
-        // return _black;
-        // else
-        // return _white;
-        // }
-
         const Board& get_piece_board(Piece p) const {
-            return _boards[p];
+            return _pieces[p];
         }
 
         bool contains_at(Color c, int p, unsigned int idx) const {
             const Board& color = get_color_board_const(c);
-            return color.contains(idx) && _boards[p].contains(idx);
+            return color.contains(idx) && _pieces[p].contains(idx);
         }
 
 
@@ -112,28 +100,27 @@ class GameState {
 
         void add_piece_at_fast(const int c, const int piece, const unsigned int idx) {
             if (c == W) {
-                _white.add(idx);
-                assert(_white.contains(idx));
+                _color[W].add(idx);
+                assert(_color[W].contains(idx));
             } else {
-                _black.add(idx);
-                assert(_black.contains(idx));
+                _color[B].add(idx);
+                assert(_color[B].contains(idx));
             }
-            _boards[piece].add(idx);
-            assert(_boards[piece].contains(idx));
+            _pieces[piece].add(idx);
+            assert(_pieces[piece].contains(idx));
         }
 
         void remove_piece_at_fast(const int c, const int piece, const unsigned int idx) {
             if (c == W) {
-                _white.remove(idx);
+                _color[W].remove(idx);
             } else {
-                _black.remove(idx);
+                _color[B].remove(idx);
             }
-            _boards[piece].remove(idx);
+            _pieces[piece].remove(idx);
         }
 
-        Board _white;
-        Board _black;
-        Board _boards[nPieces];
+        Board _color[2];
+        Board _pieces[nPieces];
 };
 
 #endif
