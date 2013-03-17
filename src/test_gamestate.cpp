@@ -39,15 +39,15 @@ TEST(GameState, Instantiation) {
 
 TEST(GameState, init_from_string) {
     GameState gs;
-    std::string ss;
-    ss += "RRRRRRRR";
-    ss += "CCDDHHME";
-    ss += "..x..x..";
-    ss += "........";
-    ss += "........";
-    ss += "..x..x..";
-    ss += "ccddhhme";
-    ss += "rrrrrrrr";
+    std::string ss(
+            "RRRRRRRR"
+            "CCDDHHME"
+            "..x..x.."
+            "........"
+            "........"
+            "..x..x.."
+            "ccddhhme"
+            "rrrrrrrr");
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
 }
 

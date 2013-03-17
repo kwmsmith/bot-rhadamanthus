@@ -143,12 +143,7 @@ bool GameState::is_empty() const
     return b == 0;
 }
 
-Board GameState::mobile_pieces(Color c) const
-{
-    return has_adjacent_empty(c) & ~frozen_pieces(c);
-}
-
-Board GameState::has_adjacent_empty(Color c) const
+Board GameState::has_adjacent_empty(const Color c) const
 {
     Board adj_empty;
     const Board empties = ~get_all_const();
@@ -158,7 +153,7 @@ Board GameState::has_adjacent_empty(Color c) const
     return adj_empty;
 }
 
-Board GameState::has_adjacent_friendly(Color c) const
+Board GameState::has_adjacent_friendly(const Color c) const
 {
     Board adjacent_friendly;
     const Board& color_board = get_color_board_const(c);
@@ -167,7 +162,7 @@ Board GameState::has_adjacent_friendly(Color c) const
     return adjacent_friendly;
 }
 
-Board GameState::has_adjacent_enemy_le(Color for_color) const
+Board GameState::has_adjacent_enemy_le(const Color for_color) const
 {
     Board adj_le, enemy_le, these_pieces;
     const Board& color_board = get_color_board_const(for_color);
@@ -181,7 +176,7 @@ Board GameState::has_adjacent_enemy_le(Color for_color) const
     return adj_le;
 }
 
-Board GameState::has_adjacent_enemy_lt(Color for_color) const
+Board GameState::has_adjacent_enemy_lt(const Color for_color) const
 {
     Board adj_lt, enemy_lt, these_pieces;
     const Board& color_board = get_color_board_const(for_color);
@@ -195,7 +190,7 @@ Board GameState::has_adjacent_enemy_lt(Color for_color) const
     return adj_lt;
 }
 
-Board GameState::has_adjacent_enemy_gt(Color for_color) const
+Board GameState::has_adjacent_enemy_gt(const Color for_color) const
 {
     Board adj_gt, enemy_gt, these_pieces;
     const Board& color_board = get_color_board_const(for_color);
@@ -209,7 +204,7 @@ Board GameState::has_adjacent_enemy_gt(Color for_color) const
     return adj_gt;
 }
 
-Board GameState::has_adjacent_enemy_ge(Color for_color) const
+Board GameState::has_adjacent_enemy_ge(const Color for_color) const
 {
     Board adj_ge, enemy_ge, these_pieces;
     const Board& color_board = get_color_board_const(for_color);
@@ -223,7 +218,30 @@ Board GameState::has_adjacent_enemy_ge(Color for_color) const
     return adj_ge;
 }
 
-Board GameState::frozen_pieces(Color c) const
+Board GameState::frozen_pieces(const Color c) const
 {
     return has_adjacent_enemy_gt(c) & ~has_adjacent_friendly(c);
+}
+
+Board GameState::mobile_pieces(const Color c) const
+{
+    return has_adjacent_empty(c) & ~frozen_pieces(c);
+}
+
+void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
+{
+    const Board empties = ~gs.get_all_const();
+    const Board& color_board = gs.get_color_board_const(c);
+    for(unsigned int direction = NORTH; direction < num_directions(); ++direction) {
+        boards->push_back(empties.move(direction) & color_board);
+    }
+}
+
+void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
+{
+    Board not_frozen = ~gs.frozen_pieces(c);
+    has_adjacent_empty_directional(gs, c, boards);
+    for(unsigned int i=0; i < num_directions(); ++i) {
+        boards->at(i) &= not_frozen;
+    }
 }

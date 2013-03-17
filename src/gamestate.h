@@ -133,4 +133,7 @@ class GameState {
  */
 bool gamestate_from_string(const std::string& str, GameState *gs);
 
+void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
+void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
+
 #endif
