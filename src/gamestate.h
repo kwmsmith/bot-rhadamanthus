@@ -94,6 +94,19 @@ class GameState {
         std::string to_oneline_string() const;
 
         std::string to_std_string() const;
+        
+        void apply_mask(const Board& mask) {
+            _color[W] &= mask; _color[B] &= mask;
+            for(int i=R; i<nPieces; ++i)
+                _pieces[i] &= mask;
+        }
+        
+        void copy_to(GameState *to) const {
+            to->_color[W] = _color[W];
+            to->_color[B] = _color[B];
+            for(int i=R; i<nPieces; ++i)
+                to->_pieces[i] = _pieces[i];
+        }
 
     private:
 
