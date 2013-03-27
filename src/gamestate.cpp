@@ -163,27 +163,43 @@ void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<B
 
 void generate_pushes(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pushes)
 {
-    const Board& mobile = mobile_pieces(gs, for_color);
-    for (unsigned int pusher_direction = NORTH; pusher_direction < num_directions(); ++pusher_direction) {
-        const Board& pieces_with_adj_lt = adj_enemy_lt(gs, for_color, pusher_direction) & mobile;
-        for (unsigned int pushed_direction = NORTH; pushed_direction < num_directions(); ++pushed_direction) {
-            if (pusher_direction == opp_dir(pushed_direction)) continue;
-            const Board& enemy_with_adj_empty = adj_empty(gs, other_color(for_color), pushed_direction);
+    const Color pushing_color = for_color;
+    const Color pushed_color = other_color(for_color);
+    const Board& pushing_mobile = mobile_pieces(gs, for_color);
+    
+    // The body of generate_pushes() takes the perspective of the pushed piece.  
+    // dir_pushed_from is the direction from which the pushing piece comes from.
+    // dir_pushed is the direction the pushed piece is pushed to.
+    
+    for (unsigned int dir_pushed_from = NORTH; dir_pushed_from < num_directions(); ++dir_pushed_from) {
+        
+        // the mobile pushing pieces with an adjacent weaker piece.
+        // We use the opp_dir(dir_pushed_from) here since we are talking about the pushing piece.
+        const Board& pushing_pieces_with_adj_lt = 
+            adj_enemy_lt(gs, pushing_color, opp_dir(dir_pushed_from)) & pushing_mobile;
+        
+        for (unsigned int dir_pushed = NORTH; dir_pushed < num_directions(); ++dir_pushed) {
+            if (dir_pushed_from == dir_pushed) continue;
+            
+            const Board& pushed_with_adj_empty = adj_empty(gs, pushed_color, dir_pushed);
                 
-            const Board& pushed_pieces = is_adjacent(enemy_with_adj_empty,
-                                                     pieces_with_adj_lt, opp_dir(pusher_direction));
-            const Board& pushing_pieces = is_adjacent(pieces_with_adj_lt,
-                                                      enemy_with_adj_empty, pusher_direction);
+            const Board& pushed_pieces = 
+                is_adjacent(pushed_with_adj_empty, pushing_pieces_with_adj_lt, dir_pushed_from);
+            
+            const Board& pushing_pieces = 
+                is_adjacent(pushing_pieces_with_adj_lt, pushed_with_adj_empty, opp_dir(dir_pushed_from));
+
             std::vector<unsigned int> pushed_idxs, pusher_idxs;
             pushed_pieces.psns_from_board(&pushed_idxs);
             pushing_pieces.psns_from_board(&pusher_idxs);
             assert(pushed_idxs.size() == pusher_idxs.size());
+            
             for(unsigned int i=0; i < pushed_idxs.size(); ++i) {
                 assert(gs.get_all_const().contains(pushed_idxs[i]));
                 assert(gs.get_all_const().contains(pusher_idxs[i]));
                 std::vector<Step> delta;
-                delta.push_back(step_from_gs(gs, pushed_idxs[i], pushed_direction));
-                delta.push_back(step_from_gs(gs, pusher_idxs[i], pusher_direction));
+                delta.push_back(step_from_gs(gs, pushed_idxs[i], dir_pushed));
+                delta.push_back(step_from_gs(gs, pusher_idxs[i], opp_dir(dir_pushed_from)));
                 pushes->push_back(delta);
             }
         }
