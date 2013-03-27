@@ -92,6 +92,15 @@ TEST(BoardTest, move_ranks_south) {
     }
 }
 
+TEST(BoardTest, is_adjacent) {
+    EXPECT_EQ(Board("01").move_opp(EAST), Board("1"));
+    EXPECT_EQ(is_adjacent(Board("1"), Board("01"), EAST), Board("1"));
+    EXPECT_EQ(is_adjacent(Board("01"), Board("1"), WEST), Board("01"));
+    EXPECT_EQ(is_adjacent(Board().add(1), Board().add(9), NORTH), Board().add(1));
+    EXPECT_EQ(is_adjacent(Board().add(10), Board().add(2), SOUTH), Board().add(10));
+    EXPECT_EQ(Board().add(8).move_opp(NORTH) & Board().add(0), Board().add(0));
+}
+
 // Tests Factorial().
 
 // Tests factorial of negative numbers.

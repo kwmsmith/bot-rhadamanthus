@@ -6,6 +6,23 @@ unsigned int num_directions() {
     return num_directions_;
 }
 
+unsigned int opp_dir(unsigned int dir)
+{
+    switch(dir) {
+        case NORTH:
+            return SOUTH;
+        case SOUTH:
+            return NORTH;
+        case EAST:
+            return WEST;
+        case WEST:
+            return EAST;
+        default:
+            assert(0);
+    }
+    assert(0);
+}
+
 int direction_from_char(const char ch)
 {
     switch(ch) {

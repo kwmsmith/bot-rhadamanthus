@@ -242,7 +242,7 @@ bool play_archive_game(const ArchivedGame& ag, GameState *gs)
             if (!gs->take_step(*it))
                 return false;
         }
-        std::cout << gs->to_std_string() << std::endl;
+        // std::cout << gs->to_std_string() << std::endl;
     }
     return true;
 }

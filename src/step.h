@@ -106,10 +106,17 @@ class Step
         unsigned char get_action() const {
             return action_;
         }
+        
+        bool operator==(const Step& other) const {
+            return color_ == other.color_ &&
+                piece_ == other.piece_ &&
+                position_ == other.position_ &&
+                action_ == other.action_;
+        }
 
     private:
         unsigned char color_, piece_, position_, action_;
-};
+}; // class Step
 
 inline Step make_step(const std::string& ss)
 {

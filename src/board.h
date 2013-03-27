@@ -114,8 +114,8 @@ inline int piece_from_char(char ch)
 
 
 unsigned int num_directions();
-
 int direction_from_char(const char ch);
+unsigned int opp_dir(unsigned int);
 
 struct Board {
 
@@ -184,66 +184,84 @@ struct Board {
             return s;
         }
 
-        void add(uint64_t v) 
+        Board& add(uint64_t v) 
         {
             assert(v >= 0 && v < 64);
             _board |= U64_ONE<<v;
+            return *this;
         }
 
-        void add(uint64_t v0, uint64_t v1)
+        Board& add(uint64_t v0, uint64_t v1)
+        {
+            add(v0);
+            return add(v1);
+        }
+
+        Board& add(uint64_t v0, uint64_t v1, uint64_t v2)
         {
             add(v0);
             add(v1);
+            return add(v2);
         }
 
-        void add(uint64_t v0, uint64_t v1, uint64_t v2)
+        Board& add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3)
         {
             add(v0);
             add(v1);
             add(v2);
+            return add(v3);
         }
 
-        void add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3)
+        Board& add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3, uint64_t v4)
         {
             add(v0);
             add(v1);
             add(v2);
             add(v3);
+            return add(v4);
         }
 
-        void add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3, uint64_t v4)
-        {
-            add(v0);
-            add(v1);
-            add(v2);
-            add(v3);
-            add(v4);
-        }
-
-        void add_file_rank(char file, int rank) {
+        Board& add_file_rank(char file, int rank) {
             assert(file >= 'A' && file <= 'H');
             assert(rank >= 1 && rank <= 8);
-            add((rank-1)*8 + (file - 'A'));
+            return add((rank-1)*8 + (file - 'A'));
         }
 
         void clear() {
             _board = 0;
         }
 
-        void remove(uint64_t v)
+        Board& remove(uint64_t v)
         {
             assert(v >= 0 && v < 64);
             _board &= ~(U64_ONE<<v);
+            return *this;
         }
 
         bool contains(uint64_t v) const 
         { 
             assert(v >= 0 && v < 64);
-            return _board & U64_ONE<<v;
+            return _board & (U64_ONE<<v);
+        }
+        
+        bool contains(const char file, const unsigned int rank) const {
+            assert(file >= 'A' && file <= 'H');
+            assert(rank >= 1 && rank <= 8);
+            return contains((rank - 1) * 8 + (file - 'A'));
+        }
+        
+        void psns_from_board(std::vector<unsigned int> *psns) const {
+            for(unsigned int i=0; i < 64; ++i) {
+                if (this->contains(i))
+                    psns->push_back(i);
+            }
         }
 
-        std::vector<unsigned char> psns_from_board() const {
-            std::vector<unsigned char> psns;
+        std::vector<unsigned int> psns_from_board() const {
+            // TODO: look into faster ways of computing this list of positions.
+            // consider using __builtin_ctz() (count trailing zeros -- found in GCC).
+            // See also the bit-twiddling-hacks.html file in this repository.
+            std::vector<unsigned int> psns;
             for(unsigned int i=0; i < 64; ++i) {
                 if (this->contains(i))
                     psns.push_back(i);
@@ -302,6 +320,26 @@ struct Board {
         bool operator==(uint64_t o) const {
             return _board == o;
         }
+        
+        Board move_opp(int direction) const {
+            const static Board not_file_8 = file_n(8).flip();
+            const static Board not_file_1 = file_n(1).flip();
+            switch(direction) {
+                case NORTH:
+                    return Board(_board >> 8); // moves South.
+                    break;
+                case SOUTH:
+                    return Board(_board << 8); // moves North.
+                    break;
+                case EAST:
+                    return Board((_board & not_file_1._board) >> 1); // moves West.
+                    break;
+                case WEST:
+                    return Board((_board & not_file_8._board) << 1); // moves East.
+                    break;
+            }
+            assert(0);
+        }
 
         Board move(int direction) const {
             const static Board not_file_8 = file_n(8).flip();
@@ -328,5 +366,10 @@ struct Board {
         uint64_t _board;
         const static uint64_t U64_ONE = 1;
 };
+
+inline Board is_adjacent(const Board& stationary, const Board& moved, const unsigned int direction)
+{
+    return moved.move_opp(direction) & stationary;
+}
 
 #endif

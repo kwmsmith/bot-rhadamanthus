@@ -28,7 +28,7 @@ class GameState {
             return _color[c];
         }
         
-        const Board& get_piece_board_const(Piece p) const {
+        const Board& get_piece_board_const(const int p) const {
             return _pieces[p];
         }
 
@@ -42,46 +42,14 @@ class GameState {
         }
 
 
-        Board has_adjacent_empty(Color c) const;
-
-        Board has_adjacent_friendly(Color c) const;
-
-        Board has_adjacent_enemy_le(Color c) const;
-
-        Board has_adjacent_enemy_lt(Color c) const;
-
-        Board has_adjacent_enemy_ge(Color c) const;
-
-        Board has_adjacent_enemy_gt(Color c) const;
-
-        /**
-         * Pieces of color `c` that can move without pushing / pulling.
-         */
-        Board mobile_pieces(Color c) const;
-
-        /**
-         * Pieces of color `c` that are not frozen but blockaded.
-         */
-        Board blockaded_pieces(Color c) const;
-
-        /**
-         * Union of blockaded and frozen pieces.
-         */
-        Board immobile_pieces(Color c) const;
-
-        /**
-         * Pieces of color `c` with an adjacent stronger enemy piece.
-         */
-        Board frozen_pieces(Color c) const;
-
         bool is_empty() const;
 
         bool add_piece_at(const int c, const int p, const unsigned int idx);
 
-        void add_piece_at(const int c, const int p, const char file, const int rank) {
+        bool add_piece_at(const int c, const int p, const char file, const int rank) {
             assert(file >= 'A' && file <= 'H');
             assert(rank >= 1 && rank <= 8);
-            add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
+            return add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
         }
 
         bool remove_piece_at(const int c, const int p, const unsigned int idx);
@@ -101,6 +69,18 @@ class GameState {
             to->_color[B] = _color[B];
             for(int i=R; i<nPieces; ++i)
                 to->_pieces[i] = _pieces[i];
+        }
+        
+        void color_and_piece_at(const unsigned int idx, int *c, int *p) const {
+            *c = -1; *p = -1; // guilty before proven innocent...
+            for(unsigned int i=0; i < 2; ++i)
+                *c += _color[i].contains(idx) * (i+1);
+            
+            for(unsigned int i=0; i < nPieces; ++i)
+                *p += _pieces[i].contains(idx) * (i+1);
+            
+            assert(*c >= 0 && *c <= 1);
+            assert(*p >= 0 && *p < nPieces);
         }
 
     private:
@@ -126,6 +106,9 @@ class GameState {
         Board _pieces[nPieces];
 };
 
+void generate_pushes(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pushes);
+
+Step step_from_gs(const GameState& gs, const unsigned int idx, const unsigned int direction);
 
 /* Expects a 64-character string, beginning with a1, ending with h8.  Piece
  * characters are rcdhme / RCDHME.  Empty characters are '.', ' ', '~' and are
@@ -135,5 +118,26 @@ bool gamestate_from_string(const std::string& str, GameState *gs);
 
 void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
 void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
+
+Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_enemy_gt(const GameState& gs, const Color for_color);
+
+Board adj_enemy_ge(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_enemy_ge(const GameState& gs, const Color for_color);
+
+Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_enemy_lt(const GameState& gs, const Color for_color);
+
+Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_enemy_le(const GameState& gs, const Color for_color);
+
+Board adj_empty(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_empty(const GameState& gs, const Color for_color);
+
+Board adj_friendly(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_friendly(const GameState& gs, const Color for_color);
+
+Board frozen_pieces(const GameState& gs, const Color for_color);
+Board mobile_pieces(const GameState& gs, const Color for_color);
 
 #endif
