@@ -167,7 +167,7 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<std
     for (unsigned int pusher_direction = NORTH; pusher_direction < num_directions(); ++pusher_direction) {
         const Board& pieces_with_adj_lt = adj_enemy_lt(gs, for_color, pusher_direction) & mobile;
         for (unsigned int pushed_direction = NORTH; pushed_direction < num_directions(); ++pushed_direction) {
-            // if (pusher_direction == pushed_direction) continue;
+            if (pusher_direction == opp_dir(pushed_direction)) continue;
             const Board& enemy_with_adj_empty = adj_empty(gs, other_color(for_color), pushed_direction);
                 
             const Board& pushed_pieces = is_adjacent(enemy_with_adj_empty,
@@ -223,10 +223,7 @@ Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned in
     const Board& enemy_color = gs.get_color_board_const(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
         these_pieces = gs.get_piece_board_const(p) & color_board;
-        std::cout << "these_pieces: " << p << ' ' << these_pieces.to_string() << std::endl;
-        std::cout << "enemy_lt    : " << p << ' ' << enemy_lt.to_string() << std::endl;
         adj_lt |= is_adjacent(these_pieces, enemy_lt, direction);
-        std::cout << "adj_lt      : " << p << ' ' << adj_lt.to_string() << std::endl;
         enemy_lt |= gs.get_piece_board_const(p) & enemy_color;
     }
     return adj_lt;
