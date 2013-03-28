@@ -163,8 +163,8 @@ void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<B
 
 void generate_pushes(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pushes)
 {
-    const Color pushing_color = for_color;
-    const Color pushed_color = other_color(for_color);
+    const Color& pushing_color = for_color;
+    const Color& pushed_color = other_color(for_color);
     const Board& pushing_mobile = mobile_pieces(gs, for_color);
     
     // The body of generate_pushes() takes the perspective of the pushed piece.  
