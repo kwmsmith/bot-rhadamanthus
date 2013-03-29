@@ -142,11 +142,14 @@ TEST(GameState, adj_enemy_lt) {
 
 TEST(GameState, generate_pushes) {
     GameState gs;
+    std::vector<std::vector<Step> > pushes;
+    
+    gs.clear();
+    pushes.clear();
     gs.add_piece_at(B, E, 'E', 5);
     gs.add_piece_at(W, R, 'F', 6);
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 4);
-    std::vector<std::vector<Step> > pushes;
     generate_pushes(gs, B, &pushes);
     EXPECT_EQ(pushes.size(), 1);
     EXPECT_EQ(pushes[0][0], make_step("Mf5e"));
@@ -173,4 +176,42 @@ TEST(GameState, generate_pushes) {
     EXPECT_EQ(pushes.size(), 1);
     EXPECT_EQ(pushes[0][0], make_step("Mf5s"));
     EXPECT_EQ(pushes[0][1], make_step("ee5e"));
+}
+
+TEST(GameState, generate_pulls) {
+    GameState gs;
+    std::vector<std::vector<Step> > pulls;
+
+    gs.clear();
+    pulls.clear();
+    gs.add_piece_at(B, H, 'E', 4);
+    gs.add_piece_at(B, E, 'E', 5);
+    gs.add_piece_at(B, H, 'E', 6);
+    gs.add_piece_at(W, M, 'F', 5);
+    generate_pulls(gs, B, &pulls);
+    EXPECT_EQ(pulls.size(), 1);
+    EXPECT_EQ(pulls[0][0], make_step("ee5w"));
+    EXPECT_EQ(pulls[0][1], make_step("Mf5w"));
+    
+    gs.clear();
+    pulls.clear();
+    gs.add_piece_at(B, H, 'D', 5);
+    gs.add_piece_at(B, E, 'E', 5);
+    gs.add_piece_at(B, H, 'E', 6);
+    gs.add_piece_at(W, M, 'F', 5);
+    generate_pulls(gs, B, &pulls);
+    EXPECT_EQ(pulls.size(), 1);
+    EXPECT_EQ(pulls[0][0], make_step("ee5s"));
+    EXPECT_EQ(pulls[0][1], make_step("Mf5w"));
+
+    gs.clear();
+    pulls.clear();
+    gs.add_piece_at(B, H, 'D', 5);
+    gs.add_piece_at(B, E, 'E', 5);
+    gs.add_piece_at(B, H, 'E', 4);
+    gs.add_piece_at(W, M, 'F', 5);
+    generate_pulls(gs, B, &pulls);
+    EXPECT_EQ(pulls.size(), 1);
+    EXPECT_EQ(pulls[0][0], make_step("ee5n"));
+    EXPECT_EQ(pulls[0][1], make_step("Mf5w"));
 }

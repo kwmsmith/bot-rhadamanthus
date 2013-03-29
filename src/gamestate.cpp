@@ -206,6 +206,49 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<std
     }
 }
 
+void generate_pulls(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pulls)
+{
+    const Color& pulling_color = for_color;
+    const Color& pulled_color = other_color(for_color);
+    const Board& pulling_mobile = mobile_pieces(gs, for_color);
+    
+    // The body of generate_pushes() takes the perspective of the pulling piece.
+    
+    for (unsigned int dir_pulled_piece = NORTH; dir_pulled_piece < num_directions(); ++dir_pulled_piece) {
+        
+        // the mobile pulling pieces with an adjacent weaker piece.
+        // We use the opp_dir(dir_pulled_piece) here since we are talking about the pushing piece.
+        const Board& pulling_pieces_with_adj_lt = 
+            adj_enemy_lt(gs, pulling_color, dir_pulled_piece) & pulling_mobile;
+        
+        for (unsigned int dir_pulling_piece = NORTH; dir_pulling_piece < num_directions(); ++dir_pulling_piece) {
+            if (dir_pulled_piece == dir_pulling_piece) continue;
+            
+            const Board& pulling_with_adj_empty = adj_empty(gs, pulling_color, dir_pulling_piece);
+            
+            const Board& pulling_pieces = pulling_pieces_with_adj_lt & pulling_with_adj_empty;
+            
+            const Board& pulled_pieces = pulling_pieces.move(dir_pulled_piece);
+            
+            assert((pulled_pieces & gs.get_color_board_const(pulled_color)) == pulled_pieces);
+
+            std::vector<unsigned int> pulled_idxs, pulling_idxs;
+            pulled_pieces.psns_from_board(&pulled_idxs);
+            pulling_pieces.psns_from_board(&pulling_idxs);
+            assert(pulled_idxs.size() == pulling_idxs.size());
+            
+            for(unsigned int i=0; i < pulled_idxs.size(); ++i) {
+                assert(gs.get_all_const().contains(pulled_idxs[i]));
+                assert(gs.get_all_const().contains(pulling_idxs[i]));
+                std::vector<Step> delta;
+                delta.push_back(step_from_gs(gs, pulling_idxs[i], dir_pulling_piece));
+                delta.push_back(step_from_gs(gs, pulled_idxs[i], opp_dir(dir_pulled_piece)));
+                pulls->push_back(delta);
+            }
+        }
+    }
+}
+
 Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)
 {
     Board adj_gt, enemy_gt, these_pieces;
