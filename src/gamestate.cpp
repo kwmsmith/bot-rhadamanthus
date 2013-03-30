@@ -249,6 +249,28 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<std:
     }
 }
 
+void generate_steps(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *steps)
+{
+    const Board& mobile = mobile_pieces(gs, for_color);
+
+    for (unsigned int dir_empty = NORTH; dir_empty < num_directions(); ++dir_empty) {
+
+        const Board& pieces_with_adj_empty = adj_empty(gs, for_color, dir_empty) & mobile;
+        
+        assert((pieces_with_adj_empty & gs.get_color_board_const(for_color)) == pieces_with_adj_empty);
+
+        std::vector<unsigned int> mobile_idxs;
+        pieces_with_adj_empty.psns_from_board(&mobile_idxs);
+        
+        for(unsigned int i=0; i < mobile_idxs.size(); ++i) {
+            assert(gs.get_all_const().contains(mobile_idxs[i]));
+            std::vector<Step> delta;
+            delta.push_back(step_from_gs(gs, mobile_idxs[i], dir_empty));
+            steps->push_back(delta);
+        }
+    }
+}
+
 Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)
 {
     Board adj_gt, enemy_gt, these_pieces;

@@ -215,3 +215,16 @@ TEST(GameState, generate_pulls) {
     EXPECT_EQ(pulls[0][0], make_step("ee5n"));
     EXPECT_EQ(pulls[0][1], make_step("Mf5w"));
 }
+
+TEST(GameState, generate_steps) {
+    GameState gs;
+    std::vector<std::vector<Step> > steps;
+
+    gs.add_piece_at(B, H, 'E', 4);
+    generate_steps(gs, B, &steps);
+    EXPECT_EQ(steps.size(), 4);
+    EXPECT_EQ(steps[0][0], make_step("he4n"));
+    EXPECT_EQ(steps[1][0], make_step("he4s"));
+    EXPECT_EQ(steps[2][0], make_step("he4e"));
+    EXPECT_EQ(steps[3][0], make_step("he4w"));
+}

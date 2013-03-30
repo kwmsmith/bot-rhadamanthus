@@ -108,6 +108,7 @@ class GameState {
 
 void generate_pushes(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pushes);
 void generate_pulls(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pulls);
+void generate_steps(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *steps);
 
 Step step_from_gs(const GameState& gs, const unsigned int idx, const unsigned int direction);
 
