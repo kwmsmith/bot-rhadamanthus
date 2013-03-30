@@ -228,3 +228,18 @@ TEST(GameState, generate_steps) {
     EXPECT_EQ(steps[2][0], make_step("he4e"));
     EXPECT_EQ(steps[3][0], make_step("he4w"));
 }
+
+TEST(GameState, generate_captures) {
+    GameState gs;
+    std::vector<Step> captures;
+    
+    gs.add_piece_at(W, E, 'C', 3);
+    gs.add_piece_at(B, R, 'C', 6);
+    gs.add_piece_at(B, M, 'F', 6);
+    gs.add_piece_at(W, H, 'E', 4);
+    generate_captures(gs, &captures);
+    EXPECT_EQ(captures.size(), 3);
+    EXPECT_EQ(captures[0], make_step("Ec3x"));
+    EXPECT_EQ(captures[1], make_step("rc6x"));
+    EXPECT_EQ(captures[2], make_step("mf6x"));
+}
