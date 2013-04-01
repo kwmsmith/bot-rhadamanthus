@@ -242,4 +242,15 @@ TEST(GameState, generate_captures) {
     EXPECT_EQ(captures[0], make_step("Ec3x"));
     EXPECT_EQ(captures[1], make_step("rc6x"));
     EXPECT_EQ(captures[2], make_step("mf6x"));
+    
+    gs.clear();
+    captures.clear();
+    gs.add_piece_at(W, E, 'C', 3);
+    gs.add_piece_at(W, M, 'C', 4);
+    gs.add_piece_at(B, R, 'C', 6);
+    gs.add_piece_at(B, R, 'D', 6);
+    gs.add_piece_at(B, M, 'F', 6);
+    gs.add_piece_at(B, H, 'E', 6);
+    generate_captures(gs, &captures);
+    EXPECT_EQ(captures.size(), 0);
 }
