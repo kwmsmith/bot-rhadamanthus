@@ -243,6 +243,7 @@ bool play_archive_game(const ArchivedGame& ag, GameState *gs)
                 return false;
         }
         // std::cout << gs->to_std_string() << std::endl;
+        std::cout << gs->get_hash() << std::endl;
     }
     return true;
 }

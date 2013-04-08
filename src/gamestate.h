@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "step.h"
+#include "transposition.h"
 #include <iostream>
 
 class GameState {
@@ -10,6 +11,12 @@ class GameState {
     public:
 
         GameState() {
+            // TODO: it is only necessary to call init_zobrist_array() once for
+            // the whole program -- we do it here for robustness to ensure that
+            // it's called before using zobrist hashing later.  if can arrange
+            // to call this once from the main entry point, then not necessary
+            // here...
+            ZobristHash::init_zobrist_array();
             clear();
         }
 
@@ -17,6 +24,7 @@ class GameState {
             _color[W].clear(); _color[B].clear();
             for(int i=R; i<nPieces; ++i)
                 _pieces[i].clear();
+            _zhash.clear();
         }
 
         bool take_step(const Step &s);
@@ -82,6 +90,8 @@ class GameState {
             assert(*c >= 0 && *c <= 1);
             assert(*p >= 0 && *p < nPieces);
         }
+        
+        const uint64_t &get_hash() const { return _zhash.get_hash(); }
 
     private:
 
@@ -94,16 +104,19 @@ class GameState {
             assert(_color[c].contains(idx));
             _pieces[piece].add(idx);
             assert(_pieces[piece].contains(idx));
+            _zhash.addrm_piece_at(c, piece, idx);
         }
 
         void remove_piece_at_fast(const int c, const int piece, const unsigned int idx) {
             assert (c == W || c == B);
             _color[c].remove(idx);
             _pieces[piece].remove(idx);
+            _zhash.addrm_piece_at(c, piece, idx);
         }
 
         Board _color[2];
         Board _pieces[nPieces];
+        ZobristHash _zhash;
 };
 
 void generate_pushes(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pushes);
