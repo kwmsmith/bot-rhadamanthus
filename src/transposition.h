@@ -8,9 +8,6 @@ class ZobristHash
 {
     public:
         
-        static void init_zobrist_array();
-        static uint64_t *get_zobrist_array();
-
         ZobristHash() : _hash(0ULL) {};
         
         void clear() { _hash = 0ULL; };
@@ -24,6 +21,7 @@ class ZobristHash
         }
         
     private:
+        static const uint64_t *get_zobrist_array();
         uint64_t _hash;
 };
 

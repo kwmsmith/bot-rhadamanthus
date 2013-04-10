@@ -1,7 +1,7 @@
 BOOST_INCL = $(HOME)/Devel/boost_1_52_0
 INCLUDE = -I$(BOOST_INCL)
 CXX = g++
-CXXFLAGS = -O3 -Wall -pedantic -Wno-format $(INCLUDE)
+CXXFLAGS = -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
 
 OBJS = board.o step.o gamestate.o arimaa_archive.o transposition.o
 TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp
@@ -11,6 +11,12 @@ GTEST_INC = $(GTEST_DIR)/include
 
 python:
 	python setup.py build_ext --inplace
+	
+zobrist_array.include : transposition.cpp
+	python zobrist_include.py 768 > $@
+	
+transposition.o : transposition.cpp transposition.h zobrist_array.include
+	$(CXX) $(CXXFLAGS) -c transposition.cpp -o $@
 
 libgtest.a:
 	$(CXX) -I$(GTEST_INC) -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest-all.cc

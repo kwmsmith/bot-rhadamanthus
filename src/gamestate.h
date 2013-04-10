@@ -11,12 +11,6 @@ class GameState {
     public:
 
         GameState() {
-            // TODO: it is only necessary to call init_zobrist_array() once for
-            // the whole program -- we do it here for robustness to ensure that
-            // it's called before using zobrist hashing later.  if can arrange
-            // to call this once from the main entry point, then not necessary
-            // here...
-            ZobristHash::init_zobrist_array();
             clear();
         }
 

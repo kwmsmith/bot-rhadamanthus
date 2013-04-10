@@ -4,3 +4,4 @@ build
 *.x
 a.out
 libgtest.a
+zobrist_array.include

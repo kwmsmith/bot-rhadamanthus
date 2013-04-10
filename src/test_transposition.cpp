@@ -5,7 +5,6 @@
 
 TEST(ZobristHash, hash) {
     uint64_t arr[10];
-    ZobristHash::init_zobrist_array();
     ZobristHash zhash;
     EXPECT_EQ(sizeof(zhash), sizeof(uint64_t));
     EXPECT_EQ(zhash.get_hash(), 0ULL);
