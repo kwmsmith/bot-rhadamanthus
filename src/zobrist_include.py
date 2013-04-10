@@ -21,7 +21,7 @@ def main(args):
             if all(rint != ii for ii in randints):
                 randints.append(rint)
                 break
-    randint_strs = ['\t%ldULL' % ri for ri in randints]
+    randint_strs = ['\t%#xULL' % ri for ri in randints]
     allints = ',\n'.join(randint_strs)
     print template.format(zints=allints)
 
