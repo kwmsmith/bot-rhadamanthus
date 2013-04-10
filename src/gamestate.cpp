@@ -161,7 +161,7 @@ void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<B
     }
 }
 
-void generate_pushes(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pushes)
+void generate_pushes(const GameState& gs, const Color for_color, std::vector<Step> *pushes)
 {
     const Color& pushing_color = for_color;
     const Color& pushed_color = other_color(for_color);
@@ -197,16 +197,14 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<std
             for(unsigned int i=0; i < pushed_idxs.size(); ++i) {
                 assert(gs.get_all_const().contains(pushed_idxs[i]));
                 assert(gs.get_all_const().contains(pusher_idxs[i]));
-                std::vector<Step> delta;
-                delta.push_back(step_from_gs(gs, pushed_idxs[i], dir_pushed));
-                delta.push_back(step_from_gs(gs, pusher_idxs[i], opp_dir(dir_pushed_from)));
-                pushes->push_back(delta);
+                pushes->push_back(step_from_gs(gs, pushed_idxs[i], dir_pushed));
+                pushes->push_back(step_from_gs(gs, pusher_idxs[i], opp_dir(dir_pushed_from)));
             }
         }
     }
 }
 
-void generate_pulls(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *pulls)
+void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step> *pulls)
 {
     const Color& pulling_color = for_color;
     const Color& pulled_color = other_color(for_color);
@@ -240,16 +238,14 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<std:
             for(unsigned int i=0; i < pulled_idxs.size(); ++i) {
                 assert(gs.get_all_const().contains(pulled_idxs[i]));
                 assert(gs.get_all_const().contains(pulling_idxs[i]));
-                std::vector<Step> delta;
-                delta.push_back(step_from_gs(gs, pulling_idxs[i], dir_pulling_piece));
-                delta.push_back(step_from_gs(gs, pulled_idxs[i], opp_dir(dir_pulled_piece)));
-                pulls->push_back(delta);
+                pulls->push_back(step_from_gs(gs, pulling_idxs[i], dir_pulling_piece));
+                pulls->push_back(step_from_gs(gs, pulled_idxs[i], opp_dir(dir_pulled_piece)));
             }
         }
     }
 }
 
-void generate_steps(const GameState& gs, const Color for_color, std::vector<std::vector<Step> > *steps)
+void generate_steps(const GameState& gs, const Color for_color, std::vector<Step> *steps)
 {
     const Board& mobile = mobile_pieces(gs, for_color);
 
@@ -264,9 +260,7 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<std:
         
         for(unsigned int i=0; i < mobile_idxs.size(); ++i) {
             assert(gs.get_all_const().contains(mobile_idxs[i]));
-            std::vector<Step> delta;
-            delta.push_back(step_from_gs(gs, mobile_idxs[i], dir_empty));
-            steps->push_back(delta);
+            steps->push_back(step_from_gs(gs, mobile_idxs[i], dir_empty));
         }
     }
 }
