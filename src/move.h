@@ -16,9 +16,14 @@ class Move
         }
         
         Move& add_step(const Step& step) {
-            assert(steps_.size() <= 3);
+            assert(step.is_motion());
+            assert(get_stepsleft() >= 1);
             steps_.push_back(step);
             gs_.take_step(step);
+            unsigned char num_captures = generate_captures(gs_, &steps_);
+            if (num_captures) {
+                gs_.take_step(steps_.back());
+            }
             return *this;
         }
         
@@ -27,7 +32,12 @@ class Move
         }
         
         unsigned int get_stepsleft() const {
-            return 4 - steps_.size();
+            typedef std::vector<Step>::const_iterator step_it;
+            signed char motion_left = 4;
+            for(step_it it=steps_.begin(); it != steps_.end(); ++it)
+                motion_left -= it->cost();
+            assert(motion_left >= 0);
+            return motion_left;
         }
 
     private:

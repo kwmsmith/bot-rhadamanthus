@@ -37,7 +37,7 @@ class Step
             return *this;
         }
 
-        bool is_move() const {
+        bool is_motion() const {
             return (action_ == NORTH || action_ == SOUTH || action_ == EAST || action_ == WEST);
         }
 
@@ -47,6 +47,10 @@ class Step
 
         bool is_placement() const {
             return action_ == ADD;
+        }
+        
+        unsigned char cost() const {
+            return (is_motion() ? 1 : 0);
         }
 
         bool is_valid() const {

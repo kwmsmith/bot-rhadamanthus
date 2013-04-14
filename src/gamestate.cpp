@@ -265,7 +265,7 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<Step
     }
 }
 
-void generate_captures(const GameState& gs, std::vector<Step> *captures)
+unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures)
 {
     const Board& captured = Board::capture_squares() & 
         (gs.get_all_const() & ~(adj_friendly(gs, B) | adj_friendly(gs, W)));
@@ -275,6 +275,7 @@ void generate_captures(const GameState& gs, std::vector<Step> *captures)
         assert(gs.get_all_const().contains(captured_idxs[i]));
         captures->push_back(step_from_gs(gs, captured_idxs[i], CAPTURE));
     }
+    return captured_idxs.size();
 }
 
 Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)

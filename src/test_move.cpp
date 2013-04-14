@@ -27,4 +27,5 @@ TEST(Move, generate_moves) {
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
     generate_moves(gs, W, &moves);
     EXPECT_TRUE(moves.size() > 0);
+    // EXPECT_EQ(moves.size(), 1);
 }
