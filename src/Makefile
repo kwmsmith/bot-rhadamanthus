@@ -3,8 +3,8 @@ INCLUDE = -I$(BOOST_INCL)
 CXX = g++
 CXXFLAGS = -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
 
-OBJS = board.o step.o gamestate.o arimaa_archive.o transposition.o
-TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp
+OBJS = board.o step.o gamestate.o arimaa_archive.o transposition.o move.o
+TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp test_move.cpp
 
 GTEST_DIR = ../gtest
 GTEST_INC = $(GTEST_DIR)/include
