@@ -16,18 +16,24 @@ bool parse_action_str(const std::string& ss,
 class Step
 {
     public:
+        
+        Step() 
+            :color_(W),
+            piece_(R),
+            position_(0),
+            action_(ADD) { }
 
         Step(unsigned char color, unsigned char piece, unsigned char position, unsigned char action)
             :color_(color),
-             piece_(piece),
-             position_(position),
-             action_(action) {}
+            piece_(piece),
+            position_(position),
+            action_(action) {}
 
         Step(const Step &m)
             :color_(m.color_),
-             piece_(m.piece_),
-             position_(m.position_),
-             action_(m.action_) {}
+            piece_(m.piece_),
+            position_(m.position_),
+            action_(m.action_) {}
 
         Step &operator=(const Step &other) {
             color_ = other.color_;
@@ -109,6 +115,24 @@ class Step
 
         unsigned char get_action() const {
             return action_;
+        }
+        
+        unsigned char get_finish() const {
+            switch(action_) {
+                case NORTH:
+                    return position_ + 8;
+                case SOUTH:
+                    return position_ - 8;
+                case EAST:
+                    return position_ + 1;
+                case WEST:
+                    return position_ - 1;
+                case CAPTURE:
+                case ADD:
+                    return position_;
+                default:
+                    return position_;
+            }
         }
         
         bool operator==(const Step& other) const {

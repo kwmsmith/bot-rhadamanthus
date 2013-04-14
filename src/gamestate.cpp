@@ -76,23 +76,23 @@ bool GameState::take_step(const Step &s)
     if (!s.is_valid())
         return false;
 
-    const int c = s.get_color(), p = s.get_piece(), pos = s.get_position();
+    const int c = s.get_color(), p = s.get_piece(), pos = s.get_position(), finish = s.get_finish();
 
     assert(c == W || c == B);
 
     switch(s.get_action()) {
         case NORTH:
-            return move_piece(c, p, pos, pos+8);
+            return move_piece(c, p, pos, finish);
         case SOUTH:
-            return move_piece(c, p, pos, pos-8);
+            return move_piece(c, p, pos, finish);
         case EAST:
-            return move_piece(c, p, pos, pos+1);
+            return move_piece(c, p, pos, finish);
         case WEST:
-            return move_piece(c, p, pos, pos-1);
-        case ADD:
-            return add_piece_at(c, p, pos);
+            return move_piece(c, p, pos, finish);
         case CAPTURE:
             return remove_piece_at(c, p, pos);
+        case ADD:
+            return add_piece_at(c, p, pos);
     }
     assert(0); // should never get here.
     return false;
@@ -276,6 +276,26 @@ unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures
         captures->push_back(step_from_gs(gs, captured_idxs[i], CAPTURE));
     }
     return captured_idxs.size();
+}
+
+bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture)
+{
+    // Common case: move doesn't even land on a capture square.
+    const unsigned char finish = step_taken.get_finish();
+    const bool is_capturable = Board::is_capture_idx(finish);
+    if (!is_capturable)
+        return false;
+    
+    const unsigned char color = step_taken.get_color();
+    const Color color_enum = (color == W ? W : B);
+    const Board capturable = gs.get_color_board_const(color) & ~adj_friendly(gs, color_enum);
+    if (capturable.contains(finish)) {
+        // we have a capture!
+        *capture = Step(color, step_taken.get_piece(), finish, CAPTURE);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)

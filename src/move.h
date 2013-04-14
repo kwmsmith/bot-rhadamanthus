@@ -20,9 +20,11 @@ class Move
             assert(get_stepsleft() >= 1);
             steps_.push_back(step);
             gs_.take_step(step);
-            unsigned char num_captures = generate_captures(gs_, &steps_);
-            if (num_captures) {
-                gs_.take_step(steps_.back());
+            Step capture_step;
+            const bool is_capture = detect_capture_from_motion(gs_, step, &capture_step);
+            if (is_capture) {
+                steps_.push_back(capture_step);
+                gs_.take_step(capture_step);
             }
             return *this;
         }

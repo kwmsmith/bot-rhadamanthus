@@ -118,6 +118,8 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
 void generate_steps(const GameState& gs, const Color for_color, std::vector<Step> *steps);
 unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures);
 
+bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);
+
 Step step_from_gs(const GameState& gs, const unsigned int idx, const unsigned int direction);
 
 /* Expects a 64-character string, beginning with a1, ending with h8.  Piece

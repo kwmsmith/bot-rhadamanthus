@@ -157,6 +157,10 @@ struct Board {
             return b;
         }
 
+        static bool is_capture_idx(const char idx) {
+            return (idx == 18 || idx == 21 || idx == 42 || idx == 45);
+        }
+
         static Board capture_squares()
         {
             Board b;
