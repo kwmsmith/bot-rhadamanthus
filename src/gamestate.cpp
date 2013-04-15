@@ -1,5 +1,4 @@
 #include "gamestate.h"
-#include <cstdio>
 #include <vector>
 
 bool gamestate_from_string(const std::string& str, GameState *gs)
@@ -247,16 +246,16 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
 
 void generate_steps(const GameState& gs, const Color for_color, std::vector<Step> *steps)
 {
-    const Board& mobile = mobile_pieces(gs, for_color);
+    const Board& not_frozen = ~frozen_pieces(gs, for_color);
 
     for (unsigned int dir_empty = NORTH; dir_empty < num_directions(); ++dir_empty) {
 
-        const Board& pieces_with_adj_empty = adj_empty(gs, for_color, dir_empty) & mobile;
+        const Board& pieces_with_step = adj_step(gs, for_color, dir_empty) & not_frozen;
         
-        assert((pieces_with_adj_empty & gs.get_color_board_const(for_color)) == pieces_with_adj_empty);
+        assert((pieces_with_step & gs.get_color_board_const(for_color)) == pieces_with_step);
 
         std::vector<unsigned int> mobile_idxs;
-        pieces_with_adj_empty.psns_from_board(&mobile_idxs);
+        pieces_with_step.psns_from_board(&mobile_idxs);
         
         for(unsigned int i=0; i < mobile_idxs.size(); ++i) {
             assert(gs.get_all_const().contains(mobile_idxs[i]));
@@ -280,22 +279,29 @@ unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture)
 {
+    assert(step_taken.is_motion());
     // Common case: move doesn't even land on a capture square.
     const unsigned char finish = step_taken.get_finish();
-    const bool is_capturable = Board::is_capture_idx(finish);
-    if (!is_capturable)
+    const bool started_adj_to_capture = Board::is_adj_capture_squares(step_taken.get_position());
+    const bool moved_onto_capture = Board::is_capture_idx(finish);
+    if (!moved_onto_capture && !started_adj_to_capture)
         return false;
     
     const unsigned char color = step_taken.get_color();
     const Color color_enum = (color == W ? W : B);
     const Board capturable = gs.get_color_board_const(color) & ~adj_friendly(gs, color_enum);
-    if (capturable.contains(finish)) {
-        // we have a capture!
-        *capture = Step(color, step_taken.get_piece(), finish, CAPTURE);
-        return true;
-    } else {
-        return false;
+    const char capture_idxs[] = {18, 21, 42, 45};
+    for(int i=0; i < 4; ++i) {
+        if (capturable.contains(capture_idxs[i])) {
+            // we have a capture!
+            int c, p;
+            gs.color_and_piece_at(capture_idxs[i], &c, &p);
+            assert(c == color);
+            *capture = Step(color, p, capture_idxs[i], CAPTURE);
+            return true;
+        }
     }
+    return false;
 }
 
 Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)
@@ -350,6 +356,31 @@ Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned in
     return adj_le;
 }
 
+Board adj_step(const GameState& gs, const Color for_color)
+{
+    Board adj_step_;
+    const Board empties = ~gs.get_all_const();
+    for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
+        adj_step_ |= adj_step(gs, for_color, direction);
+    return adj_step_;
+}
+
+Board adj_step(const GameState& gs, const Color for_color, const unsigned int direction)
+{
+    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board empties = ~gs.get_all_const();
+    const Board adj = is_adjacent(color_board, empties, direction);
+    if (direction == SOUTH && for_color == W) {
+        Board rabbit_mask = gs.get_piece_board_const(R) & color_board;
+        return adj & ~rabbit_mask;
+    } else if (direction == NORTH && for_color == B) {
+        Board rabbit_mask = gs.get_piece_board_const(R) & color_board;
+        return adj & ~rabbit_mask;
+    } else {
+        return adj;
+    }
+}
+
 Board adj_empty(const GameState& gs, const Color for_color)
 {
     Board adj_mt;
@@ -389,7 +420,7 @@ Board frozen_pieces(const GameState& gs, const Color for_color)
 
 Board mobile_pieces(const GameState& gs, const Color for_color)
 {
-    return adj_empty(gs, for_color) & ~frozen_pieces(gs, for_color);
+    return adj_step(gs, for_color) & ~frozen_pieces(gs, for_color);
 }
 
 Board adj_enemy_le(const GameState& gs, const Color for_color)

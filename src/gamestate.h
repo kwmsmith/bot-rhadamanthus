@@ -4,7 +4,6 @@
 #include "board.h"
 #include "step.h"
 #include "transposition.h"
-#include <iostream>
 
 class GameState {
 
@@ -142,6 +141,9 @@ Board adj_enemy_lt(const GameState& gs, const Color for_color);
 
 Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned int direction);
 Board adj_enemy_le(const GameState& gs, const Color for_color);
+
+Board adj_step(const GameState& gs, const Color for_color, const unsigned int direction);
+Board adj_step(const GameState& gs, const Color for_color);
 
 Board adj_empty(const GameState& gs, const Color for_color, const unsigned int direction);
 Board adj_empty(const GameState& gs, const Color for_color);

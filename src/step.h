@@ -141,6 +141,8 @@ class Step
                 position_ == other.position_ &&
                 action_ == other.action_;
         }
+        
+        const std::string to_std_string() const;
 
     private:
         unsigned char color_, piece_, position_, action_;

@@ -160,6 +160,11 @@ struct Board {
         static bool is_capture_idx(const char idx) {
             return (idx == 18 || idx == 21 || idx == 42 || idx == 45);
         }
+        
+        static bool is_adj_capture_squares(const char idx) {
+            const static Board adj_captures(0x245a24245a2400ULL);
+            return adj_captures.contains(idx);
+        }
 
         static Board capture_squares()
         {

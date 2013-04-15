@@ -23,6 +23,7 @@ class Move
             Step capture_step;
             const bool is_capture = detect_capture_from_motion(gs_, step, &capture_step);
             if (is_capture) {
+                assert(capture_step.is_capture());
                 steps_.push_back(capture_step);
                 gs_.take_step(capture_step);
             }

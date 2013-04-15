@@ -63,3 +63,71 @@ bool parse_action_str(const string& ss,
     if (*action == invalid_action()) return false;
     return true;
 }
+
+const std::string Step::to_std_string() const 
+{
+    std::string s;
+    if (get_color() == W) {
+        switch(get_piece()) {
+            case R:
+                s += "R";
+                break;
+            case C:
+                s += "C";
+                break;
+            case D:
+                s += "D";
+                break;
+            case H:
+                s += "H";
+                break;
+            case M:
+                s += "M";
+                break;
+            case E:
+                s += "E";
+                break;
+        }
+    } else {
+        switch(get_piece()) {
+            case R:
+                s += "r";
+                break;
+            case C:
+                s += "c";
+                break;
+            case D:
+                s += "d";
+                break;
+            case H:
+                s += "h";
+                break;
+            case M:
+                s += "m";
+                break;
+            case E:
+                s += "e";
+                break;
+        }
+    }
+    s += 'A' + get_position() % 8;
+    s += '1' + get_position() / 8;
+    switch(get_action()) {
+        case NORTH:
+            s += 'n';
+            break;
+        case SOUTH:
+            s += 's';
+            break;
+        case EAST:
+            s += 'e';
+            break;
+        case WEST:
+            s += 'w';
+            break;
+        case CAPTURE:
+            s += 'x';
+            break;
+    }
+    return s;
+}

@@ -106,6 +106,11 @@ TEST(GameState, MobilePieces) {
 
     EXPECT_EQ(mobile_pieces(gs, B), 0);
     EXPECT_EQ(mobile_pieces(gs, W), 0);
+
+    gs.clear();
+    gs.add_piece_at(W, R, 'A', 8);
+    gs.add_piece_at(B, R, 'B', 8);
+    EXPECT_EQ(mobile_pieces(gs, W), 0);
 }
 
 TEST(GameState, move_piece) {
