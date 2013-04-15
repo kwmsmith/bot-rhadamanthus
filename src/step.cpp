@@ -110,7 +110,7 @@ const std::string Step::to_std_string() const
                 break;
         }
     }
-    s += 'A' + get_position() % 8;
+    s += 'a' + get_position() % 8;
     s += '1' + get_position() / 8;
     switch(get_action()) {
         case NORTH:

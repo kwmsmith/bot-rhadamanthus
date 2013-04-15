@@ -1,6 +1,10 @@
 #include "move.h"
 #include "gtest/gtest.h"
 
+#include <iostream>
+
+typedef std::vector<MovePtr>::const_iterator move_it;
+
 TEST(Move, generate_moves) {
     std::vector<MovePtr> moves;
     GameState gs;
@@ -21,6 +25,7 @@ TEST(Move, generate_moves) {
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
     generate_moves(gs, W, &moves);
     EXPECT_EQ(moves.size(), 3);
+
 
     ss =  
         "........"
@@ -150,30 +155,22 @@ TEST(Move, generate_moves) {
     generate_moves(gs, W, &moves);
     EXPECT_EQ(moves.size(), 23887);
 
-    // ss = 
-        // "..RRRRm."
-        // "R.C...ER"
-        // "..x.ex.r"
-        // "DdRr...h"
-        // ".....MHr"
-        // "..x.Hxd."
-        // "r.r.rr.."
-        // ".rc..c.."
-        // ;
-
-    // ss = 
-        // "..RRRRm."
-        // "R.C...ER"
-        // "..x.ex.r"
-        // "DdRr...h"
-        // ".....MHr"
-        // "..x.Hxd."
-        // "r.r.rr.."
-        // ".rc..c.."
-        // ;
-    // gs.clear();
-    // moves.clear();
-    // EXPECT_TRUE(gamestate_from_string(ss, &gs));
-    // generate_moves(gs, W, &moves);
-    // EXPECT_EQ(moves.size(), 23887);
+    ss = 
+        "..RRRRm."
+        "R.C...ER"
+        "..x.ex.r"
+        "DdRr...h"
+        ".....MHr"
+        "..x.Hxd."
+        "r.r.rr.."
+        ".rc..c.."
+        ;
+    gs.clear();
+    moves.clear();
+    EXPECT_TRUE(gamestate_from_string(ss, &gs));
+    generate_moves(gs, W, &moves);
+    EXPECT_EQ(moves.size(), 23887);
+    for (move_it it=moves.begin(); it != moves.end(); ++it) {
+        std::cout << (*it)->to_std_string() << std::endl;
+    }
 }

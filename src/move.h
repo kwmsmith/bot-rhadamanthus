@@ -2,6 +2,8 @@
 #include "gamestate.h"
 #include <boost/shared_ptr.hpp>
 
+typedef std::vector<Step>::const_iterator step_it;
+
 class Move
 {
     public:
@@ -35,13 +37,14 @@ class Move
         }
         
         unsigned int get_stepsleft() const {
-            typedef std::vector<Step>::const_iterator step_it;
             signed char motion_left = 4;
             for(step_it it=steps_.begin(); it != steps_.end(); ++it)
                 motion_left -= it->cost();
             assert(motion_left >= 0);
             return motion_left;
         }
+        
+        const std::string to_std_string() const;
 
     private:
 
