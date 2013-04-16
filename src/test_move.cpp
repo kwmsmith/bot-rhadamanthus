@@ -9,7 +9,7 @@ TEST(Move, generate_moves) {
     std::vector<MovePtr> moves;
     GameState gs;
     std::string ss;
-    
+
     ss =  
         "........"
         "........"
@@ -90,7 +90,7 @@ TEST(Move, generate_moves) {
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
     generate_moves(gs, B, &moves);
     EXPECT_EQ(moves.size(), 13);
-    
+
     ss =  
         "........"
         "........"
@@ -106,7 +106,7 @@ TEST(Move, generate_moves) {
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
     generate_moves(gs, W, &moves);
     EXPECT_EQ(moves.size(), 34);
-    
+
     ss =  
         "........"
         "........"
@@ -122,7 +122,7 @@ TEST(Move, generate_moves) {
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
     generate_moves(gs, W, &moves);
     EXPECT_EQ(moves.size(), 12133);
-    
+
     ss =  
         "........"
         "........"
@@ -156,6 +156,22 @@ TEST(Move, generate_moves) {
     EXPECT_EQ(moves.size(), 23887);
 
     ss = 
+        "........"
+        "........"
+        "..x..x.."
+        "........"
+        "........"
+        "..x..x.."
+        "......md"
+        "......cD"
+        ;
+    gs.clear();
+    moves.clear();
+    gamestate_from_string(ss, &gs);
+    generate_moves(gs, W, &moves);
+    EXPECT_EQ(moves.size(), 2);
+
+    ss = 
         "..RRRRm."
         "R.C...ER"
         "..x.ex.r"
@@ -167,10 +183,7 @@ TEST(Move, generate_moves) {
         ;
     gs.clear();
     moves.clear();
-    EXPECT_TRUE(gamestate_from_string(ss, &gs));
+    gamestate_from_string(ss, &gs);
     generate_moves(gs, W, &moves);
-    EXPECT_EQ(moves.size(), 23887);
-    for (move_it it=moves.begin(); it != moves.end(); ++it) {
-        std::cout << (*it)->to_std_string() << std::endl;
-    }
+    EXPECT_EQ(moves.size(), 204785);
 }

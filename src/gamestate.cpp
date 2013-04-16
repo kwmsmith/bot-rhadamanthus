@@ -164,7 +164,7 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
 {
     const Color& pushing_color = for_color;
     const Color& pushed_color = other_color(for_color);
-    const Board& pushing_mobile = mobile_pieces(gs, for_color);
+    const Board& pushing_mobile = ~frozen_pieces(gs, for_color);
     
     // The body of generate_pushes() takes the perspective of the pushed piece.  
     // dir_pushed_from is the direction from which the pushing piece comes from.
@@ -207,7 +207,7 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
 {
     const Color& pulling_color = for_color;
     const Color& pulled_color = other_color(for_color);
-    const Board& pulling_mobile = mobile_pieces(gs, for_color);
+    const Board& pulling_mobile = ~frozen_pieces(gs, for_color);
     
     // The body of generate_pushes() takes the perspective of the pulling piece.
     
