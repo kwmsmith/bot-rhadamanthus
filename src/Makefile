@@ -1,4 +1,5 @@
-CXX = g++
+# CXX = g++
+CXX = /opt/local/bin/g++-mp-4.7
 BOOST_INCL = $(HOME)/Devel/boost_1_52_0
 INCLUDE = -I$(BOOST_INCL)
 CXXFLAGS = -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
@@ -41,8 +42,13 @@ test_all.x : $(OBJS) $(TEST_SRC) libgtest.a board.h step.h
 test: test_all.x
 	./test_all.x
 	
-test-valgrind: test_all.x
-	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./test_all.x
+gen_move_perf.x : gen_move_perf.o $(OBJS)
+	$(CXX) $(INCLUDE) $^ -o $@
+	
+test-valgrind: gen_move_perf.x
+	-rm callgrind.*
+	valgrind --tool=callgrind ./$^
+	# valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./$^
 
 clean:
 	rm -r build sipboard*.cpp sipAPIboard.h *.so *.o *.pyc *.x
