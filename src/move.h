@@ -1,8 +1,21 @@
 #include "step.h"
 #include "gamestate.h"
 #include <boost/shared_ptr.hpp>
+#include <sparsehash/dense_hash_set>
+
+class Move;
+
+size_t move_hash(const Move& m);
+
+struct GameStateHash
+{
+    size_t operator()(const uint64_t& key) const {
+        return key;
+    }
+};
 
 typedef std::vector<Step>::const_iterator step_it;
+typedef google::dense_hash_set<uint64_t, GameStateHash> hash_set;
 
 class Move
 {
@@ -45,6 +58,10 @@ class Move
         }
         
         const std::string to_std_string() const;
+        
+        const uint64_t get_zobrist_hash() const {
+            return gs_.get_hash();
+        }
 
     private:
 
@@ -54,7 +71,5 @@ class Move
 
 typedef boost::shared_ptr<Move> MovePtr;
 
-/**
- * Takes a gamestate, generates all unique moves from this gamestate.
- */
 void generate_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves);
+void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves);

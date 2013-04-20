@@ -66,6 +66,7 @@ class GameState {
         }
         
         void copy_to(GameState *to) const {
+            to->_zhash = _zhash;
             to->_color[W] = _color[W];
             to->_color[B] = _color[B];
             for(int i=R; i<nPieces; ++i)
@@ -84,7 +85,7 @@ class GameState {
             assert(*p >= 0 && *p < nPieces);
         }
         
-        const uint64_t &get_hash() const { return _zhash.get_hash(); }
+        const uint64_t get_hash() const { return _zhash.get_hash(); }
 
     private:
 

@@ -12,7 +12,7 @@ class ZobristHash
         
         void clear() { _hash = 0ULL; };
         
-        const uint64_t& get_hash() const { return _hash; };
+        const uint64_t get_hash() const { return _hash; };
         
         void addrm_piece_at(const int color, const int piece, const int idx) {
             const uint64_t *zarr = get_zobrist_array();

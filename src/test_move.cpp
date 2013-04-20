@@ -4,6 +4,44 @@
 #include <iostream>
 
 typedef std::vector<MovePtr>::const_iterator move_it;
+TEST(Move, generate_unique_moves) {
+    std::vector<MovePtr> moves;
+    GameState gs;
+    std::string ss;
+    
+    ss =  
+        "........"
+        "........"
+        "..x..x.."
+        "........"
+        "....R..."
+        "..x..x.."
+        "........"
+        "........"
+        ;
+    gs.clear();
+    moves.clear();
+    EXPECT_TRUE(gamestate_from_string(ss, &gs));
+    generate_unique_moves(gs, W, &moves);
+    EXPECT_EQ(moves.size(), 22);
+    
+    ss = 
+        "..RRRRm."
+        "R.C...ER"
+        "..x.ex.r"
+        "DdRr...h"
+        ".....MHr"
+        "..x.Hxd."
+        "r.r.rr.."
+        ".rc..c.."
+        ;
+    gs.clear();
+    moves.clear();
+    gamestate_from_string(ss, &gs);
+    generate_unique_moves(gs, W, &moves);
+    EXPECT_EQ(moves.size(), 15420);
+}
+
 
 TEST(Move, generate_moves) {
     std::vector<MovePtr> moves;
@@ -25,7 +63,6 @@ TEST(Move, generate_moves) {
     EXPECT_TRUE(gamestate_from_string(ss, &gs));
     generate_moves(gs, W, &moves);
     EXPECT_EQ(moves.size(), 3);
-
 
     ss =  
         "........"

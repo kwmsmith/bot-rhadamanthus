@@ -1,8 +1,9 @@
-# CXX = g++
-CXX = /opt/local/bin/g++-mp-4.7
+CXX = g++
+# CXX = /opt/local/bin/g++-mp-4.7
 BOOST_INCL = $(HOME)/Devel/boost_1_52_0
-INCLUDE = -I$(BOOST_INCL)
+INCLUDE = -I$(BOOST_INCL) -I$(SPARSEHASH_INCL)
 CXXFLAGS = -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
+SPARSEHASH_INCL = $(HOME)/Devel/sparsehash/include
 
 # PROFILE_LIB = -L$(HOME)/Devel/gperftools-install/lib -lprofiler
 # CXXFLAGS = -g -O1 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)

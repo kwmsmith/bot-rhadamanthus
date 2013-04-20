@@ -18,6 +18,7 @@ bool gamestate_from_string(const std::string& str, GameState *gs)
         if (!gs->add_piece_at(color, piece, idx))
             return false;
     }
+    assert(gs->get_hash());
     // FIXME: Validation!!!
     return true;
 }
@@ -40,6 +41,30 @@ std::string GameState::to_std_string() const
     s += "+-----------------+\n";
     return s;
 }
+
+// std::string GameState::to_compare_string() const
+// {
+    // typedef std::vector<unsigned int>::const_iterator psn_it;
+    // std::string s("                                                                ");
+    
+    // const char white_char[] = { 'R', 'C', 'D', 'H', 'M', 'E'};
+    // const char black_char[] = { 'r', 'c', 'd', 'h', 'm', 'e'};
+    // for(int p=R; p < nPieces; p++) {
+        // const Board &b = _color[W] & _pieces[p];
+        // const std::vector<unsigned int> &psns = b.psns_from_board();
+        // for (psn_it it=psns.begin(); it != psns.end(); ++it) {
+            // s[*it] = white_char[p];
+        // }
+    // }
+    // for(int p=R; p < nPieces; p++) {
+        // const Board &b = _color[B] & _pieces[p];
+        // const std::vector<unsigned int> &psns = b.psns_from_board();
+        // for (psn_it it=psns.begin(); it != psns.end(); ++it) {
+            // s[*it] = black_char[p];
+        // }
+    // }
+    // return "[" + s "]";
+// }
 
 std::string GameState::to_oneline_string() const 
 {
@@ -359,7 +384,6 @@ Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned in
 Board adj_step(const GameState& gs, const Color for_color)
 {
     Board adj_step_;
-    const Board empties = ~gs.get_all_const();
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         adj_step_ |= adj_step(gs, for_color, direction);
     return adj_step_;
