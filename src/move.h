@@ -1,7 +1,7 @@
+#include <boost/shared_ptr.hpp>
+
 #include "step.h"
 #include "gamestate.h"
-#include <boost/shared_ptr.hpp>
-#include <sparsehash/dense_hash_set>
 
 class Move;
 
@@ -15,7 +15,6 @@ struct GameStateHash
 };
 
 typedef std::vector<Step>::const_iterator step_it;
-typedef google::dense_hash_set<uint64_t, GameStateHash> hash_set;
 
 class Move
 {

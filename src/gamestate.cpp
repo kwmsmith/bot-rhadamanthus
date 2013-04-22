@@ -42,30 +42,6 @@ std::string GameState::to_std_string() const
     return s;
 }
 
-// std::string GameState::to_compare_string() const
-// {
-    // typedef std::vector<unsigned int>::const_iterator psn_it;
-    // std::string s("                                                                ");
-    
-    // const char white_char[] = { 'R', 'C', 'D', 'H', 'M', 'E'};
-    // const char black_char[] = { 'r', 'c', 'd', 'h', 'm', 'e'};
-    // for(int p=R; p < nPieces; p++) {
-        // const Board &b = _color[W] & _pieces[p];
-        // const std::vector<unsigned int> &psns = b.psns_from_board();
-        // for (psn_it it=psns.begin(); it != psns.end(); ++it) {
-            // s[*it] = white_char[p];
-        // }
-    // }
-    // for(int p=R; p < nPieces; p++) {
-        // const Board &b = _color[B] & _pieces[p];
-        // const std::vector<unsigned int> &psns = b.psns_from_board();
-        // for (psn_it it=psns.begin(); it != psns.end(); ++it) {
-            // s[*it] = black_char[p];
-        // }
-    // }
-    // return "[" + s "]";
-// }
-
 std::string GameState::to_oneline_string() const 
 {
     std::string s("................................................................");

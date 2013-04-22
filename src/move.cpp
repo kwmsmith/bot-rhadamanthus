@@ -1,35 +1,15 @@
+#include <inttypes.h>
+#include <sparsehash/dense_hash_set>
+
 #include "move.h"
 
-#include <iostream>
-#include <inttypes.h>
-
-typedef std::vector<Step>::iterator vec_step_it;
-
-static void _generate_unique_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves)
-{
-    typedef std::vector<MovePtr>::const_iterator move_it;
-    std::vector<MovePtr> all_moves;
-    generate_moves(gs, for_color, &all_moves);
-
-    hash_set seen;
-    seen.set_empty_key(ULLONG_MAX);
-
-    uint64_t hash;
-
-    for (move_it it=all_moves.begin(); it != all_moves.end(); ++it) {
-        hash = (*it)->get_zobrist_hash();
-        if (seen.count(hash))
-            continue;
-        seen.insert(hash);
-        moves->push_back(*it);
-    }
-}
+typedef google::dense_hash_set<uint64_t, GameStateHash> hash_set;
 
 void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves)
 {
     uint64_t hash;
     std::vector<Step> vec_step;
-    hash_set seen;
+    hash_set seen(20000);
     seen.set_empty_key(ULLONG_MAX);
     size_t idx = moves->size();
     
@@ -43,7 +23,7 @@ void generate_unique_moves(const GameState& gs, const Color for_color, std::vect
         if (steps_left >= 1) {
             vec_step.clear();
             generate_steps(gs, for_color, &vec_step);
-            for(vec_step_it it=vec_step.begin(); it != vec_step.end(); ++it) {
+            for(step_it it=vec_step.begin(); it != vec_step.end(); ++it) {
                 MovePtr mv = MovePtr(new Move(*mp));
                 mv->add_step(*it);
                 hash = mv->get_zobrist_hash();
@@ -57,7 +37,7 @@ void generate_unique_moves(const GameState& gs, const Color for_color, std::vect
             vec_step.clear();
             generate_pushes(gs, for_color, &vec_step);
             generate_pulls(gs, for_color, &vec_step);
-            for(vec_step_it it=vec_step.begin(); it != vec_step.end(); it += 2) {
+            for(step_it it=vec_step.begin(); it != vec_step.end(); it += 2) {
                 MovePtr mv = MovePtr(new Move(*mp));
                 mv->add_step(*it).add_step(*(it+1));
                 hash = mv->get_zobrist_hash();
@@ -84,7 +64,7 @@ void generate_moves(const GameState& gs, const Color for_color, std::vector<Move
         if (steps_left >= 1) {
             vec_step.clear();
             generate_steps(gs, for_color, &vec_step);
-            for(vec_step_it it=vec_step.begin(); it != vec_step.end(); ++it) {
+            for(step_it it=vec_step.begin(); it != vec_step.end(); ++it) {
                 MovePtr mv = MovePtr(new Move(*mp));
                 mv->add_step(*it);
                 moves->push_back(mv);
@@ -94,7 +74,7 @@ void generate_moves(const GameState& gs, const Color for_color, std::vector<Move
             vec_step.clear();
             generate_pushes(gs, for_color, &vec_step);
             generate_pulls(gs, for_color, &vec_step);
-            for(vec_step_it it=vec_step.begin(); it != vec_step.end(); it += 2) {
+            for(step_it it=vec_step.begin(); it != vec_step.end(); it += 2) {
                 MovePtr mv = MovePtr(new Move(*mp));
                 mv->add_step(*it).add_step(*(it+1));
                 moves->push_back(mv);
