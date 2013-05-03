@@ -1,3 +1,6 @@
+#ifndef _MOVE_H_
+#define _MOVE_H_
+
 #include <boost/shared_ptr.hpp>
 
 #include "step.h"
@@ -69,6 +72,9 @@ class Move
 };
 
 typedef boost::shared_ptr<Move> MovePtr;
+typedef std::vector<MovePtr>::const_iterator vec_move_it;
 
 void generate_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves);
 void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves);
+
+#endif

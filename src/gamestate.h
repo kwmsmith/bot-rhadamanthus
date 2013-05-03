@@ -42,7 +42,6 @@ class GameState {
             return color.contains(idx) && _pieces[p].contains(idx);
         }
 
-
         bool is_empty() const;
 
         bool add_piece_at(const int c, const int p, const unsigned int idx);
