@@ -461,3 +461,8 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
     gs.color_and_piece_at(idx, &c, &p);
     return Step(c, p, idx, direction);
 }
+
+void get_num_stronger_pieces(const GameState& gs, const Color for_color, int* num_stronger_pieces)
+{
+    
+}

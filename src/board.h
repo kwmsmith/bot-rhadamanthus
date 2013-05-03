@@ -4,7 +4,6 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
-// #include <iostream>
 #include <cstdio>
 #include <algorithm>
 
@@ -125,8 +124,8 @@ class Board {
 
         explicit Board(uint64_t board) : _board(board) {}
 
-        explicit Board(const std::vector<uint64_t>& vec) {
-            for(std::vector<uint64_t>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
+        explicit Board(const std::vector<uint8_t>& vec) {
+            for(std::vector<uint8_t>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
                 add(*it);
             }
         }
@@ -148,11 +147,11 @@ class Board {
             _board = b._board;
         }
 
-        static Board file_n(unsigned int n)
+        static Board file_n(const uint8_t n)
         {
             assert(n >= 1 && n <= 8);
             Board b;
-            for(int i=n-1; i < 64; i+=8)
+            for(uint8_t i=n-1; i < 64; i+=8)
                 b.add(i);
             return b;
         }
@@ -173,11 +172,11 @@ class Board {
             return b;
         }
 
-        static Board rank_n(unsigned int n)
+        static Board rank_n(const uint8_t n)
         {
             assert(n >= 1 && n <= 8);
             Board b;
-            for(unsigned int i=(n-1)*8; i < n * 8; i++)
+            for(uint8_t i=(n-1)*8; i < n * 8; i++)
                 b.add(i);
             return b;
         }
