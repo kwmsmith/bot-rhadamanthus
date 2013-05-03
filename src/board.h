@@ -57,7 +57,7 @@ enum Action {NORTH, SOUTH, EAST, WEST, ADD, CAPTURE};
  * Takes a display integer (0 -> square h1, 63 -> square a8), and converts it
  * to its internal index.
  */
-inline int internal_idx_from_display(int d)
+inline int internal_idx_from_display(uint8_t d)
 {
     int row =  - d / 8 + 7;
     int col = d % 8;
@@ -117,7 +117,7 @@ unsigned int num_directions();
 int direction_from_char(const char ch);
 unsigned int opp_dir(unsigned int);
 
-struct Board {
+class Board {
 
     public:
 
@@ -161,7 +161,7 @@ struct Board {
             return (idx == 18 || idx == 21 || idx == 42 || idx == 45);
         }
         
-        static bool is_adj_capture_squares(const char idx) {
+        static bool is_adj_capture_squares(uint8_t idx) {
             const static Board adj_captures(0x245a24245a2400ULL);
             return adj_captures.contains(idx);
         }
@@ -187,33 +187,33 @@ struct Board {
          */
         std::string to_string() const {
             std::string s;
-            for(unsigned int i=0; i < 64; ++i) {
+            for(uint8_t i=0; i < 64; ++i) {
                 s += (this->contains(i) ? "1" : "0");
             }
             return s;
         }
 
-        Board& add(uint64_t v) 
+        Board& add(uint8_t v) 
         {
-            assert(v >= 0 && v < 64);
+            assert(v < 64);
             _board |= U64_ONE<<v;
             return *this;
         }
 
-        Board& add(uint64_t v0, uint64_t v1)
+        Board& add(uint8_t v0, uint8_t v1)
         {
             add(v0);
             return add(v1);
         }
 
-        Board& add(uint64_t v0, uint64_t v1, uint64_t v2)
+        Board& add(uint8_t v0, uint8_t v1, uint8_t v2)
         {
             add(v0);
             add(v1);
             return add(v2);
         }
 
-        Board& add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3)
+        Board& add(uint8_t v0, uint8_t v1, uint8_t v2, uint8_t v3)
         {
             add(v0);
             add(v1);
@@ -221,7 +221,7 @@ struct Board {
             return add(v3);
         }
 
-        Board& add(uint64_t v0, uint64_t v1, uint64_t v2, uint64_t v3, uint64_t v4)
+        Board& add(uint8_t v0, uint8_t v1, uint8_t v2, uint8_t v3, uint8_t v4)
         {
             add(v0);
             add(v1);
@@ -230,7 +230,7 @@ struct Board {
             return add(v4);
         }
 
-        Board& add_file_rank(char file, int rank) {
+        Board& add_file_rank(const uint8_t file, const uint8_t rank) {
             assert(file >= 'A' && file <= 'H');
             assert(rank >= 1 && rank <= 8);
             return add((rank-1)*8 + (file - 'A'));
@@ -240,38 +240,38 @@ struct Board {
             _board = 0;
         }
 
-        Board& remove(uint64_t v)
+        Board& remove(uint8_t v)
         {
-            assert(v >= 0 && v < 64);
+            assert(v < 64);
             _board &= ~(U64_ONE<<v);
             return *this;
         }
 
-        bool contains(uint64_t v) const 
+        bool contains(uint8_t v) const 
         { 
-            assert(v >= 0 && v < 64);
+            assert(v < 64);
             return _board & (U64_ONE<<v);
         }
         
-        bool contains(const char file, const unsigned int rank) const {
+        bool contains(const uint8_t file, const uint8_t rank) const {
             assert(file >= 'A' && file <= 'H');
             assert(rank >= 1 && rank <= 8);
             return contains((rank - 1) * 8 + (file - 'A'));
         }
         
-        void psns_from_board(std::vector<unsigned int> *psns) const {
-            for(unsigned int i=0; i < 64; ++i) {
+        void psns_from_board(std::vector<uint8_t> *psns) const {
+            for(uint8_t i=0; i < 64; ++i) {
                 if (this->contains(i))
                     psns->push_back(i);
             }
         }
 
-        std::vector<unsigned int> psns_from_board() const {
+        std::vector<uint8_t> psns_from_board() const {
             // TODO: look into faster ways of computing this list of positions.
             // consider using __builtin_ctz() (count trailing zeros -- found in GCC).
             // See also the bit-twiddling-hacks.html file in this repository.
-            std::vector<unsigned int> psns;
-            for(unsigned int i=0; i < 64; ++i) {
+            std::vector<uint8_t> psns;
+            for(uint8_t i=0; i < 64; ++i) {
                 if (this->contains(i))
                     psns.push_back(i);
             }

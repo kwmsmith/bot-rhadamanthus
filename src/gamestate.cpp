@@ -54,16 +54,16 @@ std::string GameState::to_oneline_string() const
     const char black_char[] = { 'r', 'c', 'd', 'h', 'm', 'e'};
     for(int p=R; p < nPieces; p++) {
         const Board &b = _color[W] & _pieces[p];
-        const std::vector<unsigned int> &psns = b.psns_from_board();
-        for (std::vector<unsigned int>::const_iterator it=psns.begin();
+        const std::vector<uint8_t> &psns = b.psns_from_board();
+        for (std::vector<uint8_t>::const_iterator it=psns.begin();
                 it != psns.end(); ++it) {
             s[*it] = white_char[p];
         }
     }
     for(int p=R; p < nPieces; p++) {
         const Board &b = _color[B] & _pieces[p];
-        const std::vector<unsigned int> &psns = b.psns_from_board();
-        for (std::vector<unsigned int>::const_iterator it=psns.begin();
+        const std::vector<uint8_t> &psns = b.psns_from_board();
+        for (std::vector<uint8_t>::const_iterator it=psns.begin();
                 it != psns.end(); ++it) {
             s[*it] = black_char[p];
         }
@@ -98,11 +98,11 @@ bool GameState::take_step(const Step &s)
     return false;
 }
 
-bool GameState::add_piece_at(const int c, const int piece, const unsigned int idx)
+bool GameState::add_piece_at(const int c, const int piece, const uint8_t idx)
 {
     assert(c == W || c == B);
     assert(piece >= R && piece <= E);
-    assert(idx >= 0 && idx < 64);
+    assert(idx < 64);
     if (get_all_const().contains(idx)) {
         return false; // position already occupied.
     }
@@ -112,7 +112,7 @@ bool GameState::add_piece_at(const int c, const int piece, const unsigned int id
     return true;
 }
 
-bool GameState::remove_piece_at(const int c, const int piece, const unsigned int idx)
+bool GameState::remove_piece_at(const int c, const int piece, const uint8_t idx)
 {
     if (!(_pieces[piece] & get_color_board_const(c)).contains(idx)) {
         return false; // idx does not contain the right piece.
@@ -125,7 +125,7 @@ bool GameState::remove_piece_at(const int c, const int piece, const unsigned int
 /**
  * Safe move.  Returns false on failure, true on success.
  */
-bool GameState::move_piece(const int c, const int piece, const unsigned int from, const unsigned int to)
+bool GameState::move_piece(const int c, const int piece, const uint8_t from, const uint8_t to)
 {
     // TODO: Test for move off of board?
 
@@ -189,7 +189,7 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
             const Board& pushing_pieces = 
                 is_adjacent(pushing_pieces_with_adj_lt, pushed_with_adj_empty, opp_dir(dir_pushed_from));
 
-            std::vector<unsigned int> pushed_idxs, pusher_idxs;
+            std::vector<uint8_t> pushed_idxs, pusher_idxs;
             pushed_pieces.psns_from_board(&pushed_idxs);
             pushing_pieces.psns_from_board(&pusher_idxs);
             assert(pushed_idxs.size() == pusher_idxs.size());
@@ -230,12 +230,12 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
             
             assert((pulled_pieces & gs.get_color_board_const(pulled_color)) == pulled_pieces);
 
-            std::vector<unsigned int> pulled_idxs, pulling_idxs;
+            std::vector<uint8_t> pulled_idxs, pulling_idxs;
             pulled_pieces.psns_from_board(&pulled_idxs);
             pulling_pieces.psns_from_board(&pulling_idxs);
             assert(pulled_idxs.size() == pulling_idxs.size());
             
-            for(unsigned int i=0; i < pulled_idxs.size(); ++i) {
+            for(uint8_t i=0; i < pulled_idxs.size(); ++i) {
                 assert(gs.get_all_const().contains(pulled_idxs[i]));
                 assert(gs.get_all_const().contains(pulling_idxs[i]));
                 pulls->push_back(step_from_gs(gs, pulling_idxs[i], dir_pulling_piece));
@@ -255,7 +255,7 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<Step
         
         assert((pieces_with_step & gs.get_color_board_const(for_color)) == pieces_with_step);
 
-        std::vector<unsigned int> mobile_idxs;
+        std::vector<uint8_t> mobile_idxs;
         pieces_with_step.psns_from_board(&mobile_idxs);
         
         for(unsigned int i=0; i < mobile_idxs.size(); ++i) {
@@ -269,7 +269,7 @@ unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures
 {
     const Board& captured = Board::capture_squares() & 
         (gs.get_all_const() & ~(adj_friendly(gs, B) | adj_friendly(gs, W)));
-    std::vector<unsigned int> captured_idxs;
+    std::vector<uint8_t> captured_idxs;
     captured.psns_from_board(&captured_idxs);
     for(unsigned int i=0; i < captured_idxs.size(); ++i) {
         assert(gs.get_all_const().contains(captured_idxs[i]));
@@ -455,7 +455,7 @@ Board adj_enemy_ge(const GameState& gs, const Color for_color)
     return adj_ge;
 }
 
-Step step_from_gs(const GameState& gs, const unsigned int idx, const unsigned int direction)
+Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int direction)
 {
     int c, p;
     gs.color_and_piece_at(idx, &c, &p);

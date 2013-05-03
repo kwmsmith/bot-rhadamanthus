@@ -22,7 +22,7 @@ class GameState {
 
         bool take_step(const Step &s);
 
-        bool move_piece(const int c, const int p, const unsigned int from, const unsigned int to);
+        bool move_piece(const int c, const int p, const uint8_t from, const uint8_t to);
 
         const Board& get_color_board_const(const int c) const {
             assert(c == B || c == W);
@@ -37,14 +37,14 @@ class GameState {
             return _color[W] | _color[B];
         }
 
-        bool contains_at(Color c, int p, unsigned int idx) const {
+        bool contains_at(const Color c, const int p, const uint8_t idx) const {
             const Board& color = get_color_board_const(c);
             return color.contains(idx) && _pieces[p].contains(idx);
         }
 
         bool is_empty() const;
 
-        bool add_piece_at(const int c, const int p, const unsigned int idx);
+        bool add_piece_at(const int c, const int p, const uint8_t idx);
 
         bool add_piece_at(const int c, const int p, const char file, const int rank) {
             assert(file >= 'A' && file <= 'H');
@@ -52,7 +52,7 @@ class GameState {
             return add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
         }
 
-        bool remove_piece_at(const int c, const int p, const unsigned int idx);
+        bool remove_piece_at(const int c, const int p, const uint8_t idx);
 
         std::string to_oneline_string() const;
 
@@ -72,7 +72,7 @@ class GameState {
                 to->_pieces[i] = _pieces[i];
         }
         
-        void color_and_piece_at(const unsigned int idx, int *c, int *p) const {
+        void color_and_piece_at(const uint8_t idx, int *c, int *p) const {
             *c = -1; *p = -1; // guilty before proven innocent...
             for(unsigned int i=0; i < 2; ++i)
                 *c += _color[i].contains(idx) * (i+1);
@@ -91,7 +91,7 @@ class GameState {
         GameState(const GameState& gs);  // noncopyable
         GameState& operator=(const GameState& gs);  // noncopyable
 
-        void add_piece_at_fast(const int c, const int piece, const unsigned int idx) {
+        void add_piece_at_fast(const int c, const int piece, const uint8_t idx) {
             assert (c == W || c == B);
             _color[c].add(idx);
             assert(_color[c].contains(idx));
@@ -100,7 +100,7 @@ class GameState {
             _zhash.addrm_piece_at(c, piece, idx);
         }
 
-        void remove_piece_at_fast(const int c, const int piece, const unsigned int idx) {
+        void remove_piece_at_fast(const int c, const int piece, const uint8_t idx) {
             assert (c == W || c == B);
             _color[c].remove(idx);
             _pieces[piece].remove(idx);
@@ -119,7 +119,7 @@ unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);
 
-Step step_from_gs(const GameState& gs, const unsigned int idx, const unsigned int direction);
+Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int direction);
 
 /* Expects a 64-character string, beginning with a1, ending with h8.  Piece
  * characters are rcdhme / RCDHME.  Empty characters are '.', ' ', '~' and are
@@ -153,5 +153,7 @@ Board adj_friendly(const GameState& gs, const Color for_color);
 
 Board frozen_pieces(const GameState& gs, const Color for_color);
 Board mobile_pieces(const GameState& gs, const Color for_color);
+
+void get_num_stronger_pieces(const GameState& gs, const Color for_color, const int* num_stronger_pieces);
 
 #endif
