@@ -32,6 +32,10 @@ class GameState {
         const Board& get_piece_board_const(const int p) const {
             return _pieces[p];
         }
+        
+        const uint8_t get_count(const int p, const int c) const {
+            return (get_piece_board_const(p) & get_color_board_const(c)).count();
+        }
 
         const Board get_all_const() const {
             return _color[W] | _color[B];

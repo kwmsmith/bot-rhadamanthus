@@ -277,6 +277,15 @@ class Board {
             return psns;
         }
         
+        const uint8_t count() const {
+            // TODO: Try other bit counting methods to speed this one up.
+            uint64_t tmp = _board, ret = 0;
+            for(ret=0; tmp; ret++) {
+                tmp &= tmp - 1;
+            }
+            return ret;
+        }
+        
         Board mask(Board m) const {
             return *this & m;
         }
