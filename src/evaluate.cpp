@@ -25,15 +25,17 @@
 
 // float harlog(const GameState& gs, const Color for_color)
 // {
-    // int num_stronger_pieces[nPieces];
-    // gs.get_num_stronger_pieces(num_stronger_pieces, for_color);
+    // const float Q = 1.447530126, G=0.6314442034;
+    // uint8_t num_stronger_pieces[nPieces];
+    // get_num_stronger_pieces(gs, for_color, num_stronger_pieces);
     
     // float score = 0.;
     // for(unsigned int i=C; i < nPieces; ++i) {
-        // if (!num_stronger_pieces[i]) {
-            // score += 2. / Q;
+        // register uint8_t num_stronger = num_stronger_pieces[i];
+        // if (num_stronger) {
+            // score += 1. / (Q + num_stronger);
         // } else {
-            // score += 1. / (Q + num_stronger_pieces[i]);
+            // score += 2. / Q;
         // }
     // }
     // score += G * approx_log(gs.get_num_pieces(R, for_color) * gs.get_total_num_pieces(for_color));

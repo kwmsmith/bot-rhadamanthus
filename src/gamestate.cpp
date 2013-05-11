@@ -462,7 +462,21 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
     return Step(c, p, idx, direction);
 }
 
-void get_num_stronger_pieces(const GameState& gs, const Color for_color, int* num_stronger_pieces)
+void get_num_stronger_pieces(const GameState& gs, const Color for_color, uint8_t *num_stronger_pieces)
 {
-    
+    num_stronger_pieces[E] = 0;
+    const Board other_pieces = gs.get_color_board_const(other_color(for_color));
+    for (uint8_t i=M; i >= 0; --i) {
+        const Board these_pieces = gs.get_piece_board_const(i + 1); // i+1 for stronger piece than i.
+        num_stronger_pieces[i] = num_stronger_pieces[i+1] + (other_pieces & these_pieces).count();
+    }
 }
+
+// void get_num_pieces_array(const GameState& gs, const Color for_color, uint8_t *num_pieces)
+// {
+    // const Board all_pieces = gs.get_color_board_const(for_color);
+    // for (uint8_t i=0; i < nPieces; i++) {
+        // const Board these_pieces = gs.get_piece_board_const(i + 1); // i+1 for stronger piece than i.
+        // num_stronger_pieces[i] = num_stronger_pieces[i+1] + (other_pieces & these_pieces).count();
+    // }
+// }

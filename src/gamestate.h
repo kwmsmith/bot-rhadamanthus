@@ -158,6 +158,7 @@ Board adj_friendly(const GameState& gs, const Color for_color);
 Board frozen_pieces(const GameState& gs, const Color for_color);
 Board mobile_pieces(const GameState& gs, const Color for_color);
 
-void get_num_stronger_pieces(const GameState& gs, const Color for_color, int* num_stronger_pieces);
+void get_num_stronger_pieces(const GameState& gs, const Color for_color, uint8_t *num_stronger_pieces);
+// void get_num_pieces(const GameState& gs, const Color for_color, const Piece p);
 
 #endif
