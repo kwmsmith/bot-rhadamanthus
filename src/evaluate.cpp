@@ -22,24 +22,58 @@
  * trade of a dog for two rabbits.
  ****************************************************************************/
 
+#include <iostream>
 
-// float harlog(const GameState& gs, const Color for_color)
-// {
-    // const float Q = 1.447530126, G=0.6314442034;
-    // uint8_t num_stronger_pieces[nPieces];
-    // get_num_stronger_pieces(gs, for_color, num_stronger_pieces);
+float harlog(const uint8_t total_pieces, const uint8_t num_rabbits, const uint8_t *num_pieces_other);
+
+inline void calc_num_stronger_pieces(const uint8_t *num_pieces, uint8_t *num_stronger_pieces)
+{
+    num_stronger_pieces[E] = 0;
+    for (int8_t i=M; i >= 0; --i) {
+        num_stronger_pieces[i] = num_stronger_pieces[i+1] + num_pieces[i+1];
+    }
+}
+
+float eval_material(const GameState& gs, const Color for_color)
+{
+    Color cl = for_color;
+    uint8_t num_stronger_pieces[nPieces];
+    uint8_t num_enemy_pieces[nPieces];
+    const Board rabbit_board = gs.get_piece_board_const(R);
+    Board color_board = gs.get_color_board_const(cl);
+    uint8_t total_pieces = color_board.count();
+    uint8_t num_rabbits = (rabbit_board & color_board).count();
+    get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
+    calc_num_stronger_pieces(num_enemy_pieces, num_stronger_pieces);
+    float pos_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
     
-    // float score = 0.;
-    // for(unsigned int i=C; i < nPieces; ++i) {
-        // register uint8_t num_stronger = num_stronger_pieces[i];
-        // if (num_stronger) {
-            // score += 1. / (Q + num_stronger);
-        // } else {
-            // score += 2. / Q;
-        // }
-    // }
-    // score += G * approx_log(gs.get_num_pieces(R, for_color) * gs.get_total_num_pieces(for_color));
-// }
+    cl = other_color(cl);
+    color_board = gs.get_color_board_const(cl);
+    total_pieces = color_board.count();
+    num_rabbits = (rabbit_board & color_board).count();
+    get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
+    calc_num_stronger_pieces(num_enemy_pieces, num_stronger_pieces);
+    float neg_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
+    
+    return pos_score - neg_score;
+}
+
+float harlog(const uint8_t total_pieces, const uint8_t num_rabbits, const uint8_t *num_stronger_pieces)
+{
+    const static float Q = 1.447530126, G=0.6314442034;
+    
+    float score = 0.;
+    for(unsigned int i=C; i < nPieces; ++i) {
+        uint8_t num_stronger = num_stronger_pieces[i];
+        if (num_stronger) {
+            score += 1. / (Q + num_stronger);
+        } else {
+            score += 2. / Q;
+        }
+    }
+    score += G * approx_log(num_rabbits * total_pieces);
+    return score;
+}
 
 /*****************************************************************************
  * DAPE (Optimized Coefficients) 
