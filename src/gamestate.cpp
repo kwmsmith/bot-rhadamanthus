@@ -53,19 +53,17 @@ std::string GameState::to_oneline_string() const
     const char white_char[] = { 'R', 'C', 'D', 'H', 'M', 'E'};
     const char black_char[] = { 'r', 'c', 'd', 'h', 'm', 'e'};
     for(int p=R; p < nPieces; p++) {
-        const Board &b = _color[W] & _pieces[p];
-        const std::vector<uint8_t> &psns = b.psns_from_board();
-        for (std::vector<uint8_t>::const_iterator it=psns.begin();
-                it != psns.end(); ++it) {
-            s[*it] = white_char[p];
+        Board b = _color[W] & _pieces[p];
+        while(!b.is_empty()) {
+            uint8_t psn = b.idx_and_reset();
+            s[psn] = white_char[p];
         }
     }
     for(int p=R; p < nPieces; p++) {
-        const Board &b = _color[B] & _pieces[p];
-        const std::vector<uint8_t> &psns = b.psns_from_board();
-        for (std::vector<uint8_t>::const_iterator it=psns.begin();
-                it != psns.end(); ++it) {
-            s[*it] = black_char[p];
+        Board b = _color[B] & _pieces[p];
+        while(!b.is_empty()) {
+            uint8_t psn = b.idx_and_reset();
+            s[psn] = black_char[p];
         }
     }
     return s;
@@ -140,7 +138,7 @@ bool GameState::is_empty() const
     Board b(get_all_const());
     for(int i=R; i < nPieces; ++i)
         b |= _pieces[i];
-    return b == 0;
+    return b.is_empty();
 }
 
 void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
@@ -166,10 +164,17 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
     const Color& pushing_color = for_color;
     const Color& pushed_color = other_color(for_color);
     const Board& pushing_mobile = ~frozen_pieces(gs, for_color);
+
+    Board pushed_with_adj_empty[4];
+    // Board pushing_pieces[4];
     
     // The body of generate_pushes() takes the perspective of the pushed piece.  
     // dir_pushed_from is the direction from which the pushing piece comes from.
     // dir_pushed is the direction the pushed piece is pushed to.
+    
+    for (unsigned int dir = NORTH; dir < num_directions(); ++dir) {
+        pushed_with_adj_empty[dir] = adj_empty(gs, pushed_color, dir);
+    }
     
     for (unsigned int dir_pushed_from = NORTH; dir_pushed_from < num_directions(); ++dir_pushed_from) {
         
@@ -181,25 +186,27 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
         for (unsigned int dir_pushed = NORTH; dir_pushed < num_directions(); ++dir_pushed) {
             if (dir_pushed_from == dir_pushed) continue;
             
-            const Board& pushed_with_adj_empty = adj_empty(gs, pushed_color, dir_pushed);
+            // // TODO: can be pulled out of the double-nested for loops...
+            // const Board& pushed_with_adj_empty = adj_empty(gs, pushed_color, dir_pushed);
+            
+            // TODO: can be pulled out of double-nested for loops?
+            Board pushing_pieces = 
+                is_adjacent(pushing_pieces_with_adj_lt, pushed_with_adj_empty[dir_pushed],
+                        opp_dir(dir_pushed_from));
                 
-            const Board& pushed_pieces = 
-                is_adjacent(pushed_with_adj_empty, pushing_pieces_with_adj_lt, dir_pushed_from);
+            Board pushed_pieces = 
+                is_adjacent(pushed_with_adj_empty[dir_pushed], pushing_pieces_with_adj_lt, dir_pushed_from);
             
-            const Board& pushing_pieces = 
-                is_adjacent(pushing_pieces_with_adj_lt, pushed_with_adj_empty, opp_dir(dir_pushed_from));
-
-            std::vector<uint8_t> pushed_idxs, pusher_idxs;
-            pushed_pieces.psns_from_board(&pushed_idxs);
-            pushing_pieces.psns_from_board(&pusher_idxs);
-            assert(pushed_idxs.size() == pusher_idxs.size());
-            
-            for(unsigned int i=0; i < pushed_idxs.size(); ++i) {
-                assert(gs.get_all_const().contains(pushed_idxs[i]));
-                assert(gs.get_all_const().contains(pusher_idxs[i]));
-                pushes->push_back(step_from_gs(gs, pushed_idxs[i], dir_pushed));
-                pushes->push_back(step_from_gs(gs, pusher_idxs[i], opp_dir(dir_pushed_from)));
+            while(!pushed_pieces.is_empty()) {
+                assert(!pushing_pieces.is_empty());
+                uint8_t pushed_idx = pushed_pieces.idx_and_reset();
+                uint8_t pusher_idx = pushing_pieces.idx_and_reset();
+                assert(gs.get_all_const().contains(pushed_idx));
+                assert(gs.get_all_const().contains(pusher_idx));
+                pushes->push_back(step_from_gs(gs, pushed_idx, dir_pushed));
+                pushes->push_back(step_from_gs(gs, pusher_idx, opp_dir(dir_pushed_from)));
             }
+            
         }
     }
 }
@@ -207,7 +214,6 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
 void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step> *pulls)
 {
     const Color& pulling_color = for_color;
-    const Color& pulled_color = other_color(for_color);
     const Board& pulling_mobile = ~frozen_pieces(gs, for_color);
     
     // The body of generate_pushes() takes the perspective of the pulling piece.
@@ -224,22 +230,18 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
             
             const Board& pulling_with_adj_empty = adj_empty(gs, pulling_color, dir_pulling_piece);
             
-            const Board& pulling_pieces = pulling_pieces_with_adj_lt & pulling_with_adj_empty;
+            Board pulling_pieces = pulling_pieces_with_adj_lt & pulling_with_adj_empty;
             
-            const Board& pulled_pieces = pulling_pieces.move(dir_pulled_piece);
+            Board pulled_pieces = pulling_pieces.move(dir_pulled_piece);
             
-            assert((pulled_pieces & gs.get_color_board_const(pulled_color)) == pulled_pieces);
-
-            std::vector<uint8_t> pulled_idxs, pulling_idxs;
-            pulled_pieces.psns_from_board(&pulled_idxs);
-            pulling_pieces.psns_from_board(&pulling_idxs);
-            assert(pulled_idxs.size() == pulling_idxs.size());
-            
-            for(uint8_t i=0; i < pulled_idxs.size(); ++i) {
-                assert(gs.get_all_const().contains(pulled_idxs[i]));
-                assert(gs.get_all_const().contains(pulling_idxs[i]));
-                pulls->push_back(step_from_gs(gs, pulling_idxs[i], dir_pulling_piece));
-                pulls->push_back(step_from_gs(gs, pulled_idxs[i], opp_dir(dir_pulled_piece)));
+            while(!pulled_pieces.is_empty()) {
+                assert(!pulling_pieces.is_empty());
+                uint8_t pulled_idx = pulled_pieces.idx_and_reset();
+                uint8_t pulling_idx = pulling_pieces.idx_and_reset();
+                assert(gs.get_all_const().contains(pulled_idx));
+                assert(gs.get_all_const().contains(pulling_idx));
+                pulls->push_back(step_from_gs(gs, pulling_idx, dir_pulling_piece));
+                pulls->push_back(step_from_gs(gs, pulled_idx, opp_dir(dir_pulled_piece)));
             }
         }
     }
@@ -251,31 +253,31 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<Step
 
     for (unsigned int dir_empty = NORTH; dir_empty < num_directions(); ++dir_empty) {
 
-        const Board& pieces_with_step = adj_step(gs, for_color, dir_empty) & not_frozen;
+        Board pieces_with_step = adj_step(gs, for_color, dir_empty) & not_frozen;
         
         assert((pieces_with_step & gs.get_color_board_const(for_color)) == pieces_with_step);
 
-        std::vector<uint8_t> mobile_idxs;
-        pieces_with_step.psns_from_board(&mobile_idxs);
-        
-        for(unsigned int i=0; i < mobile_idxs.size(); ++i) {
-            assert(gs.get_all_const().contains(mobile_idxs[i]));
-            steps->push_back(step_from_gs(gs, mobile_idxs[i], dir_empty));
+        while(!pieces_with_step.is_empty()) {
+            uint8_t mobile_idx = pieces_with_step.idx_and_reset();
+            assert(gs.get_all_const().contains(mobile_idx));
+            steps->push_back(step_from_gs(gs, mobile_idx, dir_empty));
         }
     }
 }
 
-unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures)
+uint8_t generate_captures(const GameState& gs, std::vector<Step> *captures)
 {
-    const Board& captured = Board::capture_squares() & 
+    uint8_t ncaptures = 0;
+    Board captured = Board::capture_squares() & 
         (gs.get_all_const() & ~(adj_friendly(gs, B) | adj_friendly(gs, W)));
-    std::vector<uint8_t> captured_idxs;
-    captured.psns_from_board(&captured_idxs);
-    for(unsigned int i=0; i < captured_idxs.size(); ++i) {
-        assert(gs.get_all_const().contains(captured_idxs[i]));
-        captures->push_back(step_from_gs(gs, captured_idxs[i], CAPTURE));
+    
+    while(!captured.is_empty()) {
+        uint8_t captured_idx = captured.idx_and_reset();
+        assert(gs.get_all_const().contains(captured_idx));
+        captures->push_back(step_from_gs(gs, captured_idx, CAPTURE));
+        ncaptures++;
     }
-    return captured_idxs.size();
+    return ncaptures;
 }
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture)

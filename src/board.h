@@ -45,10 +45,10 @@ const static int kInvalidPiece = -1;
 
 enum Color { W, B };
 
-inline Color other_color(Color c) {
+inline Color other_color(Color c) 
+{
     return c == W ? B : W;
 }
-
 
 enum Action {NORTH, SOUTH, EAST, WEST, ADD, CAPTURE};
 
@@ -115,6 +115,11 @@ inline int piece_from_char(char ch)
 unsigned int num_directions();
 int direction_from_char(const char ch);
 unsigned int opp_dir(unsigned int);
+
+// inline uint8_t next_psn(Board &b)
+// {
+    // register Board next_psn = b & -b;
+// }
 
 class Board {
 
@@ -238,6 +243,10 @@ class Board {
         void clear() {
             _board = 0;
         }
+        
+        bool is_empty() const {
+            return _board == 0;
+        }
 
         Board& remove(uint8_t v)
         {
@@ -258,23 +267,10 @@ class Board {
             return contains((rank - 1) * 8 + (file - 'A'));
         }
         
-        void psns_from_board(std::vector<uint8_t> *psns) const {
-            for(uint8_t i=0; i < 64; ++i) {
-                if (this->contains(i))
-                    psns->push_back(i);
-            }
-        }
-
-        std::vector<uint8_t> psns_from_board() const {
-            // TODO: look into faster ways of computing this list of positions.
-            // consider using __builtin_ctz() (count trailing zeros -- found in GCC).
-            // See also the bit-twiddling-hacks.html file in this repository.
-            std::vector<uint8_t> psns;
-            for(uint8_t i=0; i < 64; ++i) {
-                if (this->contains(i))
-                    psns.push_back(i);
-            }
-            return psns;
+        uint8_t idx_and_reset() {
+            uint8_t idx = _board ? __builtin_ctzl(_board) : 64;
+            _board ^= (_board & -_board);
+            return idx;
         }
         
         const uint8_t count() const {
