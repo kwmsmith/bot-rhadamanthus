@@ -166,7 +166,6 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
     const Board& pushing_mobile = ~frozen_pieces(gs, for_color);
 
     Board pushed_with_adj_empty[4];
-    // Board pushing_pieces[4];
     
     // The body of generate_pushes() takes the perspective of the pushed piece.  
     // dir_pushed_from is the direction from which the pushing piece comes from.
@@ -186,10 +185,7 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
         for (unsigned int dir_pushed = NORTH; dir_pushed < num_directions(); ++dir_pushed) {
             if (dir_pushed_from == dir_pushed) continue;
             
-            // // TODO: can be pulled out of the double-nested for loops...
-            // const Board& pushed_with_adj_empty = adj_empty(gs, pushed_color, dir_pushed);
-            
-            // TODO: can be pulled out of double-nested for loops?
+            // TODO: Try and make symmetric with generate_pulls() -- simplify inner loop here...
             Board pushing_pieces = 
                 is_adjacent(pushing_pieces_with_adj_lt, pushed_with_adj_empty[dir_pushed],
                         opp_dir(dir_pushed_from));
@@ -206,7 +202,6 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
                 pushes->push_back(step_from_gs(gs, pushed_idx, dir_pushed));
                 pushes->push_back(step_from_gs(gs, pusher_idx, opp_dir(dir_pushed_from)));
             }
-            
         }
     }
 }
@@ -216,7 +211,13 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
     const Color& pulling_color = for_color;
     const Board& pulling_mobile = ~frozen_pieces(gs, for_color);
     
+    Board pulling_with_adj_empty[4];
+    
     // The body of generate_pushes() takes the perspective of the pulling piece.
+    
+    for (unsigned int dir = NORTH; dir < num_directions(); ++dir) {
+        pulling_with_adj_empty[dir] = adj_empty(gs, pulling_color, dir);
+    }
     
     for (unsigned int dir_pulled_piece = NORTH; dir_pulled_piece < num_directions(); ++dir_pulled_piece) {
         
@@ -228,9 +229,7 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
         for (unsigned int dir_pulling_piece = NORTH; dir_pulling_piece < num_directions(); ++dir_pulling_piece) {
             if (dir_pulled_piece == dir_pulling_piece) continue;
             
-            const Board& pulling_with_adj_empty = adj_empty(gs, pulling_color, dir_pulling_piece);
-            
-            Board pulling_pieces = pulling_pieces_with_adj_lt & pulling_with_adj_empty;
+            Board pulling_pieces = pulling_pieces_with_adj_lt & pulling_with_adj_empty[dir_pulling_piece];
             
             Board pulled_pieces = pulling_pieces.move(dir_pulled_piece);
             
