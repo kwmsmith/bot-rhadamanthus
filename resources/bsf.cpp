@@ -1,26 +1,15 @@
-/* Simple benchmark harness for different popcount implementations
+/* Simple benchmark harness for different bsf (bit-scan-forward)
+ * implementations.  Each computes the lsb position that is set.
 
   To compile:
-    g++ -O3 popcnt.cpp -o popcnt
+    g++ -O3 bsf.cpp -o bsf.x
 
-  If your machine and gcc supports SSE4.2 POPCNT then you should try:
-    g++ -O3 popcnt.cpp -o popcnt -mpopcnt
   and for SSSE3 support you may need
-    g++ -O3 popcnt.cpp -o popcnt -mssse3
+    g++ -O3 bsf.cpp -o bsf -mssse3
 
   This program supports OpenMP on both GCC and Visual Studio.
   To compile with OpenMP support using GCC:
-    g++ -O3 popcnt.cpp -o popcnt -fopenmp
-
-
-This code is derived from original source code by a1k0n
-    http://www.a1k0n.net/temp/popcnt.c.txt
-and found via a comment by a1k0n at
-    http://www.reddit.com/r/programming/info/22p5v/comments
-
-Additional popcount implementations by Andrew Dalke, derived from
-various sources identified in each section.
-
+    g++ -O3 bsf.cpp -o bsf -fopenmp
 
 For more details see
    http://dalkescientific.com/writings/diary/archive/2008/07/03/hakmem_and_other_popcounts.html
@@ -72,7 +61,7 @@ const uint64_t m32 = UINT64_C(0x00000000ffffffff); // binary: 32 zeros, 32 ones
 const uint64_t hff = UINT64_C(0xffffffffffffffff); // binary: all ones
 const uint64_t h01 = UINT64_C(0x0101010101010101); // the sum of 256 to the power of 0,1,2,3...
 
-unsigned *buf;
+uint64_t *buf;
 unsigned char *lut;
 
 void init_lut(void)
@@ -95,32 +84,17 @@ unsigned long get_usecs(void)
   return tv.tv_sec*1000000+tv.tv_usec;
 }
 
-static inline int popcount_fbsd1(unsigned *buf, int n)
-{
-  int cnt=0;
-  do {
-    unsigned m = *buf++;
-    m = (m & 0x55555555) + ((m & 0xaaaaaaaa) >> 1);
-    m = (m & 0x33333333) + ((m & 0xcccccccc) >> 2);
-    m = (m & 0x0f0f0f0f) + ((m & 0xf0f0f0f0) >> 4);
-    m = (m & 0x00ff00ff) + ((m & 0xff00ff00) >> 8);
-    m = (m & 0x0000ffff) + ((m & 0xffff0000) >> 16);
-    cnt += m;
-  } while(--n);
-  return cnt;
-}
-
 #include <smmintrin.h>
 
-static inline int popcount_intrinsic(unsigned *buf, int n)
-{
-  int cnt=0;
-  do {
-    unsigned v = *buf++;
-    cnt += _mm_popcnt_u32(v);
-  } while(--n);
-  return cnt;
-}
+// static inline int popcount_intrinsic(unsigned *buf, int n)
+// {
+  // int cnt=0;
+  // do {
+    // unsigned v = *buf++;
+    // cnt += _mm_popcnt_u32(v);
+  // } while(--n);
+  // return cnt;
+// }
 
 static inline int popcount_fbsd2(unsigned *buf, int n)
 {
@@ -216,11 +190,11 @@ static inline int popcount_wikipedia_3(uint64_t *buf, int n) {
 static inline int popcount_gcc(unsigned *buf, int n) {
   int cnt = 0;
   int i;
-  // for (i = 0; i < n - n % 4; i += 4) {
-    // cnt += (__builtin_popcount(buf[i+0]) + __builtin_popcount(buf[i+1])) +
-           // (__builtin_popcount(buf[i+2]) + __builtin_popcount(buf[i+3]));
-  // }
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n - n % 4; i += 4) {
+    cnt += (__builtin_popcount(buf[i+0]) + __builtin_popcount(buf[i+1])) +
+           (__builtin_popcount(buf[i+2]) + __builtin_popcount(buf[i+3]));
+  }
+  for (; i < n; i++) {
     cnt += __builtin_popcount(buf[i]);
   }
   return cnt;
@@ -229,14 +203,159 @@ static inline int popcount_gcc(unsigned *buf, int n) {
 static inline int popcountll_gcc(uint64_t *buf, int n) {
   int cnt = 0;
   int i;
-  // for (i = 0; i < n - n % 4; i += 4) {
-    // cnt += (__builtin_popcountll(buf[i+0]) + __builtin_popcountll(buf[i+1])) +
-           // (__builtin_popcountll(buf[i+2]) + __builtin_popcountll(buf[i+3]));
-  // }
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n - n % 4; i += 4) {
+    cnt += (__builtin_popcountll(buf[i+0]) + __builtin_popcountll(buf[i+1])) +
+           (__builtin_popcountll(buf[i+2]) + __builtin_popcountll(buf[i+3]));
+  }
+  for (; i < n; i++) {
     cnt += __builtin_popcountll(buf[i]);
   }
   return cnt;
+}
+
+
+
+static inline int ctz_llel(uint64_t *buf, int n)
+{
+    int cnt = 0;
+    uint64_t v;
+    
+    do {
+        v = *buf;
+        cnt += 64;
+        v &= -v;
+        if (v) cnt--;
+        if (v & m32) cnt -= 32;
+        if (v & m16) cnt -= 16;
+        if (v & m8) cnt -= 8;
+        if (v & m4) cnt -= 4;
+        if (v & m2) cnt -= 2;
+        if (v & m1) cnt -= 1;
+        buf++;
+    } while(--n);
+
+    return cnt;
+// unsigned int v;      // 32-bit word input to count zero bits on right
+// unsigned int c = 32; // c will be the number of zero bits on the right
+// v &= -signed(v);
+// if (v) c--;
+// if (v & 0x0000FFFF) c -= 16;
+// if (v & 0x00FF00FF) c -= 8;
+// if (v & 0x0F0F0F0F) c -= 4;
+// if (v & 0x33333333) c -= 2;
+// if (v & 0x55555555) c -= 1;
+}
+
+static inline int ctz_wikipedia(uint64_t *buf, int n)
+{
+    int cnt = 0;
+    uint64_t v;
+
+    do {
+        v = *buf;
+        if (!v) {
+            cnt += 64;
+            continue;
+        }
+        if (!(v & m32)) {
+            cnt += 32;
+            v >>= 32;
+        }
+        if (!(v & UINT64_C(0x0000ffff))) {
+            cnt += 16;
+            v >>= 16;
+        }
+        if (!(v & UINT64_C(0x00ff))) {
+            cnt += 8;
+            v >>= 8;
+        }
+        if (!(v & UINT64_C(0x0f))) {
+            cnt += 4;
+            v >>= 4;
+        }
+        if (!(v & UINT64_C(0x03))) {
+            cnt += 2;
+            v >>= 2;
+        }
+        if (!(v & UINT64_C(0x01))) {
+            cnt += 1;
+        }
+        buf++;
+    } while(--n);
+        
+    return cnt;
+}
+
+
+
+static int gcc_builtin_bsf(uint64_t *buf, int n)
+{
+    int cnt = 0;
+    uint64_t v;
+    do {
+        v = *buf;
+        if(v) {
+            cnt += __builtin_ctzl(v);
+        } else {
+            cnt += 64;
+        }
+        buf++;
+    } while(--n);
+    return cnt;
+}
+
+static inline int noop(uint64_t *buf, int n)
+{
+    int cnt = 0;
+    uint64_t v;
+    do {
+        v = *buf;
+        cnt += v;
+        buf++;
+    } while(--n);
+    return cnt;
+}
+
+static inline int naiveer_bsf(uint64_t *buf, int n)
+{
+    uint8_t i;
+    int cnt = 0;
+    uint64_t v;
+    do {
+        v = *buf;
+        if(v) {
+            for(i=0; i<64; ++i) {
+                if(v & (1<<i)) {
+                    cnt += i;
+                    break;
+                }
+            }
+        } else {
+            cnt += 64;
+        }
+        buf++;
+    } while(--n);
+    return cnt;
+}
+
+
+static inline int naive_bsf(uint64_t *buf, int n)
+{
+    int cnt = 0;
+    uint64_t v;
+    do {
+        v = *buf;
+        if(v) {
+            v = (v ^ (v - 1)) >> 1;
+            for (; v; cnt++) {
+                v >>= 1;
+            }
+        } else {
+            cnt += 64;
+        }
+        buf++;
+    } while(--n);
+    return cnt;
 }
 
 
@@ -914,61 +1033,19 @@ void benchmark(int (*popcount)(T*, int), const std::string& label) {
 int main()
 {
   int size = BUFSIZE / sizeof(unsigned);
-  buf = new unsigned[size];
+  buf = new uint64_t[size];
+  srand(time(NULL));
   for(int i = 0; i < size; i++) {
-    buf[i] = rand();
-    // buf[i] = (1<<5);
+    // buf[i] = rand();
+    buf[i] = (1ULL);
   }
-
-  // initialize look up table for popcount_lut*
-  init_lut();
-
-  benchmark<unsigned>(popcount_7words,      "Bitslice(7) #");
-  benchmark<unsigned>(popcount_24words,     "Bitslice(24) #");
-  benchmark<unsigned>(popcount_lauradoux,   "Lauradoux #");
-
-  benchmark<unsigned>(popcount_intrinsic,   "intrinsic");
-
-#if defined(__GNUC__) && defined(__SSE2__)
-  benchmark<unsigned>(popcount_sse2_8bit,   "SSE2 8-bit #");
-  benchmark<unsigned>(popcount_sse2_16bit,  "SSE2 16-bit #");
-  benchmark<unsigned>(popcount_sse2_32bit,  "SSE2 32-bit #");
-#else
-  std::cout << "Skipping SSE2 timings; not compiled for that architecture" << std::endl;
-#endif
-
-#if defined(__GNUC__) && defined(__SSSE3__)
-  benchmark<unsigned>(popcount_ssse3,       "SSSE3 #");
-#else
-  // try compiling with -mssse3
-  std::cout << "Skipping SSSE3 timing; not compiled for that architecture." << std::endl;
-#endif
-
-  benchmark<unsigned>(popcount_lut16,       "16-bit LUT");
-  benchmark<unsigned>(popcount_lut8,        "8-bit LUT");
-
-#if defined(__GNUC__)
-  benchmark<unsigned>(popcount_gcc,         "gcc popcount");
-  benchmark<uint64_t>(popcountll_gcc,       "gcc popcountll");
-#else
-  std::cout << "Skipping builtin popcount timings; not compiled with GCC." << std::endl;
-#endif
-
-
-  benchmark<unsigned>(popcount_fbsd1,       "FreeBSD version 1");
-  benchmark<unsigned>(popcount_fbsd2,       "FreeBSD version 2");
-  benchmark<uint64_t>(popcount_wikipedia_2, "Wikipedia #2");
-  benchmark<uint64_t>(popcount_wikipedia_3, "Wikipedia #3");
-  benchmark<unsigned>(popcount_hakmem_169,  "HAKMEM 169/X11");
-  benchmark<unsigned>(popcount_naive,       "naive");
-  benchmark<unsigned>(popcount_wegner,      "Wegner/Kernigan");
-  benchmark<unsigned>(popcount_anderson,    "Anderson");
-#if defined(__GNUC__)
-  benchmark<char>    (popcount_roladc8,     "8x shift and add");
-  benchmark<unsigned>(popcount_roladc32,    "32x shift and add");
-#else
-  std::cout << "Skipping slow gcc/assembly timings; not compiled with GCC." << std::endl;
-#endif
+  
+  benchmark<uint64_t>(noop, "noop");
+  benchmark<uint64_t>(naive_bsf, "naive_bsf");
+  benchmark<uint64_t>(naiveer_bsf, "naiveer_bsf");
+  benchmark<uint64_t>(ctz_wikipedia, "ctz_wikipedia");
+  benchmark<uint64_t>(gcc_builtin_bsf, "gcc_builtin_bsf");
+  benchmark<uint64_t>(ctz_llel, "ctz_llel");
 
   return 0;
 }
