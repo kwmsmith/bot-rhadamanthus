@@ -1,5 +1,6 @@
 CXX = g++
 # CXX = /opt/local/bin/g++-mp-4.7
+# CXX = clang++
 BOOST_INCL = $(HOME)/Devel/boost_1_52_0
 INCLUDE = -I$(BOOST_INCL) -I$(SPARSEHASH_INCL)
 CXXFLAGS = -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
@@ -10,6 +11,7 @@ SPARSEHASH_INCL = $(HOME)/Devel/sparsehash/include
 
 OBJS = board.o step.o gamestate.o arimaa_archive.o transposition.o move.o evaluate.o
 TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp test_move.cpp test_evaluate.cpp
+TEST_OBJS = test_board.o test_step.o test_gamestate.o test_archive.o test_transposition.o test_move.o test_evaluate.o
 
 GTEST_DIR = /Users/ksmith/Devel/googletest
 GTEST_INC = $(GTEST_DIR)/include
@@ -36,8 +38,11 @@ test_gamestate.x: test_gamestate.cpp gamestate.o libgtest.a
 	
 test_transposition.x: test_transposition.cpp transposition.o libgtest.a
 	$(CXX) -I${GTEST_INC} $^ -o $@
+	
+%.o : %.cpp
+	$(CXX) -I$(GTEST_INC) $(CXXFLAGS) -c $^ 
 
-test_all.x : $(OBJS) $(TEST_SRC) libgtest.a board.h step.h
+test_all.x : $(OBJS) $(TEST_OBJS) libgtest.a
 	$(CXX) $(INCLUDE) -I$(GTEST_INC)  $^ -o $@
 
 test: test_all.x
