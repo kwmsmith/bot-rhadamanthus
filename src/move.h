@@ -23,25 +23,29 @@ class Move
 {
     public:
 
-        Move(const GameState& gs) {
+        Move(const GameState& gs) : total_steps_taken_(0) {
             gs.copy_to(&gs_); 
         }
         
         Move(const Move& m) {
-            steps_ = m.steps_;
+            for(int i=0; i<MAXSTEPS; ++i)
+                steps_[i] = m.steps_[i];
             m.gs_.copy_to(&gs_);
+            total_steps_taken_ = m.total_steps_taken_;
         }
         
         Move& add_step(const Step& step) {
             assert(step.is_motion());
             assert(get_stepsleft() >= 1);
-            steps_.push_back(step);
+            steps_[total_steps_taken_] = step;
+            total_steps_taken_++;
             gs_.take_step(step);
             Step capture_step;
             const bool is_capture = detect_capture_from_motion(gs_, step, &capture_step);
             if (is_capture) {
                 assert(capture_step.is_capture());
-                steps_.push_back(capture_step);
+                steps_[total_steps_taken_] = capture_step;
+                total_steps_taken_++;
                 gs_.take_step(capture_step);
             }
             return *this;
@@ -53,8 +57,8 @@ class Move
         
         unsigned int get_stepsleft() const {
             signed char motion_left = 4;
-            for(step_it it=steps_.begin(); it != steps_.end(); ++it)
-                motion_left -= it->cost();
+            for(int i=0; i < total_steps_taken_; ++i)
+                motion_left -= steps_[i].cost();
             assert(motion_left >= 0);
             return motion_left;
         }
@@ -66,9 +70,12 @@ class Move
         }
 
     private:
+        
+        const static uint8_t MAXSTEPS = 8;
 
         GameState gs_;
-        std::vector<Step> steps_;
+        Step steps_[MAXSTEPS];
+        uint8_t total_steps_taken_;
 };
 
 typedef boost::shared_ptr<Move> MovePtr;

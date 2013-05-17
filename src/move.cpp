@@ -87,8 +87,8 @@ void generate_moves(const GameState& gs, const Color for_color, std::vector<Move
 const std::string Move::to_std_string() const
 {
     std::string s;
-    for (step_it it=steps_.begin(); it != steps_.end(); ++it) {
-        s += it->to_std_string() + " ";
+    for (int i=0; i < total_steps_taken_; ++i) {
+        s += steps_[i].to_std_string() + " ";
     }
     return s;
 }
