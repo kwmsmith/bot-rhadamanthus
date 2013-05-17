@@ -244,6 +244,10 @@ class Board {
             _board = 0;
         }
         
+        bool any() const {
+            return _board;
+        }
+        
         bool is_empty() const {
             return _board == 0;
         }

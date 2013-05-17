@@ -77,15 +77,16 @@ class GameState {
         }
         
         void color_and_piece_at(const uint8_t idx, int *c, int *p) const {
-            *c = -1; *p = -1; // guilty before proven innocent...
-            for(unsigned int i=0; i < 2; ++i)
-                *c += _color[i].contains(idx) * (i+1);
+            uint8_t _c = -1, _p = -1; // guilty before proven innocent...
+            _c = _color[W].contains(idx) ? W : B;
             
+            const Board bitidx = Board().add(idx);
             for(unsigned int i=0; i < nPieces; ++i)
-                *p += _pieces[i].contains(idx) * (i+1);
+                _p += (_pieces[i] & bitidx).any() * (i+1);
             
-            assert(*c >= 0 && *c <= 1);
-            assert(*p >= 0 && *p < nPieces);
+            assert(_c >= 0 && _c <= 1);
+            assert(_p >= 0 && _p < nPieces);
+            *c = _c; *p = _p;
         }
         
         const uint64_t get_hash() const { return _zhash.get_hash(); }
