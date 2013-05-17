@@ -41,11 +41,7 @@ class Move
             total_steps_taken_++;
             gs_.take_step(step);
             Step capture_step;
-            const bool is_capture = detect_capture_from_motion(gs_, step, &capture_step);
-            if (is_capture) {
-                assert(capture_step.is_capture());
-                steps_[total_steps_taken_] = capture_step;
-                total_steps_taken_++;
+            if (detect_capture_from_motion(gs_, step, &capture_step)) {
                 gs_.take_step(capture_step);
             }
             return *this;
@@ -56,11 +52,7 @@ class Move
         }
         
         unsigned int get_stepsleft() const {
-            signed char motion_left = 4;
-            for(int i=0; i < total_steps_taken_; ++i)
-                motion_left -= steps_[i].cost();
-            assert(motion_left >= 0);
-            return motion_left;
+            return 4 - total_steps_taken_;
         }
         
         const std::string to_std_string() const;
@@ -71,7 +63,7 @@ class Move
 
     private:
         
-        const static uint8_t MAXSTEPS = 8;
+        const static uint8_t MAXSTEPS = 4;
 
         GameState gs_;
         Step steps_[MAXSTEPS];
