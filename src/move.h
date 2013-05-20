@@ -1,8 +1,6 @@
 #ifndef _MOVE_H_
 #define _MOVE_H_
 
-#include <boost/shared_ptr.hpp>
-
 #include "step.h"
 #include "gamestate.h"
 
@@ -23,16 +21,7 @@ class Move
 {
     public:
 
-        Move(const GameState& gs) : total_steps_taken_(0) {
-            gs.copy_to(&gs_); 
-        }
-        
-        Move(const Move& m) {
-            for(int i=0; i<MAXSTEPS; ++i)
-                steps_[i] = m.steps_[i];
-            m.gs_.copy_to(&gs_);
-            total_steps_taken_ = m.total_steps_taken_;
-        }
+        Move(const GameState& gs) : gs_(gs), total_steps_taken_(0) {}
         
         Move& add_step(const Step& step) {
             assert(step.is_motion());
@@ -70,10 +59,7 @@ class Move
         uint8_t total_steps_taken_;
 };
 
-typedef boost::shared_ptr<Move> MovePtr;
-typedef std::vector<MovePtr>::const_iterator vec_move_it;
-
-void generate_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves);
-void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<MovePtr> *moves);
+void generate_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves);
+void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves);
 
 #endif

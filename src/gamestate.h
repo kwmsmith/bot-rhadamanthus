@@ -69,17 +69,15 @@ class GameState {
         }
         
         void copy_to(GameState *to) const {
-            to->_zhash = _zhash;
-            to->_color[W] = _color[W];
-            to->_color[B] = _color[B];
-            for(int i=R; i<nPieces; ++i)
-                to->_pieces[i] = _pieces[i];
+            *to = *this;
         }
         
         void color_and_piece_at(const uint8_t idx, int *c, int *p) const {
-            uint8_t _c = -1, _p = -1; // guilty before proven innocent...
-            _c = _color[W].contains(idx) ? W : B;
+            int8_t _c = -1, _p = -1; // guilty before proven innocent...
             
+            _c += _color[W].contains(idx) * (W+1);
+            _c += _color[B].contains(idx) * (B+1);
+
             const Board bitidx = Board().add(idx);
             for(unsigned int i=0; i < nPieces; ++i)
                 _p += (_pieces[i] & bitidx).any() * (i+1);
@@ -92,9 +90,6 @@ class GameState {
         const uint64_t get_hash() const { return _zhash.get_hash(); }
 
     private:
-
-        GameState(const GameState& gs);  // noncopyable
-        GameState& operator=(const GameState& gs);  // noncopyable
 
         void add_piece_at_fast(const int c, const int piece, const uint8_t idx) {
             assert (c == W || c == B);

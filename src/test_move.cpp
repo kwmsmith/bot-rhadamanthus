@@ -3,9 +3,8 @@
 
 #include <iostream>
 
-typedef std::vector<MovePtr>::const_iterator move_it;
 TEST(Move, generate_unique_moves) {
-    std::vector<MovePtr> moves;
+    std::vector<Move> moves;
     GameState gs;
     std::string ss;
     
@@ -44,7 +43,7 @@ TEST(Move, generate_unique_moves) {
 
 
 TEST(Move, generate_moves) {
-    std::vector<MovePtr> moves;
+    std::vector<Move> moves;
     GameState gs;
     std::string ss;
 
