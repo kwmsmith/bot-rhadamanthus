@@ -37,18 +37,39 @@ TEST(GameState, Instantiation) {
     GameState gb;
 }
 
-TEST(GameState, init_from_string) {
+TEST(GameState, gamestate_from_input) {
     GameState gs;
+    Color cc;
     std::string ss(
-            "RRRRRRRR"
-            "CCDDHHME"
-            "..x..x.."
-            "........"
-            "........"
-            "..x..x.."
-            "ccddhhme"
-            "rrrrrrrr");
-    EXPECT_TRUE(gamestate_from_string(ss, &gs));
+        "10w \n"
+        " +-----------------+\n"
+        "8| r r r     r r   |\n"
+        "7| r   m c c h r r |\n"
+        "6|   d         d   |\n"
+        "5|         E       |\n"
+        "4|                 |\n"
+        "3|   H     e   D   |\n"
+        "2| R   C     C   R |\n"
+        "1| R R R D M R R R |\n"
+        " +-----------------+\n"
+        "   a b c d e f g h\n");
+    EXPECT_TRUE(gamestate_from_input(ss, &gs, &cc));
+    EXPECT_EQ(cc, W);
+    
+    ss = "w\n"
+            " +-----------------+\n"
+            "8| r r r r r r r r |\n" 
+            "8| c c d d h h m e |\n" 
+            "8| . . x . . x . . |\n" 
+            "8| . . . . . . . . |\n" 
+            "8| . . . . . . . . |\n" 
+            "8| . . x . . x . . |\n" 
+            "8| C C D D H H M E |\n" 
+            "8| R R R R R R R R |\n" 
+            " +-----------------+\n"
+            "   a b c d e f g h\n";
+    gs.clear();
+    EXPECT_TRUE(gamestate_from_input(ss, &gs, &cc));
 }
 
 TEST(GameState, piece_enum) {

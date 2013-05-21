@@ -58,9 +58,9 @@ class GameState {
 
         bool remove_piece_at(const int c, const int p, const uint8_t idx);
 
-        std::string to_oneline_string() const;
+        std::string to_oneline_string(const char empty='.') const;
 
-        std::string to_std_string() const;
+        std::string to_std_string(const char empty='.') const;
         
         void apply_mask(const Board& mask) {
             _color[W] &= mask; _color[B] &= mask;
@@ -121,11 +121,10 @@ bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Ste
 
 Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int direction);
 
-/* Expects a 64-character string, beginning with a1, ending with h8.  Piece
- * characters are rcdhme / RCDHME.  Empty characters are '.', ' ', '~' and are
- * ignored.  Trap characters ('x' or 'X') are ignored.
+/* Piece characters are rcdhme / RCDHME.  Empty characters are '.', and ' ' and
+ * are ignored.  Trap characters ('x' or 'X') are ignored.
  */
-bool gamestate_from_string(const std::string& str, GameState *gs);
+bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move);
 
 void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
 void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards);

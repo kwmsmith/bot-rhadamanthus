@@ -1,35 +1,74 @@
 #include "gamestate.h"
 #include <vector>
+#include <cstdio>
 
-bool gamestate_from_string(const std::string& str, GameState *gs)
+#include "boost/algorithm/string.hpp"
+
+using namespace boost;
+
+bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move)
 {
-    if (str.length() != 64)
-        return false;
-    int color;
-    int piece;
-    for (unsigned int idx=0; idx < str.length(); idx++) {
-        if (str[idx] == 'x' || str[idx] == 'X' ||
-                str[idx] == ' ' || str[idx] == '.')
-            continue;
-        color = color_from_char(str[idx]);
-        piece = piece_from_char(str[idx]);
-        if (color == kInvalidPiece || piece == kInvalidPiece)
-            return false;
-        if (!gs->add_piece_at(color, piece, idx))
-            return false;
+    gs->clear(); // error sentinel.
+    std::vector<std::string> lines;
+    split(lines, ss, is_any_of("\n"), token_compress_on);
+    for (unsigned int i=0; i < lines.size(); ++i) {
+        lines[i] = trim_copy(lines[i]);
     }
-    assert(gs->get_hash());
-    // FIXME: Validation!!!
+    // get color to move.
+    std::vector<std::string> tokens;
+    split(tokens, lines[0], is_any_of(" "), token_compress_on);
+    to_lower(tokens[0]);
+    const char color = tokens[0][tokens[0].size() - 1];
+    if (color == 'w' || color == 'g') {
+        *to_move = W;
+    } else if (color == 'b' || color == 's') {
+        *to_move = B;
+    } else {
+        return false;
+    }
+    
+    // parse game position
+    
+    const int start_line = 2;
+    for (unsigned int line_idx=start_line; line_idx < start_line+8; ++line_idx) {
+        tokens.clear();
+        // After splitting on '|', tokens[0] is the line number.  tokens[1] is
+        // the board contents.
+        split(tokens, lines[line_idx], is_any_of("|"), token_compress_on);
+        
+        // row_idx: labels the row we're in such that row_idx == 0 is gold's
+        // territory; row_idx == 7 is silver's.
+        uint8_t row_idx = 7 - (line_idx - start_line);
+        int piece_color;
+        int this_piece;
+        uint8_t idx;
+        for (uint8_t col_idx=0; col_idx < tokens[1].size() - 1; col_idx += 2) {
+            const char piece_or_empty = tokens[1][col_idx+1];
+            if (piece_or_empty == ' ' || piece_or_empty == 'x' ||
+                piece_or_empty == 'X' || piece_or_empty == '.') {
+                continue;
+            }
+            this_piece = piece_from_char(piece_or_empty);
+            if (this_piece == kInvalidPiece)
+                return false;
+            piece_color = color_from_char(piece_or_empty);
+            idx = row_idx * 8 + col_idx / 2;
+            gs->add_piece_at(piece_color, this_piece, idx);
+        }
+    }
     return true;
 }
 
-std::string GameState::to_std_string() const
+std::string GameState::to_std_string(const char empty) const
 {
-    const std::string &oneline = to_oneline_string();
-    std::string s("+-----------------+\n");
+    const std::string &oneline = to_oneline_string(empty);
+    std::string s(" +-----------------+\n");
     int rev_row = 0;
+    char buf[10];
     for(int row=0; row < 8; row++) {
         rev_row = 7 - row;
+        sprintf(buf, "%d", rev_row + 1);
+        s += buf;
         s += '|';
         s += ' ';
         for(int col=0; col < 8; col++) {
@@ -38,13 +77,14 @@ std::string GameState::to_std_string() const
         }
         s += "|\n";
     }
-    s += "+-----------------+\n";
+    s += " +-----------------+\n";
+    s += "   a b c d e f g h\n";
     return s;
 }
 
-std::string GameState::to_oneline_string() const 
+std::string GameState::to_oneline_string(const char empty) const 
 {
-    std::string s("................................................................");
+    std::string s(64, empty);
 
     // put x's on the trap squares
     s[18] = 'x'; s[21] = 'x';
