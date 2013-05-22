@@ -319,14 +319,36 @@ uint8_t generate_captures(const GameState& gs, std::vector<Step> *captures)
     return ncaptures;
 }
 
+bool possible_capture_from_motion(const GameState &gs, const Step& step_taken)
+{
+    const unsigned char finish = step_taken.get_finish();
+    const bool moved_onto_capture = Board::is_capture_idx(finish);
+    if (moved_onto_capture)
+        return true;
+    const bool started_adj_to_capture = Board::is_adj_capture_squares(step_taken.get_position());
+    if (started_adj_to_capture)
+        return true;
+    return false;
+}
+
+void capture_from_motion(const Step& step_taken, GameState *gs)
+{
+    const unsigned char color = step_taken.get_color();
+    const Color color_enum = (color == W ? W : B);
+    Board capturable = 
+        gs->get_color_board_const(color) & ~adj_friendly(*gs, color_enum) & Board::capture_squares();
+    if (capturable.is_empty())
+        return;
+    uint8_t capture_idx = capturable.idx_and_reset();
+    assert(capturable.is_empty());
+    int c, p;
+    gs->color_and_piece_at(capture_idx, &c, &p);
+    gs->remove_piece_at(c, p, capture_idx);
+}
+
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture)
 {
-    assert(step_taken.is_motion());
-    // Common case: move doesn't even land on a capture square.
-    const unsigned char finish = step_taken.get_finish();
-    const bool started_adj_to_capture = Board::is_adj_capture_squares(step_taken.get_position());
-    const bool moved_onto_capture = Board::is_capture_idx(finish);
-    if (!moved_onto_capture && !started_adj_to_capture)
+    if (!possible_capture_from_motion(gs, step_taken))
         return false;
     
     const unsigned char color = step_taken.get_color();
@@ -338,7 +360,7 @@ bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Ste
             // we have a capture!
             int c, p;
             gs.color_and_piece_at(capture_idxs[i], &c, &p);
-            assert(c == color);
+            // assert(c == color);
             *capture = Step(color, p, capture_idxs[i], CAPTURE);
             return true;
         }

@@ -57,7 +57,7 @@ class GameState {
         }
 
         bool remove_piece_at(const int c, const int p, const uint8_t idx);
-
+        
         std::string to_oneline_string(const char empty='.') const;
 
         std::string to_std_string(const char empty='.') const;
@@ -118,6 +118,8 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<Step
 unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures);
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);
+bool possible_capture_from_motion(const GameState &gs, const Step& step_taken);
+void capture_from_motion(const Step& step_taken, GameState *gs);
 
 Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int direction);
 

@@ -11,6 +11,7 @@ void generate_unique_moves(const GameState& gs, const Color for_color, std::vect
     std::vector<Step> vec_step;
     hash_set seen(20000);
     seen.set_empty_key(ULLONG_MAX);
+    moves->reserve(1000);
     size_t idx = moves->size();
     
     moves->push_back(Move(gs));

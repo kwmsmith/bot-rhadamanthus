@@ -30,8 +30,8 @@ class Move
             total_steps_taken_++;
             gs_.take_step(step);
             Step capture_step;
-            if (detect_capture_from_motion(gs_, step, &capture_step)) {
-                gs_.take_step(capture_step);
+            if (possible_capture_from_motion(gs_, step)) {
+                capture_from_motion(step, &gs_);
             }
             return *this;
         }

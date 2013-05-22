@@ -172,9 +172,8 @@ class Board {
 
         static Board capture_squares()
         {
-            Board b;
-            b.add(18, 21, 42, 45);
-            return b;
+            const static Board _captures(0x240000240000ULL);
+            return _captures;
         }
 
         static Board rank_n(const uint8_t n)
