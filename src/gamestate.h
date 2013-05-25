@@ -5,7 +5,8 @@
 #include "step.h"
 #include "transposition.h"
 
-class GameState {
+class GameState 
+{
 
     public:
 
