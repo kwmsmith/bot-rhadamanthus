@@ -128,6 +128,7 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
  * are ignored.  Trap characters ('x' or 'X') are ignored.
  */
 bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move);
+bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move);
 
 void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
 void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards);

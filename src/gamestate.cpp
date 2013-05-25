@@ -6,6 +6,53 @@
 
 using namespace boost;
 
+uint8_t flip_row(uint8_t psn)
+{
+    uint8_t row = psn / 8;
+    uint8_t col = psn % 8;
+    uint8_t flip_row = 7 - row;
+    return flip_row * 8 + col;
+}
+
+
+bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move)
+{
+    int idx = 0;
+    char ch;
+    do {
+        ch = ss[idx++];
+    } while(ch == ' ');
+
+    if (ch == 'w' || ch == 'g') {
+        *to_move = W;
+    } else if (ch == 'b' || ch == 's') {
+        *to_move = B;
+    } else {
+        return false;
+    }
+    
+    do {
+        ch = ss[idx++];
+    } while(ch == ' ');
+
+    if (ch != '[') {
+        return false;
+    }
+    
+    for(int i=idx; i<idx+64; ++i) {
+       int piece_color, this_piece;
+       char ch = ss[i];
+       if (ch == ' ' || ch == 'x' || ch == 'X' || ch == '.')
+           continue;
+       this_piece = piece_from_char(ch);
+       if (this_piece == kInvalidPiece)
+           return false;
+       piece_color = color_from_char(ch);
+       gs->add_piece_at(piece_color, this_piece, flip_row(idx));
+    }
+    return true;
+}
+
 bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move)
 {
     gs->clear(); // error sentinel.
@@ -85,28 +132,24 @@ std::string GameState::to_std_string(const char empty) const
 std::string GameState::to_oneline_string(const char empty) const 
 {
     std::string s(64, empty);
-
+    
     // put x's on the trap squares
-    s[18] = 'x'; s[21] = 'x';
-    s[42] = 'x'; s[45] = 'x';
+    s[flip_row(18)] = 'x'; s[flip_row(21)] = 'x';
+    s[flip_row(42)] = 'x'; s[flip_row(45)] = 'x';
 
-    const char white_char[] = { 'R', 'C', 'D', 'H', 'M', 'E'};
-    const char black_char[] = { 'r', 'c', 'd', 'h', 'm', 'e'};
-    for(int p=R; p < nPieces; p++) {
-        Board b = _color[W] & _pieces[p];
-        while(!b.is_empty()) {
-            uint8_t psn = b.idx_and_reset();
-            s[psn] = white_char[p];
+    const int colors[] = {W, B};
+    const char piece_char[] = { 'R', 'C', 'D', 'H', 'M', 'E'};
+    const int lower_offset = 'a' - 'A';
+    for(int i=0; i<2; i++) {
+        for(int p=R; p < nPieces; p++) {
+            Board b = _color[colors[i]] & _pieces[p];
+            while(!b.is_empty()) {
+                uint8_t psn = b.idx_and_reset();
+                s[flip_row(psn)] = i==W ? piece_char[p] : (piece_char[p]+lower_offset);
+            }
         }
     }
-    for(int p=R; p < nPieces; p++) {
-        Board b = _color[B] & _pieces[p];
-        while(!b.is_empty()) {
-            uint8_t psn = b.idx_and_reset();
-            s[psn] = black_char[p];
-        }
-    }
-    return s;
+    return '[' + s + ']';
 }
 
 bool GameState::take_step(const Step &s)
