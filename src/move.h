@@ -62,4 +62,6 @@ class Move
 void generate_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves);
 void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves);
 
+uint64_t move_counter(const GameState& gs, const Color for_color);
+
 #endif

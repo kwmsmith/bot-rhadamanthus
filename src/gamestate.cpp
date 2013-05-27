@@ -14,6 +14,23 @@ uint8_t flip_row(uint8_t psn)
     return flip_row * 8 + col;
 }
 
+void take_step_and_capture(const Step& step, GameState *gs)
+{
+    assert(step.is_motion());
+    gs->take_step(step);
+    Step capture_step;
+    if (possible_capture_from_motion(*gs, step)) {
+        capture_from_motion(step, gs);
+    }
+}
+
+void apply_delta_and_capture(const Delta& dd, GameState *gs)
+{
+    take_step_and_capture(dd.first(), gs);
+    if (dd.get_nsteps() == 2)
+        take_step_and_capture(dd.second(), gs);
+}
+
 
 bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move)
 {

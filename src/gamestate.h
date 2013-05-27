@@ -118,6 +118,8 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
 void generate_steps(const GameState& gs, const Color for_color, std::vector<Step> *steps);
 unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures);
 
+void take_step_and_capture(const Step& step, GameState *gs);
+
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);
 bool possible_capture_from_motion(const GameState &gs, const Step& step_taken);
 void capture_from_motion(const Step& step_taken, GameState *gs);

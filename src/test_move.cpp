@@ -47,6 +47,56 @@ TEST(Move, generate_unique_moves) {
     }
 }
 
+TEST(Move, move_counter) {
+    unsigned int counts[] = {2, 1, 15420};
+    
+    std::string positions[] = {
+        "10w\n"
+            " +-----------------+\n"
+            "8| . . . . . . . . |\n"
+            "7| . . . . . . . . |\n"
+            "6| . . x . . x . . |\n"
+            "5| . r . r . . . . |\n"
+            "4| . r R r . . . . |\n"
+            "3| . . x . . x . . |\n"
+            "2| . . . . . . . . |\n"
+            "1| . . . . . . . . |\n"
+            " +-----------------+\n"
+            "   a b c d e f g h\n",
+        "10w\n"
+            " +-----------------+\n"
+            "8| . r . . . . . . |\n"
+            "7| r . r . . . . . |\n"
+            "6| r R R r . x . . |\n"
+            "5| . . . . . . . . |\n"
+            "4| . . . . . . . . |\n"
+            "3| . . x . . x . . |\n"
+            "2| . . . . . . . . |\n"
+            "1| . . . . . . . . |\n"
+            " +-----------------+\n"
+            "   a b c d e f g h\n",
+        "10w\n"
+            " +-----------------+\n"
+            "8| . r c . . c . . |\n"
+            "7| r . r . r r . . |\n"
+            "6| . . x . H x d . |\n"
+            "5| . . . . . M H r |\n"
+            "4| D d R r . . . h |\n"
+            "3| . . x . e x . r |\n"
+            "2| R . C . . . E R |\n"
+            "1| . . R R R R m . |\n"
+            " +-----------------+\n"
+            "   a b c d e f g h\n"
+    };
+    GameState gs;
+    Color cc;
+    for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
+        gs.clear();
+        EXPECT_TRUE(gamestate_from_input(positions[i], &gs, &cc));
+        EXPECT_EQ(move_counter(gs, cc), counts[i]);
+    }
+}
+
 
 TEST(Move, generate_moves) {
 
