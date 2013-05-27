@@ -113,12 +113,12 @@ class GameState
         ZobristHash _zhash;
 };
 
-void generate_pushes(const GameState& gs, const Color for_color, std::vector<Step> *pushes);
-void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step> *pulls);
-void generate_steps(const GameState& gs, const Color for_color, std::vector<Step> *steps);
-unsigned char generate_captures(const GameState& gs, std::vector<Step> *captures);
+void generate_pushes(const GameState& gs, const Color for_color, std::vector<Delta> *pushes);
+void generate_pulls(const GameState& gs, const Color for_color, std::vector<Delta> *pulls);
+void generate_steps(const GameState& gs, const Color for_color, std::vector<Delta> *steps);
+// unsigned char generate_captures(const GameState& gs, std::vector<Delta> *captures);
 
-void take_step_and_capture(const Step& step, GameState *gs);
+void apply_delta_and_capture(const Delta& dd, GameState *gs);
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);
 bool possible_capture_from_motion(const GameState &gs, const Step& step_taken);

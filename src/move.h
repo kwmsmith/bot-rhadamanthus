@@ -15,7 +15,7 @@ struct GameStateHash
     }
 };
 
-typedef std::vector<Step>::const_iterator step_it;
+typedef std::vector<Delta>::const_iterator delta_it;
 
 class Move
 {
@@ -23,17 +23,10 @@ class Move
 
         Move(const GameState& gs) : gs_(gs), total_steps_taken_(0) {}
         
-        Move& add_step(const Step& step) {
-            assert(step.is_motion());
-            assert(get_stepsleft() >= 1);
-            steps_[total_steps_taken_] = step;
-            total_steps_taken_++;
-            gs_.take_step(step);
-            Step capture_step;
-            if (possible_capture_from_motion(gs_, step)) {
-                capture_from_motion(step, &gs_);
-            }
-            return *this;
+        void add_delta(const Delta& delta) {
+            add_step(delta.first());
+            if (delta.get_nsteps() == 2)
+                add_step(delta.second());
         }
         
         const GameState& get_gamestate() const {
@@ -51,6 +44,19 @@ class Move
         }
 
     private:
+        
+        Move& add_step(const Step& step) {
+            assert(step.is_motion());
+            assert(get_stepsleft() >= 1);
+            steps_[total_steps_taken_] = step;
+            total_steps_taken_++;
+            gs_.take_step(step);
+            Step capture_step;
+            if (possible_capture_from_motion(gs_, step)) {
+                capture_from_motion(step, &gs_);
+            }
+            return *this;
+        }
         
         const static uint8_t MAXSTEPS = 4;
 

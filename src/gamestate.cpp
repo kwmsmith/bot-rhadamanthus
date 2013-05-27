@@ -14,7 +14,7 @@ uint8_t flip_row(uint8_t psn)
     return flip_row * 8 + col;
 }
 
-void take_step_and_capture(const Step& step, GameState *gs)
+static void take_step_and_capture(const Step& step, GameState *gs)
 {
     assert(step.is_motion());
     gs->take_step(step);
@@ -259,7 +259,7 @@ void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<B
     }
 }
 
-void generate_pushes(const GameState& gs, const Color for_color, std::vector<Step> *pushes)
+void generate_pushes(const GameState& gs, const Color for_color, std::vector<Delta> *pushes)
 {
     const Color& pushing_color = for_color;
     const Color& pushed_color = other_color(for_color);
@@ -299,14 +299,14 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Ste
                 uint8_t pusher_idx = pushing_pieces.idx_and_reset();
                 assert(gs.get_all_const().contains(pushed_idx));
                 assert(gs.get_all_const().contains(pusher_idx));
-                pushes->push_back(step_from_gs(gs, pushed_idx, dir_pushed));
-                pushes->push_back(step_from_gs(gs, pusher_idx, opp_dir(dir_pushed_from)));
+                pushes->push_back(Delta(step_from_gs(gs, pushed_idx, dir_pushed),
+                                        step_from_gs(gs, pusher_idx, opp_dir(dir_pushed_from))));
             }
         }
     }
 }
 
-void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step> *pulls)
+void generate_pulls(const GameState& gs, const Color for_color, std::vector<Delta> *pulls)
 {
     const Color& pulling_color = for_color;
     const Board& pulling_mobile = ~frozen_pieces(gs, for_color);
@@ -339,14 +339,14 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Step
                 uint8_t pulling_idx = pulling_pieces.idx_and_reset();
                 assert(gs.get_all_const().contains(pulled_idx));
                 assert(gs.get_all_const().contains(pulling_idx));
-                pulls->push_back(step_from_gs(gs, pulling_idx, dir_pulling_piece));
-                pulls->push_back(step_from_gs(gs, pulled_idx, opp_dir(dir_pulled_piece)));
+                pulls->push_back(Delta(step_from_gs(gs, pulling_idx, dir_pulling_piece),
+                                       step_from_gs(gs, pulled_idx, opp_dir(dir_pulled_piece))));
             }
         }
     }
 }
 
-void generate_steps(const GameState& gs, const Color for_color, std::vector<Step> *steps)
+void generate_steps(const GameState& gs, const Color for_color, std::vector<Delta> *steps)
 {
     const Board& not_frozen = ~frozen_pieces(gs, for_color);
 
@@ -359,25 +359,25 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<Step
         while(!pieces_with_step.is_empty()) {
             uint8_t mobile_idx = pieces_with_step.idx_and_reset();
             assert(gs.get_all_const().contains(mobile_idx));
-            steps->push_back(step_from_gs(gs, mobile_idx, dir_empty));
+            steps->push_back(Delta(step_from_gs(gs, mobile_idx, dir_empty)));
         }
     }
 }
 
-uint8_t generate_captures(const GameState& gs, std::vector<Step> *captures)
-{
-    uint8_t ncaptures = 0;
-    Board captured = Board::capture_squares() & 
-        (gs.get_all_const() & ~(adj_friendly(gs, B) | adj_friendly(gs, W)));
+// uint8_t generate_captures(const GameState& gs, std::vector<Step> *captures)
+// {
+    // uint8_t ncaptures = 0;
+    // Board captured = Board::capture_squares() & 
+        // (gs.get_all_const() & ~(adj_friendly(gs, B) | adj_friendly(gs, W)));
     
-    while(!captured.is_empty()) {
-        uint8_t captured_idx = captured.idx_and_reset();
-        assert(gs.get_all_const().contains(captured_idx));
-        captures->push_back(step_from_gs(gs, captured_idx, CAPTURE));
-        ncaptures++;
-    }
-    return ncaptures;
-}
+    // while(!captured.is_empty()) {
+        // uint8_t captured_idx = captured.idx_and_reset();
+        // assert(gs.get_all_const().contains(captured_idx));
+        // captures->push_back(step_from_gs(gs, captured_idx, CAPTURE));
+        // ncaptures++;
+    // }
+    // return ncaptures;
+// }
 
 bool possible_capture_from_motion(const GameState &gs, const Step& step_taken)
 {

@@ -202,7 +202,7 @@ TEST(GameState, adj_enemy_lt) {
 
 TEST(GameState, generate_pushes) {
     GameState gs;
-    std::vector<Step> pushes;
+    std::vector<Delta> pushes;
     
     gs.clear();
     pushes.clear();
@@ -211,9 +211,9 @@ TEST(GameState, generate_pushes) {
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 4);
     generate_pushes(gs, B, &pushes);
-    EXPECT_EQ(pushes.size(), 2);
-    EXPECT_EQ(pushes[0], make_step("Mf5e"));
-    EXPECT_EQ(pushes[1], make_step("ee5e"));
+    EXPECT_EQ(pushes.size(), 1);
+    EXPECT_EQ(pushes[0].first(), make_step("Mf5e"));
+    EXPECT_EQ(pushes[0].second(), make_step("ee5e"));
     
     gs.clear();
     pushes.clear();
@@ -222,9 +222,9 @@ TEST(GameState, generate_pushes) {
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 4);
     generate_pushes(gs, B, &pushes);
-    EXPECT_EQ(pushes.size(), 2);
-    EXPECT_EQ(pushes[0], make_step("Mf5n"));
-    EXPECT_EQ(pushes[1], make_step("ee5e"));
+    EXPECT_EQ(pushes.size(), 1);
+    EXPECT_EQ(pushes[0].first(), make_step("Mf5n"));
+    EXPECT_EQ(pushes[0].second(), make_step("ee5e"));
     
     gs.clear();
     pushes.clear();
@@ -233,14 +233,14 @@ TEST(GameState, generate_pushes) {
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 6);
     generate_pushes(gs, B, &pushes);
-    EXPECT_EQ(pushes.size(), 2);
-    EXPECT_EQ(pushes[0], make_step("Mf5s"));
-    EXPECT_EQ(pushes[1], make_step("ee5e"));
+    EXPECT_EQ(pushes.size(), 1);
+    EXPECT_EQ(pushes[0].first(), make_step("Mf5s"));
+    EXPECT_EQ(pushes[0].second(), make_step("ee5e"));
 }
 
 TEST(GameState, generate_pulls) {
     GameState gs;
-    std::vector<Step> pulls;
+    std::vector<Delta> pulls;
 
     gs.clear();
     pulls.clear();
@@ -249,9 +249,9 @@ TEST(GameState, generate_pulls) {
     gs.add_piece_at(B, H, 'E', 6);
     gs.add_piece_at(W, M, 'F', 5);
     generate_pulls(gs, B, &pulls);
-    EXPECT_EQ(pulls.size(), 2);
-    EXPECT_EQ(pulls[0], make_step("ee5w"));
-    EXPECT_EQ(pulls[1], make_step("Mf5w"));
+    EXPECT_EQ(pulls.size(), 1);
+    EXPECT_EQ(pulls[0].first(), make_step("ee5w"));
+    EXPECT_EQ(pulls[0].second(), make_step("Mf5w"));
     
     gs.clear();
     pulls.clear();
@@ -260,9 +260,9 @@ TEST(GameState, generate_pulls) {
     gs.add_piece_at(B, H, 'E', 6);
     gs.add_piece_at(W, M, 'F', 5);
     generate_pulls(gs, B, &pulls);
-    EXPECT_EQ(pulls.size(), 2);
-    EXPECT_EQ(pulls[0], make_step("ee5s"));
-    EXPECT_EQ(pulls[1], make_step("Mf5w"));
+    EXPECT_EQ(pulls.size(), 1);
+    EXPECT_EQ(pulls[0].first(), make_step("ee5s"));
+    EXPECT_EQ(pulls[0].second(), make_step("Mf5w"));
 
     gs.clear();
     pulls.clear();
@@ -271,46 +271,20 @@ TEST(GameState, generate_pulls) {
     gs.add_piece_at(B, H, 'E', 4);
     gs.add_piece_at(W, M, 'F', 5);
     generate_pulls(gs, B, &pulls);
-    EXPECT_EQ(pulls.size(), 2);
-    EXPECT_EQ(pulls[0], make_step("ee5n"));
-    EXPECT_EQ(pulls[1], make_step("Mf5w"));
+    EXPECT_EQ(pulls.size(), 1);
+    EXPECT_EQ(pulls[0].first(), make_step("ee5n"));
+    EXPECT_EQ(pulls[0].second(), make_step("Mf5w"));
 }
 
 TEST(GameState, generate_steps) {
     GameState gs;
-    std::vector<Step> steps;
+    std::vector<Delta> steps;
 
     gs.add_piece_at(B, H, 'E', 4);
     generate_steps(gs, B, &steps);
     EXPECT_EQ(steps.size(), 4);
-    EXPECT_EQ(steps[0], make_step("he4n"));
-    EXPECT_EQ(steps[1], make_step("he4s"));
-    EXPECT_EQ(steps[2], make_step("he4e"));
-    EXPECT_EQ(steps[3], make_step("he4w"));
-}
-
-TEST(GameState, generate_captures) {
-    GameState gs;
-    std::vector<Step> captures;
-    
-    gs.add_piece_at(W, E, 'C', 3);
-    gs.add_piece_at(B, R, 'C', 6);
-    gs.add_piece_at(B, M, 'F', 6);
-    gs.add_piece_at(W, H, 'E', 4);
-    generate_captures(gs, &captures);
-    EXPECT_EQ(captures.size(), 3);
-    EXPECT_EQ(captures[0], make_step("Ec3x"));
-    EXPECT_EQ(captures[1], make_step("rc6x"));
-    EXPECT_EQ(captures[2], make_step("mf6x"));
-    
-    gs.clear();
-    captures.clear();
-    gs.add_piece_at(W, E, 'C', 3);
-    gs.add_piece_at(W, M, 'C', 4);
-    gs.add_piece_at(B, R, 'C', 6);
-    gs.add_piece_at(B, R, 'D', 6);
-    gs.add_piece_at(B, M, 'F', 6);
-    gs.add_piece_at(B, H, 'E', 6);
-    generate_captures(gs, &captures);
-    EXPECT_EQ(captures.size(), 0);
+    EXPECT_EQ(steps[0].first(), make_step("he4n"));
+    EXPECT_EQ(steps[1].first(), make_step("he4s"));
+    EXPECT_EQ(steps[2].first(), make_step("he4e"));
+    EXPECT_EQ(steps[3].first(), make_step("he4w"));
 }
