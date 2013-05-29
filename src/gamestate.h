@@ -18,24 +18,31 @@ class GameState
             _color[W].clear(); _color[B].clear();
             for(int i=R; i<nPieces; ++i)
                 _pieces[i].clear();
+            _this_color = W; _stepsleft = 4;
             _zhash.clear();
         }
 
         bool take_step(const Step &s);
 
         bool move_piece(const int c, const int p, const uint8_t from, const uint8_t to);
+        
+        void flip_color() {
+            _stepsleft = 4;
+            _this_color = other_color(_this_color);
+            _zhash.flip_color();
+        }
 
-        const Board& get_color_board_const(const int c) const {
+        const Board& get_color_board(const int c) const {
             assert(c == B || c == W);
             return _color[c];
         }
         
-        const Board& get_piece_board_const(const int p) const {
+        const Board& get_piece_board(const int p) const {
             return _pieces[p];
         }
         
         const uint8_t get_count(const int p, const int c) const {
-            return (get_piece_board_const(p) & get_color_board_const(c)).count();
+            return (get_piece_board(p) & get_color_board(c)).count();
         }
 
         const Board get_all_const() const {
@@ -43,7 +50,7 @@ class GameState
         }
 
         bool contains_at(const Color c, const int p, const uint8_t idx) const {
-            const Board& color = get_color_board_const(c);
+            const Board& color = get_color_board(c);
             return color.contains(idx) && _pieces[p].contains(idx);
         }
 
@@ -111,6 +118,7 @@ class GameState
         Board _color[2];
         Board _pieces[nPieces];
         ZobristHash _zhash;
+        uint8_t _this_color, _stepsleft;
 };
 
 void generate_pushes(const GameState& gs, const Color for_color, std::vector<Delta> *pushes);

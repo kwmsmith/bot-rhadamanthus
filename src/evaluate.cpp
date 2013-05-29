@@ -39,8 +39,8 @@ float eval_material(const GameState& gs, const Color for_color)
     Color cl = for_color;
     uint8_t num_stronger_pieces[nPieces];
     uint8_t num_enemy_pieces[nPieces];
-    const Board rabbit_board = gs.get_piece_board_const(R);
-    Board color_board = gs.get_color_board_const(cl);
+    const Board rabbit_board = gs.get_piece_board(R);
+    Board color_board = gs.get_color_board(cl);
     uint8_t total_pieces = color_board.count();
     uint8_t num_rabbits = (rabbit_board & color_board).count();
     get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
@@ -48,7 +48,7 @@ float eval_material(const GameState& gs, const Color for_color)
     float pos_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
     
     cl = other_color(cl);
-    color_board = gs.get_color_board_const(cl);
+    color_board = gs.get_color_board(cl);
     total_pieces = color_board.count();
     num_rabbits = (rabbit_board & color_board).count();
     get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);

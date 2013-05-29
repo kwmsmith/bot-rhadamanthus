@@ -50,6 +50,11 @@ inline Color other_color(Color c)
     return c == W ? B : W;
 }
 
+inline uint8_t other_color(uint8_t c)
+{
+    return c == W ? B : W;
+}
+
 enum Action {NORTH, SOUTH, EAST, WEST, ADD, CAPTURE};
 
 /**

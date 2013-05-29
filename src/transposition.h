@@ -20,8 +20,13 @@ class ZobristHash
             _hash ^= zarr[zidx];
         }
         
+        void flip_color() {
+            _hash ^= swap_color_;
+        }
+        
     private:
         static const uint64_t *get_zobrist_array();
+        static const uint64_t swap_color_ = 0x271828DEADBEEFULL;
         uint64_t _hash;
 };
 

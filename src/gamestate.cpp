@@ -206,30 +206,30 @@ bool GameState::add_piece_at(const int c, const int piece, const uint8_t idx)
     }
     add_piece_at_fast(c, piece, idx);
     assert(_pieces[piece].contains(idx));
-    assert(get_color_board_const(c).contains(idx));
+    assert(get_color_board(c).contains(idx));
     return true;
 }
 
 bool GameState::remove_piece_at(const int c, const int piece, const uint8_t idx)
 {
-    if (!(_pieces[piece] & get_color_board_const(c)).contains(idx)) {
+    if (!(_pieces[piece] & get_color_board(c)).contains(idx)) {
         return false; // idx does not contain the right piece.
     }
     remove_piece_at_fast(c, piece, idx);
-    assert(!(_pieces[piece] & get_color_board_const(c)).contains(idx));
+    assert(!(_pieces[piece] & get_color_board(c)).contains(idx));
     return true;
 }
 
-/**
- * Safe move.  Returns false on failure, true on success.
- */
 bool GameState::move_piece(const int c, const int piece, const uint8_t from, const uint8_t to)
 {
     // TODO: Test for move off of board?
+    
+    assert(_stepsleft >= 1);
 
     // now we can move the piece.
     remove_piece_at(c, piece, from);
     add_piece_at(c, piece, to);
+    _stepsleft--;
     return true;
 }
 
@@ -244,7 +244,7 @@ bool GameState::is_empty() const
 void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
 {
     const Board empties = ~gs.get_all_const();
-    const Board& color_board = gs.get_color_board_const(c);
+    const Board& color_board = gs.get_color_board(c);
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction) {
         boards->push_back(is_adjacent(color_board, empties, direction));
     }
@@ -354,7 +354,7 @@ void generate_steps(const GameState& gs, const Color for_color, std::vector<Delt
 
         Board pieces_with_step = adj_step(gs, for_color, dir_empty) & not_frozen;
         
-        assert((pieces_with_step & gs.get_color_board_const(for_color)) == pieces_with_step);
+        assert((pieces_with_step & gs.get_color_board(for_color)) == pieces_with_step);
 
         while(!pieces_with_step.is_empty()) {
             uint8_t mobile_idx = pieces_with_step.idx_and_reset();
@@ -396,7 +396,7 @@ void capture_from_motion(const Step& step_taken, GameState *gs)
     const unsigned char color = step_taken.get_color();
     const Color color_enum = (color == W ? W : B);
     Board capturable = 
-        gs->get_color_board_const(color) & ~adj_friendly(*gs, color_enum) & Board::capture_squares();
+        gs->get_color_board(color) & ~adj_friendly(*gs, color_enum) & Board::capture_squares();
     if (capturable.is_empty())
         return;
     uint8_t capture_idx = capturable.idx_and_reset();
@@ -413,7 +413,7 @@ bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Ste
     
     const unsigned char color = step_taken.get_color();
     const Color color_enum = (color == W ? W : B);
-    const Board capturable = gs.get_color_board_const(color) & ~adj_friendly(gs, color_enum);
+    const Board capturable = gs.get_color_board(color) & ~adj_friendly(gs, color_enum);
     const char capture_idxs[] = {18, 21, 42, 45};
     for(int i=0; i < 4; ++i) {
         if (capturable.contains(capture_idxs[i])) {
@@ -431,12 +431,12 @@ bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Ste
 Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)
 {
     Board adj_gt, enemy_gt, these_pieces;
-    const Board& color_board = gs.get_color_board_const(for_color);
-    const Board& enemy_color = gs.get_color_board_const(other_color(for_color));
+    const Board& color_board = gs.get_color_board(for_color);
+    const Board& enemy_color = gs.get_color_board(other_color(for_color));
     for(int p = E; p >= R; --p) {
-        these_pieces = gs.get_piece_board_const(p) & color_board;
+        these_pieces = gs.get_piece_board(p) & color_board;
         adj_gt |= is_adjacent(these_pieces, enemy_gt, direction);
-        enemy_gt |= gs.get_piece_board_const(p) & enemy_color;
+        enemy_gt |= gs.get_piece_board(p) & enemy_color;
     }
     return adj_gt;
 }
@@ -444,11 +444,11 @@ Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned in
 Board adj_enemy_ge(const GameState& gs, const Color for_color, const unsigned int direction)
 {
     Board adj_ge, enemy_ge, these_pieces;
-    const Board& color_board = gs.get_color_board_const(for_color);
-    const Board& enemy_color = gs.get_color_board_const(other_color(for_color));
+    const Board& color_board = gs.get_color_board(for_color);
+    const Board& enemy_color = gs.get_color_board(other_color(for_color));
     for(int p = E; p >= R; --p) {
-        enemy_ge |= gs.get_piece_board_const(p) & enemy_color;
-        these_pieces = gs.get_piece_board_const(p) & color_board;
+        enemy_ge |= gs.get_piece_board(p) & enemy_color;
+        these_pieces = gs.get_piece_board(p) & color_board;
         adj_ge |= is_adjacent(these_pieces, enemy_ge, direction);
     }
     return adj_ge;
@@ -457,12 +457,12 @@ Board adj_enemy_ge(const GameState& gs, const Color for_color, const unsigned in
 Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned int direction)
 {
     Board adj_lt, enemy_lt, these_pieces;
-    const Board& color_board = gs.get_color_board_const(for_color);
-    const Board& enemy_color = gs.get_color_board_const(other_color(for_color));
+    const Board& color_board = gs.get_color_board(for_color);
+    const Board& enemy_color = gs.get_color_board(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
-        these_pieces = gs.get_piece_board_const(p) & color_board;
+        these_pieces = gs.get_piece_board(p) & color_board;
         adj_lt |= is_adjacent(these_pieces, enemy_lt, direction);
-        enemy_lt |= gs.get_piece_board_const(p) & enemy_color;
+        enemy_lt |= gs.get_piece_board(p) & enemy_color;
     }
     return adj_lt;
 }
@@ -470,11 +470,11 @@ Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned in
 Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned int direction)
 {
     Board adj_le, enemy_le, these_pieces;
-    const Board& color_board = gs.get_color_board_const(for_color);
-    const Board& enemy_color = gs.get_color_board_const(other_color(for_color));
+    const Board& color_board = gs.get_color_board(for_color);
+    const Board& enemy_color = gs.get_color_board(other_color(for_color));
     for(int p = R; p < nPieces; ++p) {
-        enemy_le |= gs.get_piece_board_const(p) & enemy_color;
-        these_pieces = gs.get_piece_board_const(p) & color_board;
+        enemy_le |= gs.get_piece_board(p) & enemy_color;
+        these_pieces = gs.get_piece_board(p) & color_board;
         adj_le |= is_adjacent(these_pieces, enemy_le, direction);
     }
     return adj_le;
@@ -490,14 +490,14 @@ Board adj_step(const GameState& gs, const Color for_color)
 
 Board adj_step(const GameState& gs, const Color for_color, const unsigned int direction)
 {
-    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board& color_board = gs.get_color_board(for_color);
     const Board empties = ~gs.get_all_const();
     const Board adj = is_adjacent(color_board, empties, direction);
     if (direction == SOUTH && for_color == W) {
-        Board rabbit_mask = gs.get_piece_board_const(R) & color_board;
+        Board rabbit_mask = gs.get_piece_board(R) & color_board;
         return adj & ~rabbit_mask;
     } else if (direction == NORTH && for_color == B) {
-        Board rabbit_mask = gs.get_piece_board_const(R) & color_board;
+        Board rabbit_mask = gs.get_piece_board(R) & color_board;
         return adj & ~rabbit_mask;
     } else {
         return adj;
@@ -507,7 +507,7 @@ Board adj_step(const GameState& gs, const Color for_color, const unsigned int di
 Board adj_empty(const GameState& gs, const Color for_color)
 {
     Board adj_mt;
-    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board& color_board = gs.get_color_board(for_color);
     const Board empties = ~gs.get_all_const();
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         adj_mt |= is_adjacent(color_board, empties, direction);
@@ -516,21 +516,21 @@ Board adj_empty(const GameState& gs, const Color for_color)
 
 Board adj_empty(const GameState& gs, const Color for_color, const unsigned int direction)
 {
-    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board& color_board = gs.get_color_board(for_color);
     const Board empties = ~gs.get_all_const();
     return is_adjacent(color_board, empties, direction);
 }
 
 Board adj_friendly(const GameState& gs, const Color for_color, const unsigned int direction)
 {
-    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board& color_board = gs.get_color_board(for_color);
     return is_adjacent(color_board, color_board, direction);
 }
 
 Board adj_friendly(const GameState& gs, const Color for_color)
 {
     Board res;
-    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board& color_board = gs.get_color_board(for_color);
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
         res |= is_adjacent(color_board, color_board, direction);
     return res;
@@ -587,8 +587,8 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
 
 void get_num_pieces_array(const GameState& gs, const Color for_color, uint8_t *num_pieces)
 {
-    const Board& color_board = gs.get_color_board_const(for_color);
+    const Board& color_board = gs.get_color_board(for_color);
     for (uint8_t i=0; i < nPieces; i++) {
-        num_pieces[i] = (gs.get_piece_board_const(i) & color_board).count();
+        num_pieces[i] = (gs.get_piece_board(i) & color_board).count();
     }
 }

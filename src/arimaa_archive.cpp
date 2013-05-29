@@ -226,13 +226,13 @@ bool setup_archive_game(const ArchivedGame& ag, GameState *gs)
             if (!gs->take_step(*it))
                 return false;
         }
+        gs->flip_color();
     }
     return true;
 }
 
 bool play_archive_game(const ArchivedGame& ag, GameState *gs)
 {
-
     const unsigned int numply = ag.get_numply();
 
     for (unsigned int idx=0; idx < numply; ++idx) {
@@ -242,6 +242,7 @@ bool play_archive_game(const ArchivedGame& ag, GameState *gs)
             if (!gs->take_step(*it))
                 return false;
         }
+        gs->flip_color();
         // std::cout << gs->to_std_string() << std::endl;
         // std::cout << gs->get_hash() << std::endl;
     }
