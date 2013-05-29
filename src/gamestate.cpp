@@ -27,7 +27,7 @@ static void take_step_and_capture(const Step& step, GameState *gs)
 void apply_delta_and_capture(const Delta& dd, GameState *gs)
 {
     take_step_and_capture(dd.first(), gs);
-    if (dd.get_nsteps() == 2)
+    if (dd.size() == 2)
         take_step_and_capture(dd.second(), gs);
 }
 

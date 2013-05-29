@@ -30,13 +30,13 @@ static void move_counter_recur_(const GameState& gs, const Color for_color, cons
         hash = new_gs.get_hash();
         // check for duplicates.
         if (seen->count(hash)) {
-            if ((*seen)[hash] >= steps_left - it->get_nsteps())
+            if ((*seen)[hash] >= steps_left - it->size())
                 continue;
         } else {
             (*nmoves)++;
         }
-        (*seen)[hash] = steps_left - it->get_nsteps();
-        move_counter_recur_(new_gs, for_color, steps_left - it->get_nsteps(), seen, nmoves);
+        (*seen)[hash] = steps_left - it->size();
+        move_counter_recur_(new_gs, for_color, steps_left - it->size(), seen, nmoves);
     }
 }
 

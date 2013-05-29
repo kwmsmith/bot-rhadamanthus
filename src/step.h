@@ -165,7 +165,7 @@ class Delta
         Delta(const Step& s0, const Step &s1)
             :_nsteps(2) { _steps[0] = s0; _steps[1] = s1; }
         
-        uint8_t get_nsteps() const {
+        uint8_t size() const {
             return _nsteps;
         }
         
@@ -177,7 +177,7 @@ class Delta
             assert(_nsteps == 2);
             return _steps[1];
         }
-        
+
     private:
         Step _steps[2];
         uint8_t _nsteps;

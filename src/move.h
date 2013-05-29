@@ -25,7 +25,7 @@ class Move
         
         void add_delta(const Delta& delta) {
             add_step(delta.first());
-            if (delta.get_nsteps() == 2)
+            if (delta.size() == 2)
                 add_step(delta.second());
         }
         

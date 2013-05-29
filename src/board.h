@@ -337,7 +337,7 @@ class Board {
             return _board == o;
         }
         
-        Board move_opp(int direction) const {
+        Board move_opp(const uint8_t direction) const {
             const static Board not_file_8 = file_n(8).flip();
             const static Board not_file_1 = file_n(1).flip();
             switch(direction) {
@@ -383,7 +383,7 @@ class Board {
         const static uint64_t U64_ONE = 1;
 };
 
-inline Board is_adjacent(const Board& stationary, const Board& moved, const unsigned int direction)
+inline Board is_adjacent(const Board& stationary, const Board& moved, const uint8_t direction)
 {
     return moved.move_opp(direction) & stationary;
 }
