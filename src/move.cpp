@@ -8,21 +8,20 @@ typedef google::dense_hash_set<uint64_t, GameStateHash> hash_set;
 
 typedef google::dense_hash_map<uint64_t, uint8_t, GameStateHash> hash_map;
 
-static void move_counter_recur_(const GameState& gs, const Color for_color, const uint8_t steps_left, 
-                         hash_map *seen, uint64_t *nmoves)
+static void move_counter_recur_(const GameState& gs, hash_map *seen, uint64_t *nmoves)
 {
     uint64_t hash;
 
     std::vector<Delta> deltas;
 
-    if (!steps_left)
+    if (!gs.get_stepsleft())
         return;
 
-    if (steps_left >= 2) {
-        generate_pushes(gs, for_color, &deltas);
-        generate_pulls(gs, for_color, &deltas);
+    if (gs.get_stepsleft() >= 2) {
+        generate_pushes(gs, &deltas);
+        generate_pulls(gs, &deltas);
     }
-    generate_steps(gs, for_color, &deltas);
+    generate_steps(gs, &deltas);
 
     for(delta_it it=deltas.begin(); it != deltas.end(); ++it) {
         GameState new_gs = gs;
@@ -30,26 +29,26 @@ static void move_counter_recur_(const GameState& gs, const Color for_color, cons
         hash = new_gs.get_hash();
         // check for duplicates.
         if (seen->count(hash)) {
-            if ((*seen)[hash] >= steps_left - it->size())
+            if ((*seen)[hash] >= new_gs.get_stepsleft())
                 continue;
         } else {
             (*nmoves)++;
         }
-        (*seen)[hash] = steps_left - it->size();
-        move_counter_recur_(new_gs, for_color, steps_left - it->size(), seen, nmoves);
+        (*seen)[hash] = new_gs.get_stepsleft();
+        move_counter_recur_(new_gs, seen, nmoves);
     }
 }
 
-uint64_t move_counter(const GameState& gs, const Color for_color)
+uint64_t move_counter(const GameState& gs)
 {
     hash_map seen(20000);
     seen.set_empty_key(ULLONG_MAX);
     uint64_t nmoves = 0;
-    move_counter_recur_(gs, for_color, 4, &seen, &nmoves);
+    move_counter_recur_(gs, &seen, &nmoves);
     return nmoves;
 }
 
-void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves)
+void generate_unique_moves(const GameState& gs, std::vector<Move> *moves)
 {
     uint64_t hash;
     std::vector<Delta> deltas;
@@ -65,13 +64,14 @@ void generate_unique_moves(const GameState& gs, const Color for_color, std::vect
         Move this_move = (*moves)[idx];
         const GameState& gs = this_move.get_gamestate();
         const unsigned int steps_left = this_move.get_stepsleft();
+        assert(steps_left == gs.get_stepsleft());
         deltas.clear();
         if (steps_left) {
-            generate_steps(gs, for_color, &deltas);
+            generate_steps(gs, &deltas);
         } 
         if (steps_left >= 2) {
-            generate_pushes(gs, for_color, &deltas);
-            generate_pulls(gs, for_color, &deltas);
+            generate_pushes(gs, &deltas);
+            generate_pulls(gs, &deltas);
         }
         for(delta_it it=deltas.begin(); it != deltas.end(); ++it) {
             Move mv = Move(this_move);
@@ -86,7 +86,7 @@ void generate_unique_moves(const GameState& gs, const Color for_color, std::vect
     }
 }
 
-void generate_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves)
+void generate_moves(const GameState& gs, std::vector<Move> *moves)
 {
     std::vector<Delta> deltas;
     size_t idx = moves->size();
@@ -96,13 +96,14 @@ void generate_moves(const GameState& gs, const Color for_color, std::vector<Move
         Move this_move = (*moves)[idx];
         const GameState& gs = this_move.get_gamestate();
         const unsigned int steps_left = this_move.get_stepsleft();
+        assert(steps_left == gs.get_stepsleft());
         deltas.clear();
         if (steps_left) {
-            generate_steps(gs, for_color, &deltas);
+            generate_steps(gs, &deltas);
         }
         if (steps_left >= 2) {
-            generate_pushes(gs, for_color, &deltas);
-            generate_pulls(gs, for_color, &deltas);
+            generate_pushes(gs, &deltas);
+            generate_pulls(gs, &deltas);
         }
         for(delta_it it=deltas.begin(); it != deltas.end(); ++it) {
             Move mv = Move(this_move);

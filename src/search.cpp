@@ -30,26 +30,30 @@ int quiesce(int alpha, int beta) {
 */
 
 
-int alphabeta(const GameState& gs, const Color& this_color, int alpha, int beta, int depthleft, int stepsleft)
+int alphabeta(const GameState& gs, int alpha, int beta, int depthleft)
 {
-    if(depthleft == 0) {
-        return quiesce(gs, this_color, alpha, beta);
+    if(depthleft == 0)
+        return quiesce(gs, alpha, beta);
+
+    assert(gs.get_stepsleft());
+
+    std::vector<Delta> deltas;
+    if (gs.get_stepsleft() >= 2) {
+        generate_pushes(gs, &deltas);
+        generate_pulls(gs, &deltas);
     }
-    assert(stepsleft);
-    if (stepsleft >= 2) {
-        generate_pushes(gs, for_color, &pushpull);
-        generate_pulls(gs, for_color, &pushpull);
-    }
-    std::vector<Step> pushpull, singles;
-    for (vec_move_it it=moves.begin(); it!=moves.end(); ++it) {
-        const int score = -alphaBeta((*it)->get_gamestate(), other_color(this_color),
-                                      -beta, -alpha, depthleft - 1);
-        if(score >= beta) {
-            return beta;   //  fail hard beta-cutoff
-        }
-        if(score > alpha) {
-            alpha = score; // alpha acts like max in MiniMax
-        }
+    generate_steps(gs, &deltas);
+    
+    for (delta_it it=deltas.begin(); it != deltas.end(); ++it) {
+        // XXX TODO: finish!!!
+        // const int score = -alphaBeta((*it)->get_gamestate(), other_color(this_color),
+                                      // -beta, -alpha, depthleft - 1);
+        // if(score >= beta) {
+            // return beta;   //  fail hard beta-cutoff
+        // }
+        // if(score > alpha) {
+            // alpha = score; // alpha acts like max in MiniMax
+        // }
     }
     return alpha;
 }

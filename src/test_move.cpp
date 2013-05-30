@@ -36,13 +36,12 @@ TEST(Move, generate_unique_moves) {
 
     std::vector<Move> moves;
     GameState gs;
-    Color cc;
 
     for(unsigned int i=0; i<ARRSIZE(_positions); ++i) {
         gs.clear();
         moves.clear();
-        EXPECT_TRUE(gamestate_from_input(_positions[i], &gs, &cc));
-        generate_unique_moves(gs, cc, &moves);
+        EXPECT_TRUE(gamestate_from_input(_positions[i], &gs));
+        generate_unique_moves(gs, &moves);
         EXPECT_EQ(moves.size(), counts[i]);
     }
 }
@@ -89,11 +88,10 @@ TEST(Move, move_counter) {
             "   a b c d e f g h\n"
     };
     GameState gs;
-    Color cc;
     for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
         gs.clear();
-        EXPECT_TRUE(gamestate_from_input(positions[i], &gs, &cc));
-        EXPECT_EQ(move_counter(gs, cc), counts[i]);
+        EXPECT_TRUE(gamestate_from_input(positions[i], &gs));
+        EXPECT_EQ(move_counter(gs), counts[i]);
     }
 }
 
@@ -238,13 +236,12 @@ TEST(Move, generate_moves) {
     };
     std::vector<Move> moves;
     GameState gs;
-    Color cc;
 
     for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
         gs.clear();
         moves.clear();
-        EXPECT_TRUE(gamestate_from_input(positions[i], &gs, &cc));
-        generate_moves(gs, cc, &moves);
+        EXPECT_TRUE(gamestate_from_input(positions[i], &gs));
+        generate_moves(gs, &moves);
         EXPECT_EQ(moves.size(), counts[i]);
     }
 }
@@ -650,8 +647,8 @@ TEST(Move, clueless_benchmark) {
     for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
         gs.clear();
         moves.clear();
-        EXPECT_TRUE(gamestate_from_input(positions[i], &gs, &cc));
-        generate_unique_moves(gs, cc, &moves);
+        EXPECT_TRUE(gamestate_from_input(positions[i], &gs));
+        generate_unique_moves(gs, &moves);
         EXPECT_EQ(moves.size(), counts[i]+1);
     }
 }

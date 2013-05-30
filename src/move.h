@@ -65,9 +65,9 @@ class Move
         uint8_t total_steps_taken_;
 };
 
-void generate_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves);
-void generate_unique_moves(const GameState& gs, const Color for_color, std::vector<Move> *moves);
+void generate_moves(const GameState& gs, std::vector<Move> *moves);
+void generate_unique_moves(const GameState& gs, std::vector<Move> *moves);
 
-uint64_t move_counter(const GameState& gs, const Color for_color);
+uint64_t move_counter(const GameState& gs);
 
 #endif

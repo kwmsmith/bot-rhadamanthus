@@ -32,7 +32,7 @@ void apply_delta_and_capture(const Delta& dd, GameState *gs)
 }
 
 
-bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move)
+bool gamestate_from_oneline(const std::string& ss, GameState *gs)
 {
     int idx = 0;
     char ch;
@@ -41,9 +41,9 @@ bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move
     } while(ch == ' ');
 
     if (ch == 'w' || ch == 'g') {
-        *to_move = W;
+        gs->set_color(W);
     } else if (ch == 'b' || ch == 's') {
-        *to_move = B;
+        gs->set_color(B);
     } else {
         return false;
     }
@@ -70,7 +70,7 @@ bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move
     return true;
 }
 
-bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move)
+bool gamestate_from_input(const std::string& ss, GameState *gs)
 {
     gs->clear(); // error sentinel.
     std::vector<std::string> lines;
@@ -84,9 +84,9 @@ bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move)
     to_lower(tokens[0]);
     const char color = tokens[0][tokens[0].size() - 1];
     if (color == 'w' || color == 'g') {
-        *to_move = W;
+        gs->set_color(W);
     } else if (color == 'b' || color == 's') {
-        *to_move = B;
+        gs->set_color(B);
     } else {
         return false;
     }
@@ -196,10 +196,10 @@ bool GameState::take_step(const Step &s)
     return false;
 }
 
-bool GameState::add_piece_at(const int c, const int piece, const uint8_t idx)
+bool GameState::add_piece_at(const uint8_t c, const uint8_t piece, const uint8_t idx)
 {
     assert(c == W || c == B);
-    assert(piece >= R && piece <= E);
+    assert(piece <= E);
     assert(idx < 64);
     if (get_all_const().contains(idx)) {
         return false; // position already occupied.
@@ -210,7 +210,7 @@ bool GameState::add_piece_at(const int c, const int piece, const uint8_t idx)
     return true;
 }
 
-bool GameState::remove_piece_at(const int c, const int piece, const uint8_t idx)
+bool GameState::remove_piece_at(const uint8_t c, const uint8_t piece, const uint8_t idx)
 {
     if (!(_pieces[piece] & get_color_board(c)).contains(idx)) {
         return false; // idx does not contain the right piece.
@@ -220,7 +220,7 @@ bool GameState::remove_piece_at(const int c, const int piece, const uint8_t idx)
     return true;
 }
 
-bool GameState::move_piece(const int c, const int piece, const uint8_t from, const uint8_t to)
+bool GameState::move_piece(const uint8_t c, const uint8_t piece, const uint8_t from, const uint8_t to)
 {
     // TODO: Test for move off of board?
     
@@ -241,29 +241,12 @@ bool GameState::is_empty() const
     return b.is_empty();
 }
 
-void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
-{
-    const Board empties = ~gs.get_all_const();
-    const Board& color_board = gs.get_color_board(c);
-    for(unsigned int direction = NORTH; direction < num_directions(); ++direction) {
-        boards->push_back(is_adjacent(color_board, empties, direction));
-    }
-}
 
-void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
+void generate_pushes(const GameState& gs, std::vector<Delta> *pushes)
 {
-    Board not_frozen = ~frozen_pieces(gs, c);
-    has_adjacent_empty_directional(gs, c, boards);
-    for(unsigned int i=0; i < num_directions(); ++i) {
-        boards->at(i) &= not_frozen;
-    }
-}
-
-void generate_pushes(const GameState& gs, const Color for_color, std::vector<Delta> *pushes)
-{
-    const Color& pushing_color = for_color;
-    const Color& pushed_color = other_color(for_color);
-    const Board& pushing_mobile = ~frozen_pieces(gs, for_color);
+    const uint8_t pushing_color = gs.get_color();
+    const uint8_t pushed_color = other_color(gs.get_color());
+    const Board& pushing_mobile = ~frozen_pieces(gs, gs.get_color());
 
     Board pushed_with_adj_empty[4];
     
@@ -306,10 +289,10 @@ void generate_pushes(const GameState& gs, const Color for_color, std::vector<Del
     }
 }
 
-void generate_pulls(const GameState& gs, const Color for_color, std::vector<Delta> *pulls)
+void generate_pulls(const GameState& gs, std::vector<Delta> *pulls)
 {
-    const Color& pulling_color = for_color;
-    const Board& pulling_mobile = ~frozen_pieces(gs, for_color);
+    const uint8_t pulling_color = gs.get_color();
+    const Board& pulling_mobile = ~frozen_pieces(gs, gs.get_color());
     
     Board pulling_with_adj_empty[4];
     
@@ -346,15 +329,15 @@ void generate_pulls(const GameState& gs, const Color for_color, std::vector<Delt
     }
 }
 
-void generate_steps(const GameState& gs, const Color for_color, std::vector<Delta> *steps)
+void generate_steps(const GameState& gs, std::vector<Delta> *steps)
 {
-    const Board& not_frozen = ~frozen_pieces(gs, for_color);
+    const Board& not_frozen = ~frozen_pieces(gs, gs.get_color());
 
     for (unsigned int dir_empty = NORTH; dir_empty < num_directions(); ++dir_empty) {
 
-        Board pieces_with_step = adj_step(gs, for_color, dir_empty) & not_frozen;
+        Board pieces_with_step = adj_step(gs, gs.get_color(), dir_empty) & not_frozen;
         
-        assert((pieces_with_step & gs.get_color_board(for_color)) == pieces_with_step);
+        assert((pieces_with_step & gs.get_color_board(gs.get_color())) == pieces_with_step);
 
         while(!pieces_with_step.is_empty()) {
             uint8_t mobile_idx = pieces_with_step.idx_and_reset();
@@ -393,15 +376,14 @@ bool possible_capture_from_motion(const GameState &gs, const Step& step_taken)
 
 void capture_from_motion(const Step& step_taken, GameState *gs)
 {
-    const unsigned char color = step_taken.get_color();
-    const Color color_enum = (color == W ? W : B);
+    const uint8_t color = step_taken.get_color();
     Board capturable = 
-        gs->get_color_board(color) & ~adj_friendly(*gs, color_enum) & Board::capture_squares();
+        gs->get_color_board(color) & ~adj_friendly(*gs, color) & Board::capture_squares();
     if (capturable.is_empty())
         return;
     uint8_t capture_idx = capturable.idx_and_reset();
     assert(capturable.is_empty());
-    int c, p;
+    int8_t c, p;
     gs->color_and_piece_at(capture_idx, &c, &p);
     gs->remove_piece_at(c, p, capture_idx);
 }
@@ -412,13 +394,12 @@ bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Ste
         return false;
     
     const unsigned char color = step_taken.get_color();
-    const Color color_enum = (color == W ? W : B);
-    const Board capturable = gs.get_color_board(color) & ~adj_friendly(gs, color_enum);
+    const Board capturable = gs.get_color_board(color) & ~adj_friendly(gs, color);
     const char capture_idxs[] = {18, 21, 42, 45};
     for(int i=0; i < 4; ++i) {
         if (capturable.contains(capture_idxs[i])) {
             // we have a capture!
-            int c, p;
+            int8_t c, p;
             gs.color_and_piece_at(capture_idxs[i], &c, &p);
             // assert(c == color);
             *capture = Step(color, p, capture_idxs[i], CAPTURE);
@@ -428,7 +409,7 @@ bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Ste
     return false;
 }
 
-Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_enemy_gt(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     Board adj_gt, enemy_gt, these_pieces;
     const Board& color_board = gs.get_color_board(for_color);
@@ -441,7 +422,7 @@ Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned in
     return adj_gt;
 }
 
-Board adj_enemy_ge(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_enemy_ge(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     Board adj_ge, enemy_ge, these_pieces;
     const Board& color_board = gs.get_color_board(for_color);
@@ -454,7 +435,7 @@ Board adj_enemy_ge(const GameState& gs, const Color for_color, const unsigned in
     return adj_ge;
 }
 
-Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_enemy_lt(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     Board adj_lt, enemy_lt, these_pieces;
     const Board& color_board = gs.get_color_board(for_color);
@@ -467,7 +448,7 @@ Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned in
     return adj_lt;
 }
 
-Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_enemy_le(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     Board adj_le, enemy_le, these_pieces;
     const Board& color_board = gs.get_color_board(for_color);
@@ -480,7 +461,7 @@ Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned in
     return adj_le;
 }
 
-Board adj_step(const GameState& gs, const Color for_color)
+Board adj_step(const GameState& gs, const uint8_t for_color)
 {
     Board adj_step_;
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
@@ -488,7 +469,7 @@ Board adj_step(const GameState& gs, const Color for_color)
     return adj_step_;
 }
 
-Board adj_step(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_step(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     const Board& color_board = gs.get_color_board(for_color);
     const Board empties = ~gs.get_all_const();
@@ -504,7 +485,7 @@ Board adj_step(const GameState& gs, const Color for_color, const unsigned int di
     }
 }
 
-Board adj_empty(const GameState& gs, const Color for_color)
+Board adj_empty(const GameState& gs, const uint8_t for_color)
 {
     Board adj_mt;
     const Board& color_board = gs.get_color_board(for_color);
@@ -514,20 +495,20 @@ Board adj_empty(const GameState& gs, const Color for_color)
     return adj_mt;
 }
 
-Board adj_empty(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_empty(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     const Board& color_board = gs.get_color_board(for_color);
     const Board empties = ~gs.get_all_const();
     return is_adjacent(color_board, empties, direction);
 }
 
-Board adj_friendly(const GameState& gs, const Color for_color, const unsigned int direction)
+Board adj_friendly(const GameState& gs, const uint8_t for_color, const unsigned int direction)
 {
     const Board& color_board = gs.get_color_board(for_color);
     return is_adjacent(color_board, color_board, direction);
 }
 
-Board adj_friendly(const GameState& gs, const Color for_color)
+Board adj_friendly(const GameState& gs, const uint8_t for_color)
 {
     Board res;
     const Board& color_board = gs.get_color_board(for_color);
@@ -536,17 +517,17 @@ Board adj_friendly(const GameState& gs, const Color for_color)
     return res;
 }
 
-Board frozen_pieces(const GameState& gs, const Color for_color)
+Board frozen_pieces(const GameState& gs, const uint8_t for_color)
 {
     return adj_enemy_gt(gs, for_color) & ~adj_friendly(gs, for_color);
 }
 
-Board mobile_pieces(const GameState& gs, const Color for_color)
+Board mobile_pieces(const GameState& gs, const uint8_t for_color)
 {
     return adj_step(gs, for_color) & ~frozen_pieces(gs, for_color);
 }
 
-Board adj_enemy_le(const GameState& gs, const Color for_color)
+Board adj_enemy_le(const GameState& gs, const uint8_t for_color)
 {
     Board adj_le;
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
@@ -554,7 +535,7 @@ Board adj_enemy_le(const GameState& gs, const Color for_color)
     return adj_le;
 }
 
-Board adj_enemy_lt(const GameState& gs, const Color for_color)
+Board adj_enemy_lt(const GameState& gs, const uint8_t for_color)
 {
     Board adj_lt;
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
@@ -562,7 +543,7 @@ Board adj_enemy_lt(const GameState& gs, const Color for_color)
     return adj_lt;
 }
 
-Board adj_enemy_gt(const GameState& gs, const Color for_color)
+Board adj_enemy_gt(const GameState& gs, const uint8_t for_color)
 {
     Board adj_gt;
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
@@ -570,7 +551,7 @@ Board adj_enemy_gt(const GameState& gs, const Color for_color)
     return adj_gt;
 }
 
-Board adj_enemy_ge(const GameState& gs, const Color for_color)
+Board adj_enemy_ge(const GameState& gs, const uint8_t for_color)
 {
     Board adj_ge;
     for(unsigned int direction = NORTH; direction < num_directions(); ++direction)
@@ -580,15 +561,35 @@ Board adj_enemy_ge(const GameState& gs, const Color for_color)
 
 Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int direction)
 {
-    int c, p;
+    int8_t c, p;
     gs.color_and_piece_at(idx, &c, &p);
     return Step(c, p, idx, direction);
 }
 
-void get_num_pieces_array(const GameState& gs, const Color for_color, uint8_t *num_pieces)
+void get_num_pieces_array(const GameState& gs, const uint8_t for_color, uint8_t *num_pieces)
 {
     const Board& color_board = gs.get_color_board(for_color);
     for (uint8_t i=0; i < nPieces; i++) {
         num_pieces[i] = (gs.get_piece_board(i) & color_board).count();
     }
 }
+
+// candidates for removal.
+
+// void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
+// {
+    // const Board empties = ~gs.get_all_const();
+    // const Board& color_board = gs.get_color_board(c);
+    // for(unsigned int direction = NORTH; direction < num_directions(); ++direction) {
+        // boards->push_back(is_adjacent(color_board, empties, direction));
+    // }
+// }
+
+// void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards)
+// {
+    // Board not_frozen = ~frozen_pieces(gs, c);
+    // has_adjacent_empty_directional(gs, c, boards);
+    // for(unsigned int i=0; i < num_directions(); ++i) {
+        // boards->at(i) &= not_frozen;
+    // }
+// }

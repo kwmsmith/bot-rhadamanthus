@@ -39,7 +39,6 @@ TEST(GameState, Instantiation) {
 
 TEST(GameState, gamestate_from_oneline) {
     GameState gs;
-    Color cc;
     std::string ss(
         "10w \n"
         " +-----------------+\n"
@@ -53,8 +52,8 @@ TEST(GameState, gamestate_from_oneline) {
         "1| R R R D M R R R |\n"
         " +-----------------+\n"
         "   a b c d e f g h\n");
-    EXPECT_TRUE(gamestate_from_input(ss, &gs, &cc));
-    EXPECT_EQ(cc, W);
+    EXPECT_TRUE(gamestate_from_input(ss, &gs));
+    EXPECT_EQ(gs.get_color(), W);
     uint64_t hash1 = gs.get_hash();
     
     ss = "  w  "
@@ -66,14 +65,13 @@ TEST(GameState, gamestate_from_oneline) {
          ".HX.eXD."
          "R.C..C.R"
          "RRRDMRRR]";
-    EXPECT_TRUE(gamestate_from_oneline(ss, &gs, &cc));
+    EXPECT_TRUE(gamestate_from_oneline(ss, &gs));
     uint64_t hash2 = gs.get_hash();
     EXPECT_EQ(hash1, hash2);
 }
 
 TEST(GameState, gamestate_from_input) {
     GameState gs;
-    Color cc;
     std::string ss(
         "10w \n"
         " +-----------------+\n"
@@ -87,8 +85,8 @@ TEST(GameState, gamestate_from_input) {
         "1| R R R D M R R R |\n"
         " +-----------------+\n"
         "   a b c d e f g h\n");
-    EXPECT_TRUE(gamestate_from_input(ss, &gs, &cc));
-    EXPECT_EQ(cc, W);
+    EXPECT_TRUE(gamestate_from_input(ss, &gs));
+    EXPECT_EQ(gs.get_color(), W);
     
     ss = "w\n"
             " +-----------------+\n"
@@ -103,7 +101,7 @@ TEST(GameState, gamestate_from_input) {
             " +-----------------+\n"
             "   a b c d e f g h\n";
     gs.clear();
-    EXPECT_TRUE(gamestate_from_input(ss, &gs, &cc));
+    EXPECT_TRUE(gamestate_from_input(ss, &gs));
 }
 
 TEST(GameState, piece_enum) {
@@ -210,7 +208,8 @@ TEST(GameState, generate_pushes) {
     gs.add_piece_at(W, R, 'F', 6);
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 4);
-    generate_pushes(gs, B, &pushes);
+    gs.set_color(B);
+    generate_pushes(gs, &pushes);
     EXPECT_EQ(pushes.size(), 1);
     EXPECT_EQ(pushes[0].first(), make_step("Mf5e"));
     EXPECT_EQ(pushes[0].second(), make_step("ee5e"));
@@ -221,7 +220,8 @@ TEST(GameState, generate_pushes) {
     gs.add_piece_at(W, R, 'G', 5);
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 4);
-    generate_pushes(gs, B, &pushes);
+    gs.set_color(B);
+    generate_pushes(gs, &pushes);
     EXPECT_EQ(pushes.size(), 1);
     EXPECT_EQ(pushes[0].first(), make_step("Mf5n"));
     EXPECT_EQ(pushes[0].second(), make_step("ee5e"));
@@ -232,7 +232,8 @@ TEST(GameState, generate_pushes) {
     gs.add_piece_at(W, R, 'G', 5);
     gs.add_piece_at(W, M, 'F', 5);
     gs.add_piece_at(W, R, 'F', 6);
-    generate_pushes(gs, B, &pushes);
+    gs.set_color(B);
+    generate_pushes(gs, &pushes);
     EXPECT_EQ(pushes.size(), 1);
     EXPECT_EQ(pushes[0].first(), make_step("Mf5s"));
     EXPECT_EQ(pushes[0].second(), make_step("ee5e"));
@@ -248,7 +249,8 @@ TEST(GameState, generate_pulls) {
     gs.add_piece_at(B, E, 'E', 5);
     gs.add_piece_at(B, H, 'E', 6);
     gs.add_piece_at(W, M, 'F', 5);
-    generate_pulls(gs, B, &pulls);
+    gs.set_color(B);
+    generate_pulls(gs, &pulls);
     EXPECT_EQ(pulls.size(), 1);
     EXPECT_EQ(pulls[0].first(), make_step("ee5w"));
     EXPECT_EQ(pulls[0].second(), make_step("Mf5w"));
@@ -259,7 +261,8 @@ TEST(GameState, generate_pulls) {
     gs.add_piece_at(B, E, 'E', 5);
     gs.add_piece_at(B, H, 'E', 6);
     gs.add_piece_at(W, M, 'F', 5);
-    generate_pulls(gs, B, &pulls);
+    gs.set_color(B);
+    generate_pulls(gs, &pulls);
     EXPECT_EQ(pulls.size(), 1);
     EXPECT_EQ(pulls[0].first(), make_step("ee5s"));
     EXPECT_EQ(pulls[0].second(), make_step("Mf5w"));
@@ -270,7 +273,8 @@ TEST(GameState, generate_pulls) {
     gs.add_piece_at(B, E, 'E', 5);
     gs.add_piece_at(B, H, 'E', 4);
     gs.add_piece_at(W, M, 'F', 5);
-    generate_pulls(gs, B, &pulls);
+    gs.set_color(B);
+    generate_pulls(gs, &pulls);
     EXPECT_EQ(pulls.size(), 1);
     EXPECT_EQ(pulls[0].first(), make_step("ee5n"));
     EXPECT_EQ(pulls[0].second(), make_step("Mf5w"));
@@ -281,7 +285,8 @@ TEST(GameState, generate_steps) {
     std::vector<Delta> steps;
 
     gs.add_piece_at(B, H, 'E', 4);
-    generate_steps(gs, B, &steps);
+    gs.set_color(B);
+    generate_steps(gs, &steps);
     EXPECT_EQ(steps.size(), 4);
     EXPECT_EQ(steps[0].first(), make_step("he4n"));
     EXPECT_EQ(steps[1].first(), make_step("he4s"));

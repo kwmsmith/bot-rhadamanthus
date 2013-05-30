@@ -24,12 +24,26 @@ class GameState
 
         bool take_step(const Step &s);
 
-        bool move_piece(const int c, const int p, const uint8_t from, const uint8_t to);
+        bool move_piece(const uint8_t c, const uint8_t p, const uint8_t from, const uint8_t to);
+        
+        const uint8_t get_color() const {
+            return _this_color;
+        }
+        
+        void set_color(const int c) {
+            if (c == _this_color)
+                return;
+            flip_color();
+        }
         
         void flip_color() {
             _stepsleft = 4;
             _this_color = other_color(_this_color);
             _zhash.flip_color();
+        }
+        
+        const uint8_t get_stepsleft() const {
+            return _stepsleft;
         }
 
         const Board& get_color_board(const int c) const {
@@ -49,22 +63,21 @@ class GameState
             return _color[W] | _color[B];
         }
 
-        bool contains_at(const Color c, const int p, const uint8_t idx) const {
-            const Board& color = get_color_board(c);
-            return color.contains(idx) && _pieces[p].contains(idx);
+        bool contains_at(const uint8_t c, const uint8_t p, const uint8_t idx) const {
+            return get_color_board(c).contains(idx) && _pieces[p].contains(idx);
         }
 
         bool is_empty() const;
 
-        bool add_piece_at(const int c, const int p, const uint8_t idx);
+        bool add_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
 
-        bool add_piece_at(const int c, const int p, const char file, const int rank) {
+        bool add_piece_at(const uint8_t c, const uint8_t p, const char file, const int rank) {
             assert(file >= 'A' && file <= 'H');
             assert(rank >= 1 && rank <= 8);
             return add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
         }
 
-        bool remove_piece_at(const int c, const int p, const uint8_t idx);
+        bool remove_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
         
         std::string to_oneline_string(const char empty='.') const;
 
@@ -80,7 +93,7 @@ class GameState
             *to = *this;
         }
         
-        void color_and_piece_at(const uint8_t idx, int *c, int *p) const {
+        void color_and_piece_at(const uint8_t idx, int8_t *c, int8_t *p) const {
             int8_t _c = -1, _p = -1; // guilty before proven innocent...
             
             _c += _color[W].contains(idx) * (W+1);
@@ -99,7 +112,7 @@ class GameState
 
     private:
 
-        void add_piece_at_fast(const int c, const int piece, const uint8_t idx) {
+        void add_piece_at_fast(const uint8_t c, const uint8_t piece, const uint8_t idx) {
             assert (c == W || c == B);
             _color[c].add(idx);
             assert(_color[c].contains(idx));
@@ -108,7 +121,7 @@ class GameState
             _zhash.addrm_piece_at(c, piece, idx);
         }
 
-        void remove_piece_at_fast(const int c, const int piece, const uint8_t idx) {
+        void remove_piece_at_fast(const uint8_t c, const uint8_t piece, const uint8_t idx) {
             assert (c == W || c == B);
             _color[c].remove(idx);
             _pieces[piece].remove(idx);
@@ -121,10 +134,9 @@ class GameState
         uint8_t _this_color, _stepsleft;
 };
 
-void generate_pushes(const GameState& gs, const Color for_color, std::vector<Delta> *pushes);
-void generate_pulls(const GameState& gs, const Color for_color, std::vector<Delta> *pulls);
-void generate_steps(const GameState& gs, const Color for_color, std::vector<Delta> *steps);
-// unsigned char generate_captures(const GameState& gs, std::vector<Delta> *captures);
+void generate_pushes(const GameState& gs, std::vector<Delta> *pushes);
+void generate_pulls(const GameState& gs, std::vector<Delta> *pulls);
+void generate_steps(const GameState& gs, std::vector<Delta> *steps);
 
 void apply_delta_and_capture(const Delta& dd, GameState *gs);
 
@@ -137,36 +149,37 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
 /* Piece characters are rcdhme / RCDHME.  Empty characters are '.', and ' ' and
  * are ignored.  Trap characters ('x' or 'X') are ignored.
  */
-bool gamestate_from_input(const std::string& ss, GameState *gs, Color *to_move);
-bool gamestate_from_oneline(const std::string& ss, GameState *gs, Color *to_move);
+bool gamestate_from_input(const std::string& ss, GameState *gs);
+bool gamestate_from_oneline(const std::string& ss, GameState *gs);
 
-void mobile_pieces_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
-void has_adjacent_empty_directional(const GameState& gs, const Color c, std::vector<Board> *boards);
 
-Board adj_enemy_gt(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_enemy_gt(const GameState& gs, const Color for_color);
+Board adj_enemy_gt(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_enemy_gt(const GameState& gs, const uint8_t for_color);
 
-Board adj_enemy_ge(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_enemy_ge(const GameState& gs, const Color for_color);
+Board adj_enemy_ge(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_enemy_ge(const GameState& gs, const uint8_t for_color);
 
-Board adj_enemy_lt(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_enemy_lt(const GameState& gs, const Color for_color);
+Board adj_enemy_lt(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_enemy_lt(const GameState& gs, const uint8_t for_color);
 
-Board adj_enemy_le(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_enemy_le(const GameState& gs, const Color for_color);
+Board adj_enemy_le(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_enemy_le(const GameState& gs, const uint8_t for_color);
 
-Board adj_step(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_step(const GameState& gs, const Color for_color);
+Board adj_step(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_step(const GameState& gs, const uint8_t for_color);
 
-Board adj_empty(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_empty(const GameState& gs, const Color for_color);
+Board adj_empty(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_empty(const GameState& gs, const uint8_t for_color);
 
-Board adj_friendly(const GameState& gs, const Color for_color, const unsigned int direction);
-Board adj_friendly(const GameState& gs, const Color for_color);
+Board adj_friendly(const GameState& gs, const uint8_t for_color, const unsigned int direction);
+Board adj_friendly(const GameState& gs, const uint8_t for_color);
 
-Board frozen_pieces(const GameState& gs, const Color for_color);
-Board mobile_pieces(const GameState& gs, const Color for_color);
+Board frozen_pieces(const GameState& gs, const uint8_t for_color);
+Board mobile_pieces(const GameState& gs, const uint8_t for_color);
 
-void get_num_pieces_array(const GameState& gs, const Color for_color, uint8_t *num_pieces);
+void get_num_pieces_array(const GameState& gs, const uint8_t for_color, uint8_t *num_pieces);
+
+// void mobile_pieces_directional(const GameState& gs, const uint8_t c, std::vector<Board> *boards);
+// void has_adjacent_empty_directional(const GameState& gs, const uint8_t c, std::vector<Board> *boards);
 
 #endif
