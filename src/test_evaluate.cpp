@@ -12,6 +12,7 @@ TEST(Evaluate, approx_log) {
 
 TEST(Evaluate, eval_material) {
     const float normal = 0.1250700;
+    float evw, evb;
     GameState gs;
     std::string ss;
     ss = 
@@ -28,7 +29,10 @@ TEST(Evaluate, eval_material) {
         " +-----------------+\n"
         "   a b c d e f g h\n";
     gamestate_from_input(ss, &gs);
-    EXPECT_EQ(eval_material(gs, W), -eval_material(gs, B));
+    evw = eval_material(gs);
+    gs.flip_color();
+    evb = eval_material(gs);
+    EXPECT_EQ(evw, -evb);
     
     ss = 
         "10w\n"
@@ -45,8 +49,11 @@ TEST(Evaluate, eval_material) {
         "   a b c d e f g h\n" ;
     gs.clear();
     gamestate_from_input(ss, &gs);
-    EXPECT_EQ(eval_material(gs, W), -eval_material(gs, B));
-    EXPECT_EQ(eval_material(gs, W), 0.0);
+    evw = eval_material(gs);
+    gs.flip_color();
+    evb = eval_material(gs);
+    EXPECT_EQ(evw, -evb);
+    EXPECT_EQ(evw, 0.0);
     
     ss = 
         "10w\n"
@@ -63,8 +70,12 @@ TEST(Evaluate, eval_material) {
         "   a b c d e f g h\n" ;
     gs.clear();
     gamestate_from_input(ss, &gs);
-    EXPECT_EQ(eval_material(gs, W), -eval_material(gs, B));
-    EXPECT_TRUE(fabs(eval_material(gs, W) / normal + 13.40) < 0.01);
+    evw = eval_material(gs);
+    gs.flip_color();
+    evb = eval_material(gs);
+    EXPECT_EQ(evw, -evb);
+    std::cout << evw << " " << evb << std::endl;
+    EXPECT_TRUE(fabs(evw / normal + 13.40) < 0.01);
     
     ss = 
         "10w\n"
@@ -81,6 +92,9 @@ TEST(Evaluate, eval_material) {
         "   a b c d e f g h\n" ;
     gs.clear();
     gamestate_from_input(ss, &gs);
-    EXPECT_EQ(eval_material(gs, W), -eval_material(gs, B));
-    EXPECT_TRUE(fabs(eval_material(gs, W) / normal + 1.00) < 0.01);
+    evw = eval_material(gs);
+    gs.flip_color();
+    evb = eval_material(gs);
+    EXPECT_EQ(evw, -evb);
+    EXPECT_TRUE(fabs(evw / normal + 1.00) < 0.01);
 }

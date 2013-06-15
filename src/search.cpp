@@ -1,10 +1,11 @@
 #include "search.h"
 #include "move.h"
+#include "evaluate.h"
 
-static int quiesce(const GameState& gs, const Color& this_color, int alpha, int beta)
+static int quiesce(const GameState& gs, int alpha, int beta)
 {
     // TODO: Implement quiescence search!!!
-    return evaluate(gs, this_color);
+    return evaluate(gs);
 }
 
 /*

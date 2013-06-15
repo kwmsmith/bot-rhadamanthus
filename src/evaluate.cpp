@@ -22,93 +22,6 @@
  * trade of a dog for two rabbits.
  ****************************************************************************/
 
-#include <iostream>
-
-float harlog(const uint8_t total_pieces, const uint8_t num_rabbits, const uint8_t *num_pieces_other);
-
-inline void calc_num_stronger_pieces(const uint8_t *num_pieces, uint8_t *num_stronger_pieces)
-{
-    num_stronger_pieces[E] = 0;
-    for (int8_t i=M; i >= 0; --i) {
-        num_stronger_pieces[i] = num_stronger_pieces[i+1] + num_pieces[i+1];
-    }
-}
-
-float eval_material(const GameState& gs, const Color for_color)
-{
-    Color cl = for_color;
-    uint8_t num_stronger_pieces[nPieces];
-    uint8_t num_enemy_pieces[nPieces];
-    const Board rabbit_board = gs.get_piece_board(R);
-    Board color_board = gs.get_color_board(cl);
-    uint8_t total_pieces = color_board.count();
-    uint8_t num_rabbits = (rabbit_board & color_board).count();
-    get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
-    calc_num_stronger_pieces(num_enemy_pieces, num_stronger_pieces);
-    float pos_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
-    
-    cl = other_color(cl);
-    color_board = gs.get_color_board(cl);
-    total_pieces = color_board.count();
-    num_rabbits = (rabbit_board & color_board).count();
-    get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
-    calc_num_stronger_pieces(num_enemy_pieces, num_stronger_pieces);
-    float neg_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
-    
-    return pos_score - neg_score;
-}
-
-float harlog(const uint8_t total_pieces, const uint8_t num_rabbits, const uint8_t *num_stronger_pieces)
-{
-    const static float Q = 1.447530126, G=0.6314442034;
-    
-    float score = 0.;
-    for(unsigned int i=C; i < nPieces; ++i) {
-        uint8_t num_stronger = num_stronger_pieces[i];
-        if (num_stronger) {
-            score += 1. / (Q + num_stronger);
-        } else {
-            score += 2. / Q;
-        }
-    }
-    score += G * approx_log(num_rabbits * total_pieces);
-    return score;
-}
-
-/*****************************************************************************
- * DAPE (Optimized Coefficients) 
- * 
- * With coefficients optimized by my system, DAPE outperformed the other
- * algorithms and not by a small amount!  How much of this is due to DAPE being
- * a better description of Arimaa's mechanics (pieces evaluated with respect to
- * how many other pieces they can beat) and how much is due to the fact that
- * DAPE has seven tweakable coefficients is not clear.  While the end
- * performance was fairly consistent, the actual coefficients varied quite a
- * bit; each time I ran the optimizer it found a slightly different solution
- * for DAPE.   With seven interdependent coefficients, there are bound to be
- * many local minima in the error function. 
- *
- * Here are the coefficients (using Toby's terminology from this post and the
- * code on Janzert's calculator) at the end of the best-performing optimizing
- * run: 
- * 
- * A=27.9307 
- * S=0.7833 
- * E=0.4282 
- * AR = -0.46 
- * BR = -1.0683 
- * AN = 428.7 
- * BN = 0.9755 
- * (Error = 1870.34) 
- * 
- * The higher values of S and E (relative to the defaults) are telling us that,
- * like with FAME, having a larger number of pieces is more important than
- * having stronger pieces (relative to what we think, anyhow.)   AN and AR are
- * not described in 99of9's original post on DAPE but are alluded to later in
- * the thread and can be found in the code on Janzert's FAME/DAPE web page. 
- ****************************************************************************/
-
-
 /* The JS code from Janzert's website.
  *
 function harlog(pcs, rbts) {
@@ -166,6 +79,90 @@ function harlog(pcs, rbts) {
     }
 
 */
+
+
+static float harlog(const uint8_t total_pieces, const uint8_t num_rabbits, const uint8_t *num_stronger_pieces)
+{
+    const static float Q = 1.447530126, G=0.6314442034;
+    
+    float score = 0.;
+    for(unsigned int i=C; i < nPieces; ++i) {
+        uint8_t num_stronger = num_stronger_pieces[i];
+        if (num_stronger) {
+            score += 1. / (Q + num_stronger);
+        } else {
+            score += 2. / Q;
+        }
+    }
+    score += G * approx_log(num_rabbits * total_pieces);
+    return score;
+}
+
+
+static inline void calc_num_stronger_pieces(const uint8_t *num_pieces, uint8_t *num_stronger_pieces)
+{
+    num_stronger_pieces[E] = 0;
+    for (int8_t i=M; i >= 0; --i) {
+        num_stronger_pieces[i] = num_stronger_pieces[i+1] + num_pieces[i+1];
+    }
+}
+
+float eval_material(const GameState& gs)
+{
+    uint8_t cl = gs.get_color();
+    uint8_t num_stronger_pieces[nPieces];
+    uint8_t num_enemy_pieces[nPieces];
+    const Board rabbit_board = gs.get_piece_board(R);
+    Board color_board = gs.get_color_board(cl);
+    uint8_t total_pieces = color_board.count();
+    uint8_t num_rabbits = (rabbit_board & color_board).count();
+    get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
+    calc_num_stronger_pieces(num_enemy_pieces, num_stronger_pieces);
+    float pos_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
+    
+    cl = other_color(cl);
+    color_board = gs.get_color_board(cl);
+    total_pieces = color_board.count();
+    num_rabbits = (rabbit_board & color_board).count();
+    get_num_pieces_array(gs, other_color(cl), num_enemy_pieces);
+    calc_num_stronger_pieces(num_enemy_pieces, num_stronger_pieces);
+    float neg_score = harlog(total_pieces, num_rabbits, num_stronger_pieces);
+    
+    return pos_score - neg_score;
+}
+
+/*****************************************************************************
+ * DAPE (Optimized Coefficients) 
+ * 
+ * With coefficients optimized by my system, DAPE outperformed the other
+ * algorithms and not by a small amount!  How much of this is due to DAPE being
+ * a better description of Arimaa's mechanics (pieces evaluated with respect to
+ * how many other pieces they can beat) and how much is due to the fact that
+ * DAPE has seven tweakable coefficients is not clear.  While the end
+ * performance was fairly consistent, the actual coefficients varied quite a
+ * bit; each time I ran the optimizer it found a slightly different solution
+ * for DAPE.   With seven interdependent coefficients, there are bound to be
+ * many local minima in the error function. 
+ *
+ * Here are the coefficients (using Toby's terminology from this post and the
+ * code on Janzert's calculator) at the end of the best-performing optimizing
+ * run: 
+ * 
+ * A=27.9307 
+ * S=0.7833 
+ * E=0.4282 
+ * AR = -0.46 
+ * BR = -1.0683 
+ * AN = 428.7 
+ * BN = 0.9755 
+ * (Error = 1870.34) 
+ * 
+ * The higher values of S and E (relative to the defaults) are telling us that,
+ * like with FAME, having a larger number of pieces is more important than
+ * having stronger pieces (relative to what we think, anyhow.)   AN and AR are
+ * not described in 99of9's original post on DAPE but are alluded to later in
+ * the thread and can be found in the code on Janzert's FAME/DAPE web page. 
+ ****************************************************************************/
 
 /*
 function dape(pcs, rbts, CA, CS, CE, AR, BR, AN, BN, normal) {

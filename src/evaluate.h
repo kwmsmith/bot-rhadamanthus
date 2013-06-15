@@ -29,6 +29,8 @@ inline float approx_log(float x)
     // }
 // }
 
-float eval_material(const GameState& gs, const Color for_color);
+float evaluate(const GameState& gs);
+
+float eval_material(const GameState& gs);
 
 #endif
