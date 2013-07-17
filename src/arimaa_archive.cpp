@@ -216,13 +216,32 @@ const vector<Step> &ArchivedGame::get_move(unsigned int idx) const
     return movelist_->at(idx);
 }
 
-bool setup_archive_game(const ArchivedGame& ag, GameState *gs)
+bool setup(const ArchivedGame& ag, GameState *gs)
 {
-
     for (unsigned int idx=0; idx < 2; ++idx) {
         const vector<Step> &full_move = ag.get_move(idx);
         for (vector<Step>::const_iterator it=full_move.begin();
                 it != full_move.end(); ++it) {
+            if (!it->is_placement())
+                return false;
+            if (!gs->add_piece_at(*it))
+                return false;
+        }
+        gs->flip_color();
+    }
+    return true;
+}
+
+bool make_moves(const ArchivedGame& ag, GameState *gs)
+{
+    const unsigned int numply = ag.get_numply();
+
+    for (unsigned int idx=2; idx < numply; ++idx) {
+        const vector<Step> &full_move = ag.get_move(idx);
+        for (vector<Step>::const_iterator it=full_move.begin();
+                it != full_move.end(); ++it) {
+            if (it->is_capture())
+                continue;
             if (!gs->take_step(*it))
                 return false;
         }
@@ -231,20 +250,9 @@ bool setup_archive_game(const ArchivedGame& ag, GameState *gs)
     return true;
 }
 
-bool play_archive_game(const ArchivedGame& ag, GameState *gs)
+bool play(const ArchivedGame& ag, GameState *gs)
 {
-    const unsigned int numply = ag.get_numply();
-
-    for (unsigned int idx=0; idx < numply; ++idx) {
-        const vector<Step> &full_move = ag.get_move(idx);
-        for (vector<Step>::const_iterator it=full_move.begin();
-                it != full_move.end(); ++it) {
-            if (!gs->take_step(*it))
-                return false;
-        }
-        gs->flip_color();
-        // std::cout << gs->to_std_string() << std::endl;
-        // std::cout << gs->get_hash() << std::endl;
-    }
-    return true;
+    if (!setup(ag, gs))
+        return false;
+    return make_moves(ag, gs);
 }

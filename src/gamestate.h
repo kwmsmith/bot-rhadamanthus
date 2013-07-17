@@ -69,6 +69,7 @@ class GameState
 
         bool is_empty() const;
 
+        bool add_piece_at(const Step &s);
         bool add_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
 
         bool add_piece_at(const uint8_t c, const uint8_t p, const char file, const int rank) {
@@ -138,6 +139,7 @@ void generate_pushes(const GameState& gs, std::vector<Delta> *pushes);
 void generate_pulls(const GameState& gs, std::vector<Delta> *pulls);
 void generate_steps(const GameState& gs, std::vector<Delta> *steps);
 
+void take_step_and_capture(const Step& step, GameState *gs);
 void apply_delta_and_capture(const Delta& dd, GameState *gs);
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);

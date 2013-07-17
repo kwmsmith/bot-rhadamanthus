@@ -14,7 +14,7 @@ uint8_t flip_row(uint8_t psn)
     return flip_row * 8 + col;
 }
 
-static void take_step_and_capture(const Step& step, GameState *gs)
+void take_step_and_capture(const Step& step, GameState *gs)
 {
     assert(step.is_motion());
     gs->take_step(step);
@@ -171,29 +171,15 @@ std::string GameState::to_oneline_string(const char empty) const
 
 bool GameState::take_step(const Step &s)
 {
-    if (!s.is_valid())
-        return false;
-
     const int c = s.get_color(), p = s.get_piece(), pos = s.get_position(), finish = s.get_finish();
-
     assert(c == W || c == B);
+    assert(s.is_motion());
+    return move_piece(c, p, pos, finish);
+}
 
-    switch(s.get_action()) {
-        case NORTH:
-            return move_piece(c, p, pos, finish);
-        case SOUTH:
-            return move_piece(c, p, pos, finish);
-        case EAST:
-            return move_piece(c, p, pos, finish);
-        case WEST:
-            return move_piece(c, p, pos, finish);
-        case CAPTURE:
-            return remove_piece_at(c, p, pos);
-        case ADD:
-            return add_piece_at(c, p, pos);
-    }
-    assert(0); // should never get here.
-    return false;
+bool GameState::add_piece_at(const Step &s)
+{
+    return add_piece_at(s.get_color(), s.get_piece(), s.get_position());
 }
 
 bool GameState::add_piece_at(const uint8_t c, const uint8_t piece, const uint8_t idx)

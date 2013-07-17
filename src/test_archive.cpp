@@ -47,9 +47,8 @@ TEST(ArimaaArchive, play_archive_game) {
     a.init("fake_archive.txt");
     ArchivedGame g(a.get_record());
     GameState gs;
-    EXPECT_TRUE(setup_archive_game(g, &gs));
-    gs.clear();
-    EXPECT_TRUE(play_archive_game(g, &gs));
+    EXPECT_TRUE(setup(g, &gs));
+    EXPECT_TRUE(make_moves(g, &gs));
 }
 
 TEST(ArimaaArchive, mobile_pieces) {
@@ -57,7 +56,7 @@ TEST(ArimaaArchive, mobile_pieces) {
     a.init("fake_archive.txt");
     ArchivedGame g(a.get_record());
     GameState gs;
-    EXPECT_TRUE(setup_archive_game(g, &gs));
+    EXPECT_TRUE(setup(g, &gs));
     GameState mobile_w, mobile_b;
     gs.copy_to(&mobile_w);
     mobile_w.apply_mask(mobile_pieces(gs, W));

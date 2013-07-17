@@ -68,7 +68,8 @@ class ArchivedGame
         ArchivedGame& operator=(const ArchivedGame&);
 };
 
-bool play_archive_game(const ArchivedGame& ag, GameState *gs);
-bool setup_archive_game(const ArchivedGame& ag, GameState *gs);
+bool setup(const ArchivedGame& ag, GameState *gs);
+bool make_moves(const ArchivedGame& ag, GameState *gs);
+bool play(const ArchivedGame& ag, GameState *gs);
 
 #endif // ARIMAA_ARCHIVE_H_
