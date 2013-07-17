@@ -47,8 +47,7 @@ TEST(ArimaaArchive, play_archive_game) {
     a.init("fake_archive.txt");
     ArchivedGame g(a.get_record());
     GameState gs;
-    EXPECT_TRUE(setup(g, &gs));
-    EXPECT_TRUE(make_moves(g, &gs));
+    EXPECT_TRUE(play(g, &gs));
 }
 
 TEST(ArimaaArchive, mobile_pieces) {
@@ -62,7 +61,4 @@ TEST(ArimaaArchive, mobile_pieces) {
     mobile_w.apply_mask(mobile_pieces(gs, W));
     gs.copy_to(&mobile_b);
     mobile_b.apply_mask(mobile_pieces(gs, B));
-    // std::cout << gs.to_std_string() << std::endl;
-    // std::cout << mobile_w.to_std_string() << std::endl;
-    // std::cout << mobile_b.to_std_string() << std::endl;
 }

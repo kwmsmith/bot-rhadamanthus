@@ -241,6 +241,7 @@ bool make_moves(const ArchivedGame& ag, GameState *gs)
         for (vector<Step>::const_iterator it=full_move.begin();
                 it != full_move.end(); ++it) {
             if (it->is_capture())
+                // TODO: XXX: verify_capture(*gs, *it);
                 continue;
             if (!gs->take_step(*it))
                 return false;

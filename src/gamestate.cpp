@@ -333,21 +333,6 @@ void generate_steps(const GameState& gs, std::vector<Delta> *steps)
     }
 }
 
-// uint8_t generate_captures(const GameState& gs, std::vector<Step> *captures)
-// {
-    // uint8_t ncaptures = 0;
-    // Board captured = Board::capture_squares() & 
-        // (gs.get_all_const() & ~(adj_friendly(gs, B) | adj_friendly(gs, W)));
-    
-    // while(!captured.is_empty()) {
-        // uint8_t captured_idx = captured.idx_and_reset();
-        // assert(gs.get_all_const().contains(captured_idx));
-        // captures->push_back(step_from_gs(gs, captured_idx, CAPTURE));
-        // ncaptures++;
-    // }
-    // return ncaptures;
-// }
-
 bool possible_capture_from_motion(const GameState &gs, const Step& step_taken)
 {
     const unsigned char finish = step_taken.get_finish();
