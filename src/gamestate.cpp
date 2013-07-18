@@ -17,7 +17,7 @@ uint8_t flip_row(uint8_t psn)
 void take_step_and_capture(const Step& step, GameState *gs)
 {
     assert(step.is_motion());
-    gs->take_step(step);
+    gs->move_piece(step);
     Step capture_step;
     if (possible_capture_from_motion(*gs, step)) {
         capture_from_motion(step, gs);
@@ -169,14 +169,6 @@ std::string GameState::to_oneline_string(const char empty) const
     return '[' + s + ']';
 }
 
-bool GameState::take_step(const Step &s)
-{
-    const int c = s.get_color(), p = s.get_piece(), pos = s.get_position(), finish = s.get_finish();
-    assert(c == W || c == B);
-    assert(s.is_motion());
-    return move_piece(c, p, pos, finish);
-}
-
 bool GameState::add_piece_at(const Step &s)
 {
     return add_piece_at(s.get_color(), s.get_piece(), s.get_position());
@@ -204,6 +196,13 @@ bool GameState::remove_piece_at(const uint8_t c, const uint8_t piece, const uint
     remove_piece_at_fast(c, piece, idx);
     assert(!(_pieces[piece] & get_color_board(c)).contains(idx));
     return true;
+}
+
+bool GameState::move_piece(const Step &s)
+{
+    assert(s.is_motion());
+    const uint8_t c = s.get_color(), p = s.get_piece(), pos = s.get_position(), finish = s.get_finish();
+    return move_piece(c, p, pos, finish);
 }
 
 bool GameState::move_piece(const uint8_t c, const uint8_t piece, const uint8_t from, const uint8_t to)

@@ -243,7 +243,7 @@ bool make_moves(const ArchivedGame& ag, GameState *gs)
             if (it->is_capture())
                 // TODO: XXX: verify_capture(*gs, *it);
                 continue;
-            if (!gs->take_step(*it))
+            if (!gs->move_piece(*it))
                 return false;
         }
         gs->flip_color();

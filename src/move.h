@@ -50,7 +50,7 @@ class Move
             assert(get_stepsleft() >= 1);
             steps_[total_steps_taken_] = step;
             total_steps_taken_++;
-            gs_.take_step(step);
+            gs_.move_piece(step);
             Step capture_step;
             if (possible_capture_from_motion(gs_, step)) {
                 capture_from_motion(step, &gs_);

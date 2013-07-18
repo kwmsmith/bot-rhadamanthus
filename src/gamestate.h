@@ -22,8 +22,7 @@ class GameState
             _zhash.clear();
         }
 
-        bool take_step(const Step &s);
-
+        bool move_piece(const Step &s);
         bool move_piece(const uint8_t c, const uint8_t p, const uint8_t from, const uint8_t to);
         
         const uint8_t get_color() const {
