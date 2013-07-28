@@ -1,4 +1,5 @@
 #include <inttypes.h>
+#include <limits.h>
 #include <sparsehash/dense_hash_set>
 #include <sparsehash/dense_hash_map>
 
