@@ -2,7 +2,9 @@
 #include "move.h"
 #include "evaluate.h"
 
-static int quiesce(const GameState& gs, int alpha, int beta)
+#include <iostream>
+
+static float quiesce(const GameState& gs, float alpha, float beta)
 {
     // TODO: Implement quiescence search!!!
     return evaluate(gs);
@@ -30,31 +32,45 @@ int quiesce(int alpha, int beta) {
 }
 */
 
-
-int alphabeta(const GameState& gs, int alpha, int beta, int depthleft)
+static void generate_deltas(const GameState& gs, const int depthleft, std::vector<Delta> *deltas)
 {
-    if(depthleft == 0)
+    if (gs.get_stepsleft() >= 2 && depthleft >= 2) {
+        generate_pushes(gs, deltas);
+        generate_pulls(gs, deltas);
+    }
+    if (gs.get_stepsleft() >= 1 && depthleft >= 1)
+        generate_steps(gs, deltas);
+}
+
+float alphabeta(const GameState& gs, float alpha, float beta, int depthleft)
+{
+    if(depthleft == 0) 
         return quiesce(gs, alpha, beta);
 
     assert(gs.get_stepsleft());
 
     std::vector<Delta> deltas;
-    if (gs.get_stepsleft() >= 2) {
-        generate_pushes(gs, &deltas);
-        generate_pulls(gs, &deltas);
-    }
-    generate_steps(gs, &deltas);
+    generate_deltas(gs, depthleft, &deltas);
     
     for (delta_it it=deltas.begin(); it != deltas.end(); ++it) {
-        // XXX TODO: finish!!!
-        // const int score = -alphaBeta((*it)->get_gamestate(), other_color(this_color),
-                                      // -beta, -alpha, depthleft - 1);
-        // if(score >= beta) {
-            // return beta;   //  fail hard beta-cutoff
-        // }
-        // if(score > alpha) {
-            // alpha = score; // alpha acts like max in MiniMax
-        // }
+        // apply delta
+        GameState new_gs = gs;
+        apply_delta_and_capture(*it, &new_gs);
+        float score = 0.0;
+        assert(depthleft >= it->size());
+        if (new_gs.get_stepsleft()) {
+            score = alphabeta(new_gs, alpha, beta, depthleft - it->size());
+        }
+        else {
+            new_gs.flip_color();
+            score = -alphabeta(new_gs, -beta, -alpha, depthleft - it->size());
+        }
+        if(score >= beta) {
+            return beta;   //  fail hard beta-cutoff
+        }
+        if(score > alpha) {
+            alpha = score; // alpha acts like max in MiniMax
+        }
     }
     return alpha;
 }

@@ -31,7 +31,6 @@ void apply_delta_and_capture(const Delta& dd, GameState *gs)
         take_step_and_capture(dd.second(), gs);
 }
 
-
 bool gamestate_from_oneline(const std::string& ss, GameState *gs)
 {
     int idx = 0;

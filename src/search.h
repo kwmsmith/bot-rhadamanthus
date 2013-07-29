@@ -3,6 +3,6 @@
 
 #include "gamestate.h"
 
-int alphabeta(const GameState& gs, int alpha, int beta, int depthleft);
+float alphabeta(const GameState& gs, float alpha, float beta, int depthleft);
 
 #endif

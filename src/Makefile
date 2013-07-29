@@ -9,9 +9,9 @@ SPARSEHASH_INCL = $(HOME)/Devel/sparsehash/include
 # PROFILE_LIB = -L$(HOME)/Devel/gperftools-install/lib -lprofiler
 # CXXFLAGS = -g -O1 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
 
-OBJS = board.o step.o gamestate.o arimaa_archive.o transposition.o move.o evaluate.o
-TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp test_move.cpp test_evaluate.cpp
-TEST_OBJS = test_board.o test_step.o test_gamestate.o test_archive.o test_transposition.o test_move.o test_evaluate.o
+OBJS = board.o step.o gamestate.o arimaa_archive.o transposition.o move.o evaluate.o search.o
+TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp test_move.cpp test_evaluate.cpp test_search.cpp
+TEST_OBJS = test_board.o test_step.o test_gamestate.o test_archive.o test_transposition.o test_move.o test_evaluate.o test_search.o
 
 GTEST_DIR = /Users/ksmith/Devel/googletest
 GTEST_INC = $(GTEST_DIR)/include

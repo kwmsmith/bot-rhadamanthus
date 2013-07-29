@@ -1,5 +1,7 @@
 #include "evaluate.h"
 
+#include <iostream>
+
 /*****************************************************************************
  * HarLog: http://arimaa.com/arimaa/forum/cgi/YaBB.cgi?board=devTalk;action=display;num=1062013358
  *
@@ -105,6 +107,12 @@ static inline void calc_num_stronger_pieces(const uint8_t *num_pieces, uint8_t *
     for (int8_t i=M; i >= 0; --i) {
         num_stronger_pieces[i] = num_stronger_pieces[i+1] + num_pieces[i+1];
     }
+}
+
+float evaluate(const GameState& gs)
+{
+    const float em = eval_material(gs);
+    return em;
 }
 
 float eval_material(const GameState& gs)
