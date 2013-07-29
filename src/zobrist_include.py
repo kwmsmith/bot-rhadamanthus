@@ -8,6 +8,7 @@ const uint64_t zobrist_array_[] = {{
 }};
 
 // end automatically generated random numbers.
+// vim:ft=cpp noma
 '''
 
 def main(args):
