@@ -13,3 +13,7 @@ TEST(ZobristHash, hash) {
     zhash.addrm_piece_at(B, D, 32);
     EXPECT_EQ(zhash.get_hash(), 0);
 }
+
+TEST(transposition, TranspositionTable) {
+    TranspositionTable tt(500);
+}
