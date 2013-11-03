@@ -3,7 +3,6 @@
 
 #include <inttypes.h>
 #include "board.h"
-#include "boost/scoped_ptr.hpp"
 
 class ZobristHash
 {

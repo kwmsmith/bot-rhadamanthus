@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include "boost/unordered_map.hpp"
-#include "boost/scoped_ptr.hpp"
 
 #include "step.h"
 #include "gamestate.h"
@@ -62,7 +61,7 @@ class ArchivedGame
 
     private:
 
-        boost::scoped_ptr<std::vector<std::vector<Step> > > movelist_;
+        const std::auto_ptr<std::vector<std::vector<Step> > > movelist_;
 
         ArchivedGame(const ArchivedGame&);
         ArchivedGame& operator=(const ArchivedGame&);

@@ -1,6 +1,5 @@
-CXX = g++
-# CXX = /opt/local/bin/g++-mp-4.7
-# CXX = clang++
+# CXX = g++
+CXX = clang++ -std=c++11
 
 BASE_DIR = ../..
 SPARSEHASH_INCL = $(BASE_DIR)/sparsehash/include

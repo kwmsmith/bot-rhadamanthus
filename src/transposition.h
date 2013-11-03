@@ -2,7 +2,6 @@
 #define TRANSPOSITION_H__
 
 #include <inttypes.h>
-#include "boost/scoped_ptr.hpp"
 #include "zobrist.h"
 
 struct TTNode
@@ -56,7 +55,7 @@ class TranspositionTable
         // }
 
     private:
-        boost::scoped_ptr<std::vector<TTNode> > _store;
+        const std::auto_ptr<std::vector<TTNode> > _store;
         uint64_t _size_MB;
         uint64_t _hits, _miss, _collisions, _nelt;
 
