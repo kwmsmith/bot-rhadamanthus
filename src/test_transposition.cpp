@@ -15,5 +15,5 @@ TEST(ZobristHash, hash) {
 }
 
 TEST(transposition, TranspositionTable) {
-    TranspositionTable tt(500);
+    TranspositionTable tt(512);
 }

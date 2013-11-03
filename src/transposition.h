@@ -2,34 +2,8 @@
 #define TRANSPOSITION_H__
 
 #include <inttypes.h>
-#include "board.h"
 #include "boost/scoped_ptr.hpp"
-
-class ZobristHash
-{
-    public:
-
-        ZobristHash() : _hash(0ULL) {};
-
-        void clear() { _hash = 0ULL; };
-
-        const uint64_t get_hash() const { return _hash; };
-
-        void addrm_piece_at(const int color, const int piece, const int idx) {
-            const uint64_t *zarr = get_zobrist_array();
-            const int zidx = idx + 64 * (piece + nPieces * color);
-            _hash ^= zarr[zidx];
-        }
-
-        void flip_color() {
-            _hash ^= swap_color_;
-        }
-
-    private:
-        static const uint64_t *get_zobrist_array();
-        static const uint64_t swap_color_ = 0x271828DEADBEEFULL;
-        uint64_t _hash;
-};
+#include "zobrist.h"
 
 struct TTNode
 {
@@ -53,19 +27,38 @@ class TranspositionTable
     public:
 
         TranspositionTable(uint64_t size_MB) 
-            : _store(new std::vector<TTNode>), _size_MB(size_MB), _hits(0), _miss(0), _collisions(0) 
+            : _store(new std::vector<TTNode>), _size_MB(size_MB), _hits(0), _miss(0), _collisions(0), _nelt(0)
         {
-            uint64_t nelt = (1024 * 1024 * size_MB) / sizeof(TTNode); 
-            nelt = nelt < 1 ? 1 : nelt;
-            std::cout << "number of elements: " << nelt << '\n';
-            std::cout << "memory used: " << nelt * sizeof(TTNode) / (1024 * 1024) << '\n';
-            _store->resize(nelt);
+            _nelt = 2;
+            for( _nelt=2; (_nelt << 1) * sizeof(TTNode) <= (1024 * 1024 * size_MB); _nelt <<=1) ;
+            assert(_nelt >= 2);
+            _store->resize(_nelt);
         }
+
+        // const TTNode* get(const ZobristHash &zhash) 
+        // {
+            // // The mask value is limited to half of the nelts in the _store, so
+            // // (_nelt >> 1) - 1.  The '-1' is to set all ones.  If _nelt == 32
+            // // (0b00010000), then mask == 15 (0b00000111).  
+            // // The key is lshifted by 1, multiplying by 2.  So the key is
+            // // always even, leaving room for the backup entry in _store at (key
+            // // + 1).
+            // const uint64_t key = (zhash.get_hash() & ((_nelt >> 1) - 1) << 1);
+            // assert(key < _nelt);
+            // TTNode *node = &_store[key];
+            // if (node->_zobrist == zhash) {
+                // return node;
+            // }
+            // else {
+                // node = &_store[key+1];
+            // }
+            // return NULL;
+        // }
 
     private:
         boost::scoped_ptr<std::vector<TTNode> > _store;
         uint64_t _size_MB;
-        uint64_t _hits, _miss, _collisions; 
+        uint64_t _hits, _miss, _collisions, _nelt;
 
 };
 
