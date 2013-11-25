@@ -1,15 +1,21 @@
 # CXX = g++
-CXX = clang++ -std=c++11
+# CXX98 = clang++
+CXX = clang++ 
 
 BASE_DIR = ../..
 SPARSEHASH_INCL = $(BASE_DIR)/sparsehash/include
 BOOST_INCL = $(BASE_DIR)/boost
 
 INCLUDE = -I$(BOOST_INCL) -I$(SPARSEHASH_INCL)
-CXXFLAGS = -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
+
+STD_FLAGS = -std=c++11 -stdlib=libc++ -nostdinc++ -I/Users/ksmith/Devel/llvm-libcxx-svn/include -L/Users/ksmith/Devel/llvm-libcxx-svn/lib
 
 GTEST_DIR = $(BASE_DIR)/googletest
 GTEST_INC = $(GTEST_DIR)/include
+# GTEST_FLAGS = -DGTEST_USE_OWN_TR1_TUPLE=0 -DGTEST_HAS_TR1_TUPLE=0 $(STD_FLAGS)
+GTEST_FLAGS = -DGTEST_USE_OWN_TR1_TUPLE=0 -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_LANG_CXX11=1 $(STD_FLAGS) -Wno-narrowing
+
+CXXFLAGS = $(GTEST_FLAGS) -Wno-narrowing -O3 -Wall -pedantic -Wno-format -Wno-long-long $(INCLUDE)
 
 OBJS = board.o step.o gamestate.o arimaa_archive.o zobrist.o transposition.o move.o evaluate.o search.o
 TEST_SRC = test_board.cpp test_step.cpp test_gamestate.cpp test_archive.cpp test_transposition.cpp test_move.cpp test_evaluate.cpp test_search.cpp
@@ -25,8 +31,8 @@ transposition.o : transposition.cpp transposition.h zobrist_array.include
 	$(CXX) $(CXXFLAGS) -c transposition.cpp -o $@
 
 libgtest.a:
-	$(CXX) -I$(GTEST_INC) -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest-all.cc
-	$(CXX) -I$(GTEST_INC) -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest_main.cc
+	$(CXX) $(GTEST_FLAGS) -I$(GTEST_INC) -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) $(GTEST_FLAGS) -I$(GTEST_INC) -I$(GTEST_DIR) -c $(GTEST_DIR)/src/gtest_main.cc
 	$(AR) -rv libgtest.a gtest-all.o gtest_main.o
 
 test_board.x: test_board.cpp board.o libgtest.a
@@ -39,10 +45,10 @@ test_transposition.x: test_transposition.cpp transposition.o libgtest.a
 	$(CXX) -I${GTEST_INC} $^ -lpthread -o $@
 	
 %.o : %.cpp
-	$(CXX) -I$(GTEST_INC) $(CXXFLAGS) -c $^ 
+	$(CXX) $(CXXFLAGS) -I$(GTEST_INC) -c $^ 
 
 test_all.x : $(OBJS) $(TEST_OBJS) libgtest.a
-	$(CXX) $(INCLUDE) -I$(GTEST_INC)  $^ -lpthread -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -I$(GTEST_INC)  $^ -lpthread -o $@
 
 test: test_all.x
 	./test_all.x
@@ -56,7 +62,7 @@ test-valgrind: gen_move_perf.x
 	# valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./$^
 
 clean:
-	rm -r build sipboard*.cpp sipAPIboard.h *.so *.o *.pyc *.x
+	-rm -r build sipboard*.cpp sipAPIboard.h *.so *.o *.pyc *.x
 
 cleanall: clean
-	rm libgtest.a
+	-rm libgtest.a

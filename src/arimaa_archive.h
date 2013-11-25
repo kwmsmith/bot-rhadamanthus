@@ -4,12 +4,14 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include "boost/unordered_map.hpp"
+#include <unordered_map>
+// #include "boost/unordered_map.hpp"
 
 #include "step.h"
 #include "gamestate.h"
 
-typedef boost::unordered_map<std::string, std::string> map_ss;
+// typedef boost::unordered_map<std::string, std::string> map_ss;
+typedef std::unordered_map<std::string, std::string> map_ss;
 
 std::vector<std::string> &split(const std::string &, const char, std::vector<std::string> &);
 std::vector<std::string> &split(const std::string &, const std::string &, std::vector<std::string> &);
