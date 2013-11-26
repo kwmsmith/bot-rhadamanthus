@@ -55,14 +55,15 @@ map_ss ArimaaArchive::get_record()
     if(!get_line(archive_fh_, line)) {
         return map_ss();
     }
-    vector<string> values = split(line, '\t');
+    vector<string> values;
+    split(values, line, "\t", true);
     if(values.size() != get_num_columns()) {
         return map_ss();
     }
     vector<string> canon = canonical_columns();
     map_ss mp;
     for(vsit key_it = canon.begin(), val_it = values.begin() ;
-            key_it != canon.end(), val_it != values.end() ;
+            key_it != canon.end() && val_it != values.end() ;
             ++key_it, ++val_it)
         mp[*key_it] = *val_it;
     return mp;
@@ -90,41 +91,13 @@ int ArimaaArchive::read_and_validate_header()
     string header = "";
     if(!get_line(archive_fh_, header))
         return 0;
-    vector<string> columns = split(header, '\t');
+    vector<string> columns;
+    split(columns, header, "\t", true);
     vector<string> canon = canonical_columns();
     if (!equal(columns.begin(), columns.end(),  canon.begin())) {
         return 0;
     }
     return 1;
-}
-
-vector<string> &split(const string &s, const string &delim, vector<string> &elems)
-{
-    size_t start = 0, stop = 0;
-
-    stop = s.find(delim, start);
-    while(stop != string::npos) {
-        elems.push_back(s.substr(start, stop-start));
-        start = stop + delim.length();
-        stop = s.find(delim, start);
-    }
-    return elems;
-}
-
-vector<string> &split(const string &s, const char delim, vector<string> &elems) 
-{
-    stringstream ss(s);
-    string item;
-    while(getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
-
-vector<string> split(const string &s, const char delim) 
-{
-    vector<string> elems;
-    return split(s, delim, elems);
 }
 
 static bool get_line(FILE *fp, string &line)
@@ -155,10 +128,10 @@ vector<string> get_record_setup(const map_ss& record, int color)
     if (record.count("movelist") != 1)
         return ret;
     vector<string> all_moves;
-    split(record.at("movelist"), "\\n", all_moves);
+    split(all_moves, record.at("movelist"), "\\n", true);
     vector<string> placement_white, placement_black;
-    split(all_moves[0], ' ', placement_white);
-    split(all_moves[1], ' ', placement_black);
+    split(placement_white, all_moves[0], " ", true);
+    split(placement_black, all_moves[1], " ", true);
     return (color == W ? placement_white : placement_black);
 }
 
@@ -179,14 +152,14 @@ ArchivedGame::ArchivedGame(const map_ss& record)
     unsigned long plycount_ = strtoul(record.at("plycount").c_str(), NULL, 0);
 
     vector<string> all_moves;
-    split(record.at("movelist"), "\\n", all_moves);
+    split(all_moves, record.at("movelist"), "\\n", true);
 
     bool res = false;
 
     for (vector<string>::iterator it=all_moves.begin();
             it != all_moves.end(); ++it) {
         vector<string> steps_str;
-        split(*it, ' ', steps_str);
+        split(steps_str, *it, " ", true);
         assert(steps_str.size() >= 1);
         vector<Step> steps;
         res = vecstep_from_vecstr(steps_str, &steps, 1);

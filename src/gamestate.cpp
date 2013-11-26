@@ -1,10 +1,7 @@
 #include "gamestate.h"
+#include "util.h"
 #include <vector>
 #include <cstdio>
-
-#include "boost/algorithm/string.hpp"
-
-using namespace boost;
 
 uint8_t flip_row(uint8_t psn)
 {
@@ -73,13 +70,13 @@ bool gamestate_from_input(const std::string& ss, GameState *gs)
 {
     gs->clear(); // error sentinel.
     std::vector<std::string> lines;
-    split(lines, ss, is_any_of("\n"), token_compress_on);
+    split(lines, ss, "\n", false);
     for (unsigned int i=0; i < lines.size(); ++i) {
         lines[i] = trim_copy(lines[i]);
     }
     // get color to move.
     std::vector<std::string> tokens;
-    split(tokens, lines[0], is_any_of(" "), token_compress_on);
+    split(tokens, lines[0], " ", false);
     to_lower(tokens[0]);
     const char color = tokens[0][tokens[0].size() - 1];
     if (color == 'w' || color == 'g') {
@@ -97,7 +94,7 @@ bool gamestate_from_input(const std::string& ss, GameState *gs)
         tokens.clear();
         // After splitting on '|', tokens[0] is the line number.  tokens[1] is
         // the board contents.
-        split(tokens, lines[line_idx], is_any_of("|"), token_compress_on);
+        split(tokens, lines[line_idx], "|", false);
         
         // row_idx: labels the row we're in such that row_idx == 0 is gold's
         // territory; row_idx == 7 is silver's.
