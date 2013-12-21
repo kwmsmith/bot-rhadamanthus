@@ -26,7 +26,8 @@ class TranspositionTable
     public:
 
         TranspositionTable(uint64_t size_MB) 
-            : _store(new std::vector<TTNode>), _size_MB(size_MB), _hits(0), _miss(0), _collisions(0), _nelt(0)
+            : _store(new std::vector<TTNode>), _nelt(0)
+            // _size_MB(size_MB), _hits(0), _miss(0), _collisions(0)
         {
             _nelt = 2;
             for( _nelt=2; (_nelt << 1) * sizeof(TTNode) <= (1024 * 1024 * size_MB); _nelt <<=1) ;
@@ -56,8 +57,9 @@ class TranspositionTable
 
     private:
         const std::auto_ptr<std::vector<TTNode> > _store;
-        uint64_t _size_MB;
-        uint64_t _hits, _miss, _collisions, _nelt;
+        uint64_t _nelt;
+        // uint64_t _size_MB;
+        // uint64_t _hits, _miss, _collisions, _nelt;
 
 };
 

@@ -642,7 +642,6 @@ TEST(Move, clueless_benchmark) {
     };
     std::vector<Move> moves;
     GameState gs;
-    Color cc;
 
     for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
         gs.clear();
