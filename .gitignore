@@ -5,3 +5,5 @@ build
 a.out
 libgtest.a
 callgrind*
+depend.mk
+*.gch
