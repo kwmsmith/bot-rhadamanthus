@@ -74,7 +74,6 @@ TEST(Evaluate, eval_material) {
     gs.flip_color();
     evb = eval_material(gs);
     EXPECT_EQ(evw, -evb);
-    std::cout << evw << " " << evb << std::endl;
     EXPECT_TRUE(fabs(evw / normal + 13.40) < 0.01);
     
     ss = 

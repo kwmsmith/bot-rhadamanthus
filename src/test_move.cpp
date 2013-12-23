@@ -6,7 +6,7 @@
 #define ARRSIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 TEST(Move, generate_unique_moves) {
-    std::string _positions[] = {
+    std::string positions[] = {
         "10w\n"
             " +-----------------+\n"
             "8| . . . . . . . . |\n"
@@ -34,13 +34,15 @@ TEST(Move, generate_unique_moves) {
 
     unsigned int counts[] = {22, 15420};
 
+    EXPECT_EQ(ARRSIZE(positions), ARRSIZE(counts));
+
     std::vector<Move> moves;
     GameState gs;
 
-    for(unsigned int i=0; i<ARRSIZE(_positions); ++i) {
+    for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
         gs.clear();
         moves.clear();
-        EXPECT_TRUE(gamestate_from_input(_positions[i], &gs));
+        EXPECT_TRUE(gamestate_from_input(positions[i], &gs));
         generate_unique_moves(gs, &moves);
         EXPECT_EQ(moves.size(), counts[i]);
     }
@@ -87,6 +89,9 @@ TEST(Move, move_counter) {
             " +-----------------+\n"
             "   a b c d e f g h\n"
     };
+
+    EXPECT_EQ(ARRSIZE(positions), ARRSIZE(counts));
+
     GameState gs;
     for(unsigned int i=0; i<ARRSIZE(positions); ++i) {
         gs.clear();
@@ -234,6 +239,9 @@ TEST(Move, generate_moves) {
             " +-----------------+\n"
             "   a b c d e f g h\n"
     };
+
+    EXPECT_EQ(ARRSIZE(positions), ARRSIZE(counts));
+
     std::vector<Move> moves;
     GameState gs;
 
@@ -640,6 +648,9 @@ TEST(Move, clueless_benchmark) {
             " +-----------------+\n"
             "   a b c d e f g h\n",
     };
+
+    EXPECT_EQ(ARRSIZE(positions), ARRSIZE(counts));
+
     std::vector<Move> moves;
     GameState gs;
 
