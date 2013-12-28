@@ -8,130 +8,130 @@
 class GameState 
 {
 
-    public:
+  public:
 
-        GameState() {
-            clear();
-        }
+    GameState() {
+      clear();
+    }
 
-        void clear() {
-            _color[W].clear(); _color[B].clear();
-            for(int i=R; i<nPieces; ++i)
-                _pieces[i].clear();
-            _this_color = W; _stepsleft = 4;
-            _zhash.clear();
-        }
+    void clear() {
+      _color[W].clear(); _color[B].clear();
+      for(int i=R; i<nPieces; ++i)
+        _pieces[i].clear();
+      _this_color = W; _stepsleft = 4;
+      _zhash.clear();
+    }
 
-        bool move_piece(const Step &s);
-        bool move_piece(const uint8_t c, const uint8_t p, const uint8_t from, const uint8_t to);
-        
-        const uint8_t get_color() const {
-            return _this_color;
-        }
-        
-        void set_color(const int c) {
-            if (c == _this_color)
-                return;
-            flip_color();
-        }
-        
-        void flip_color() {
-            _stepsleft = 4;
-            _this_color = other_color(_this_color);
-            _zhash.flip_color();
-        }
-        
-        const uint8_t get_stepsleft() const {
-            return _stepsleft;
-        }
+    bool move_piece(const Step &s);
+    bool move_piece(const uint8_t c, const uint8_t p, const uint8_t from, const uint8_t to);
 
-        const Board& get_color_board(const int c) const {
-            assert(c == B || c == W);
-            return _color[c];
-        }
-        
-        const Board& get_piece_board(const int p) const {
-            return _pieces[p];
-        }
-        
-        const uint8_t get_count(const int p, const int c) const {
-            return (get_piece_board(p) & get_color_board(c)).count();
-        }
+    const uint8_t get_color() const {
+      return _this_color;
+    }
 
-        const Board get_all_const() const {
-            return _color[W] | _color[B];
-        }
+    void set_color(const int c) {
+      if (c == _this_color)
+        return;
+      flip_color();
+    }
 
-        bool contains_at(const uint8_t c, const uint8_t p, const uint8_t idx) const {
-            return get_color_board(c).contains(idx) && _pieces[p].contains(idx);
-        }
+    void flip_color() {
+      _stepsleft = 4;
+      _this_color = other_color(_this_color);
+      _zhash.flip_color();
+    }
 
-        bool is_empty() const;
+    const uint8_t get_stepsleft() const {
+      return _stepsleft;
+    }
 
-        bool add_piece_at(const Step &s);
-        bool add_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
+    const Board& get_color_board(const int c) const {
+      assert(c == B || c == W);
+      return _color[c];
+    }
 
-        bool add_piece_at(const uint8_t c, const uint8_t p, const char file, const int rank) {
-            assert(file >= 'A' && file <= 'H');
-            assert(rank >= 1 && rank <= 8);
-            return add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
-        }
+    const Board& get_piece_board(const int p) const {
+      return _pieces[p];
+    }
 
-        bool remove_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
-        
-        std::string to_oneline_string(const char empty='.') const;
+    const uint8_t get_count(const int p, const int c) const {
+      return (get_piece_board(p) & get_color_board(c)).count();
+    }
 
-        std::string to_std_string(const char empty='.') const;
-        
-        void apply_mask(const Board& mask) {
-            _color[W] &= mask; _color[B] &= mask;
-            for(int i=R; i<nPieces; ++i)
-                _pieces[i] &= mask;
-        }
-        
-        void copy_to(GameState *to) const {
-            *to = *this;
-        }
-        
-        void color_and_piece_at(const uint8_t idx, int8_t *c, int8_t *p) const {
-            int8_t _c = -1, _p = -1; // guilty before proven innocent...
-            
-            _c += _color[W].contains(idx) * (W+1);
-            _c += _color[B].contains(idx) * (B+1);
+    const Board get_all_const() const {
+      return _color[W] | _color[B];
+    }
 
-            const Board bitidx = Board().add(idx);
-            for(unsigned int i=0; i < nPieces; ++i)
-                _p += (_pieces[i] & bitidx).any() * (i+1);
-            
-            assert(_c >= 0 && _c <= 1);
-            assert(_p >= 0 && _p < nPieces);
-            *c = _c; *p = _p;
-        }
-        
-        const uint64_t get_hash() const { return _zhash.get_hash(); }
+    bool contains_at(const uint8_t c, const uint8_t p, const uint8_t idx) const {
+      return get_color_board(c).contains(idx) && _pieces[p].contains(idx);
+    }
 
-    private:
+    bool is_empty() const;
 
-        void add_piece_at_fast(const uint8_t c, const uint8_t piece, const uint8_t idx) {
-            assert (c == W || c == B);
-            _color[c].add(idx);
-            assert(_color[c].contains(idx));
-            _pieces[piece].add(idx);
-            assert(_pieces[piece].contains(idx));
-            _zhash.addrm_piece_at(c, piece, idx);
-        }
+    bool add_piece_at(const Step &s);
+    bool add_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
 
-        void remove_piece_at_fast(const uint8_t c, const uint8_t piece, const uint8_t idx) {
-            assert (c == W || c == B);
-            _color[c].remove(idx);
-            _pieces[piece].remove(idx);
-            _zhash.addrm_piece_at(c, piece, idx);
-        }
+    bool add_piece_at(const uint8_t c, const uint8_t p, const char file, const int rank) {
+      assert(file >= 'A' && file <= 'H');
+      assert(rank >= 1 && rank <= 8);
+      return add_piece_at(c, p, (rank - 1) * 8 + (file - 'A'));
+    }
 
-        Board _color[2];
-        Board _pieces[nPieces];
-        ZobristHash _zhash;
-        uint8_t _this_color, _stepsleft;
+    bool remove_piece_at(const uint8_t c, const uint8_t p, const uint8_t idx);
+
+    std::string to_oneline_string(const char empty='.') const;
+
+    std::string to_std_string(const char empty='.') const;
+
+    void apply_mask(const Board& mask) {
+      _color[W] &= mask; _color[B] &= mask;
+      for(int i=R; i<nPieces; ++i)
+        _pieces[i] &= mask;
+    }
+
+    void copy_to(GameState *to) const {
+      *to = *this;
+    }
+
+    void color_and_piece_at(const uint8_t idx, int8_t *c, int8_t *p) const {
+      int8_t _c = -1, _p = -1; // guilty before proven innocent...
+
+      _c += _color[W].contains(idx) * (W+1);
+      _c += _color[B].contains(idx) * (B+1);
+
+      const Board bitidx = Board().add(idx);
+      for(unsigned int i=0; i < nPieces; ++i)
+        _p += (_pieces[i] & bitidx).any() * (i+1);
+
+      assert(_c >= 0 && _c <= 1);
+      assert(_p >= 0 && _p < nPieces);
+      *c = _c; *p = _p;
+    }
+
+    const uint64_t get_hash() const { return _zhash.get_hash(); }
+
+  private:
+
+    void add_piece_at_fast(const uint8_t c, const uint8_t piece, const uint8_t idx) {
+      assert (c == W || c == B);
+      _color[c].add(idx);
+      assert(_color[c].contains(idx));
+      _pieces[piece].add(idx);
+      assert(_pieces[piece].contains(idx));
+      _zhash.addrm_piece_at(c, piece, idx);
+    }
+
+    void remove_piece_at_fast(const uint8_t c, const uint8_t piece, const uint8_t idx) {
+      assert (c == W || c == B);
+      _color[c].remove(idx);
+      _pieces[piece].remove(idx);
+      _zhash.addrm_piece_at(c, piece, idx);
+    }
+
+    Board _color[2];
+    Board _pieces[nPieces];
+    ZobristHash _zhash;
+    uint8_t _this_color, _stepsleft;
 };
 
 void generate_pushes(const GameState& gs, std::vector<Delta> *pushes);

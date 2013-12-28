@@ -5,5 +5,5 @@
 
 const uint64_t *ZobristHash::get_zobrist_array()
 {
-    return zobrist_array_;
+  return zobrist_array_;
 }

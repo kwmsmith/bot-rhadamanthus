@@ -16,52 +16,52 @@ std::vector<std::string> get_record_setup(const map_ss& record, int color);
 
 class ArimaaArchive 
 {
-    public:
+  public:
 
-        ArimaaArchive() : archive_fh_(NULL) { }
+    ArimaaArchive() : archive_fh_(NULL) { }
 
-        ~ArimaaArchive();
+    ~ArimaaArchive();
 
-        int init(const char *fname);
+    int init(const char *fname);
 
-        static std::vector<std::string> canonical_columns();
+    static std::vector<std::string> canonical_columns();
 
-        const static unsigned int get_num_columns() {
-            return canonical_columns().size();
-        }
+    const static unsigned int get_num_columns() {
+      return canonical_columns().size();
+    }
 
-        map_ss get_record();
+    map_ss get_record();
 
-    private:
+  private:
 
-        int read_and_validate_header();
+    int read_and_validate_header();
 
-        FILE *archive_fh_;
+    FILE *archive_fh_;
 
-        // disable copying / copy constructor.
-        ArimaaArchive(const ArimaaArchive&);
-        ArimaaArchive& operator=(const ArimaaArchive&);
+    // disable copying / copy constructor.
+    ArimaaArchive(const ArimaaArchive&);
+    ArimaaArchive& operator=(const ArimaaArchive&);
 };
 
 class ArchivedGame
 {
 
-    public:
+  public:
 
-        explicit ArchivedGame(const map_ss&);
+    explicit ArchivedGame(const map_ss&);
 
-        unsigned int get_numply() const;
+    unsigned int get_numply() const;
 
-        bool verify() const;
+    bool verify() const;
 
-        const std::vector<Step> &get_move(unsigned int idx) const;
+    const std::vector<Step> &get_move(unsigned int idx) const;
 
-    private:
+  private:
 
-        const std::auto_ptr<std::vector<std::vector<Step> > > movelist_;
+    const std::auto_ptr<std::vector<std::vector<Step> > > movelist_;
 
-        ArchivedGame(const ArchivedGame&);
-        ArchivedGame& operator=(const ArchivedGame&);
+    ArchivedGame(const ArchivedGame&);
+    ArchivedGame& operator=(const ArchivedGame&);
 };
 
 bool setup(const ArchivedGame& ag, GameState *gs);

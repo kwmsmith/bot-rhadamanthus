@@ -5,7 +5,7 @@
 #include <vector>
 
 void split(std::vector<std::string>&, 
-        const std::string& ss, const std::string& delim, const bool keep_empty=true);
+    const std::string& ss, const std::string& delim, const bool keep_empty=true);
 
 std::string trim_copy(const std::string& s);
 
