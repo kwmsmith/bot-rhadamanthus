@@ -136,7 +136,7 @@ class Board {
 
     Board() : _board(0ULL) {}
 
-    explicit Board(uint64_t board) : _board(board) {}
+    Board(uint64_t board) : _board(board) {}
 
     explicit Board(const std::vector<uint8_t>& vec) : Board() {
       for(std::vector<uint8_t>::const_iterator it = vec.begin(); it != vec.end(); ++it) {

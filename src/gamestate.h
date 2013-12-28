@@ -10,9 +10,12 @@ class GameState
 
   public:
 
-    GameState() {
-      clear();
-    }
+    GameState() : _color{0ULL, 0ULL},
+      _pieces{0ULL,0ULL,0ULL,0ULL,0ULL,0ULL},
+      _zhash(),
+      _this_color(W),
+      _stepsleft(4) 
+      { }
 
     void clear() {
       _color[W].clear(); _color[B].clear();
