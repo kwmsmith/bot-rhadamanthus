@@ -130,11 +130,15 @@ class Board {
 
     public:
 
-        Board() : _board(0) {}
+        //---------------------------------------------------------------------
+        // CTORs
+        //---------------------------------------------------------------------
+
+        Board() : _board(0ULL) {}
 
         explicit Board(uint64_t board) : _board(board) {}
 
-        explicit Board(const std::vector<uint8_t>& vec) {
+        explicit Board(const std::vector<uint8_t>& vec) : Board() {
             for(std::vector<uint8_t>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
                 add(*it);
             }
@@ -143,7 +147,7 @@ class Board {
         /**
          * String is in order a1-a8 b1-b8 ... h1-h8, i.e. indices 0..63.
          */
-        explicit Board(const std::string& s) :_board(0) {
+        explicit Board(const std::string& s) : Board() {
             size_t lim = std::min(s.length(), (size_t)64);
             for(unsigned int i=0; i < lim; ++i) {
                 if(s[i] == '0')
@@ -152,10 +156,17 @@ class Board {
             }
         }
 
-        Board(const Board &b) 
-        { 
-            _board = b._board;
-        }
+        // Copy CTOR.
+
+        Board(const Board &b) = default;
+
+        // Move CTOR.
+
+        Board(Board &&b) = default;
+
+        // Copy assignment.
+        
+        Board& operator=(const Board &b) = default;
 
         static Board file_n(const uint8_t n)
         {
@@ -294,13 +305,14 @@ class Board {
             return *this & m;
         }
 
-        Board& operator=(const Board &b)
-        {
-            if (this != &b) {
-                _board = b._board;
-            }
-            return *this;
-        }
+
+        // Board& operator=(const Board &b)
+        // {
+            // if (this != &b) {
+                // _board = b._board;
+            // }
+            // return *this;
+        // }
 
         Board operator|(const Board& other) const {
             return Board(_board | other._board);

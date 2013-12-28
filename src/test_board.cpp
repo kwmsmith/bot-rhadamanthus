@@ -2,6 +2,15 @@
 #include "gtest/gtest.h"
 #include <climits>
 #include <cstdio>
+#include <type_traits>
+
+TEST(BoardTest, std_layout) {
+    EXPECT_TRUE(std::is_standard_layout<Board>::value);
+}
+
+TEST(BoardTest, trivially_copyable) {
+    EXPECT_TRUE(std::is_trivially_copyable<Board>::value);
+}
 
 TEST(BoardTest, Instantiate) {
     Board b;
