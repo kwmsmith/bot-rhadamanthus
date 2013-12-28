@@ -3,6 +3,8 @@
 #-----------------------------------------------------------------------------
 # CXX = g++
 
+BUILD := BUILD
+
 CXX = clang++ 
 CXX11_FLAGS = -std=c++11 -stdlib=libc++ 
 CLANG_FLAGS = -Werror -nostdinc++ \
@@ -21,74 +23,86 @@ GTEST_FLAGS = -DGTEST_USE_OWN_TR1_TUPLE=0 -DGTEST_HAS_TR1_TUPLE=0 \
 			  -DGTEST_LANG_CXX11=1 -Wno-narrowing $(GTEST_INC)
 
 MAKEDEPEND = $(CXX) $(CXX11_FLAGS) $(GTEST_FLAGS) $(SPARSEHASH_FLAGS) \
-			 -E -MM $(SRCFILES) $(TEST_SRCFILES) > depend.mk
+			 -E -MM $(SRCFILES) $(TEST_SRCFILES) > $(BUILD)/depend.mk
 #-----------------------------------------------------------------------------
 # Source files.
 #-----------------------------------------------------------------------------
 
-SRCFILES =\
-util.cpp\
-board.cpp\
-step.cpp\
-gamestate.cpp\
-arimaa_archive.cpp\
-zobrist.cpp\
-transposition.cpp\
-move.cpp\
-evaluate.cpp\
-search.cpp\
+GTEST_SRC_DIR = $(GTEST_DIR)/src
 
-OBJS = ${SRCFILES:.cpp=.o}
+GTEST_SRC = gtest-all.cc gtest_main.cc 
+GTEST_OBJS = ${patsubst %.cc,$(BUILD)/%.o,$(GTEST_SRC)}
+
+SRCFILES =\
+		  util.cpp\
+		  board.cpp\
+		  step.cpp\
+		  gamestate.cpp\
+		  arimaa_archive.cpp\
+		  zobrist.cpp\
+		  transposition.cpp\
+		  move.cpp\
+		  evaluate.cpp\
+		  search.cpp\
+
+OBJS = ${patsubst %.cpp,$(BUILD)/%.o,$(SRCFILES)}
 HEADERS = ${SRCFILES:.cpp=.h}
 
 TEST_SRCFILES =\
-test_board.cpp\
-test_step.cpp\
-test_gamestate.cpp\
-test_arimaa_archive.cpp\
-test_transposition.cpp\
-test_move.cpp\
-test_evaluate.cpp\
-test_search.cpp\
-test_util.cpp
+			   test_board.cpp\
+			   test_step.cpp\
+			   test_gamestate.cpp\
+			   test_arimaa_archive.cpp\
+			   test_transposition.cpp\
+			   test_move.cpp\
+			   test_evaluate.cpp\
+			   test_search.cpp\
+			   test_util.cpp
 
-TEST_OBJS = ${TEST_SRCFILES:.cpp=.o}
+TEST_OBJS = ${patsubst %.cpp,$(BUILD)/%.o,$(TEST_SRCFILES)}
 
 #-----------------------------------------------------------------------------
 # Rules
 #-----------------------------------------------------------------------------
 
-test: test_all.x
-	./test_all.x
+test: $(BUILD)/test_all.x
+	./$(BUILD)/test_all.x
 
-test_all.x : $(OBJS) $(TEST_OBJS) libgtest.a
+$(BUILD)/test_all.x : $(OBJS) $(TEST_OBJS) $(BUILD)/libgtest.a
 	$(CXX) $(LDFLAGS) $(GTEST_FLAGS) $^ -o $@
 
-$(TEST_OBJS) : test_%.o : test_%.cpp
+$(TEST_OBJS) : $(BUILD)/test_%.o : test_%.cpp
 	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c test_$*.cpp -o $@
 
-$(OBJS) : %.o : %.cpp %.h
-	$(CXX) $(CXXFLAGS) -c $*.cpp
+$(OBJS) : $(BUILD)/%.o : %.cpp %.h
+	$(CXX) $(CXXFLAGS) -c $*.cpp -o $@
 
-move.o : CXXFLAGS += $(SPARSEHASH_FLAGS)
+$(BUILD)/move.o : CXXFLAGS += $(SPARSEHASH_FLAGS)
 
-libgtest.a:
-	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c $(GTEST_DIR)/src/gtest-all.cc
-	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c $(GTEST_DIR)/src/gtest_main.cc
-	$(AR) -rv libgtest.a gtest-all.o gtest_main.o
+$(GTEST_OBJS) : $(BUILD)/%.o : $(GTEST_SRC_DIR)/%.cc
+	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c $< -o $@
 
-zobrist_array.include : transposition.cpp
+$(BUILD)/libgtest.a: $(GTEST_OBJS)
+	$(AR) -rv $@ $^
+
+$(BUILD)/zobrist_array.include : transposition.cpp
 	python zobrist_include.py 768 > $@
-	
+
 clean:
-	-rm -r build *.so *.o *.pyc *.x
+	-rm $(BUILD)/*.o $(BUILD)/*.x
 
 cleanall: clean
-	-rm libgtest.a depend.mk
+	-rm $(BUILD)/*
 
-depend: depend.mk
+depend: $(BUILD)/depend.mk
 
-depend.mk:
+$(BUILD)/depend.mk:
 	$(MAKEDEPEND)
+	sed -i -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
 
--include depend.mk
+$(BUILD)/depend.mk $(OBJS) $(TEST_OBJS) : | $(BUILD)
+
+$(BUILD):
+	@mkdir -p $@
+
+-include $(BUILD)/depend.mk
