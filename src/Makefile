@@ -57,7 +57,8 @@ TEST_SRCFILES =\
 			   test_move.cpp\
 			   test_evaluate.cpp\
 			   test_search.cpp\
-			   test_util.cpp
+			   test_util.cpp \
+			   test_goal.cpp
 
 TEST_OBJS = ${patsubst %.cpp,$(BUILD)/%.o,$(TEST_SRCFILES)}
 
@@ -94,9 +95,12 @@ clean:
 cleanall: clean
 	-rm $(BUILD)/*
 
-depend: $(BUILD)/depend.mk
+.PHONY : depend
+depend:
+	$(MAKEDEPEND)
+	sed -i -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
 
-$(BUILD)/depend.mk:
+$(BUILD)/depend.mk: $(SRCFILES) $(TEST_SRCFILES)
 	$(MAKEDEPEND)
 	sed -i -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
 

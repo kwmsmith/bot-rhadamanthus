@@ -10,12 +10,20 @@ class GameState
 
   public:
 
+    //  Only default ctor defined.
     GameState() : _color{0ULL, 0ULL},
       _pieces{0ULL,0ULL,0ULL,0ULL,0ULL,0ULL},
       _zhash(),
       _this_color(W),
       _stepsleft(4) 
       { }
+
+    // Everthing else is explicitly default since a GameState has no handles.
+    GameState(const GameState&) = default;
+    GameState(GameState&&) = default;
+    GameState& operator=(const GameState&) = default;
+    GameState& operator=(GameState&&) = default;
+    ~GameState() = default;
 
     void clear() {
       _color[W].clear(); _color[B].clear();
@@ -92,10 +100,6 @@ class GameState
         _pieces[i] &= mask;
     }
 
-    void copy_to(GameState *to) const {
-      *to = *this;
-    }
-
     void color_and_piece_at(const uint8_t idx, int8_t *c, int8_t *p) const {
       int8_t _c = -1, _p = -1; // guilty before proven innocent...
 
@@ -155,6 +159,7 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
  */
 bool gamestate_from_input(const std::string& ss, GameState *gs);
 bool gamestate_from_oneline(const std::string& ss, GameState *gs);
+GameState gamestate_from_goal_position(const std::string& ss);
 
 
 Board adj_enemy_gt(const GameState& gs, const uint8_t for_color, const unsigned int direction);

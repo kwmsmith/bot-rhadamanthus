@@ -66,6 +66,15 @@ bool gamestate_from_oneline(const std::string& ss, GameState *gs)
   return true;
 }
 
+GameState gamestate_from_goal_position(const std::string& ss)
+{
+  GameState gs;
+  if (!gamestate_from_input(ss, &gs)) {
+    throw std::runtime_error("unable to parse input string");
+  }
+  return gs;
+}
+
 bool gamestate_from_input(const std::string& ss, GameState *gs)
 {
   gs->clear(); // error sentinel.

@@ -58,8 +58,8 @@ TEST(ArimaaArchive, mobile_pieces) {
   GameState gs;
   EXPECT_TRUE(setup(g, &gs));
   GameState mobile_w, mobile_b;
-  gs.copy_to(&mobile_w);
+  mobile_w = gs;
   mobile_w.apply_mask(mobile_pieces(gs, W));
-  gs.copy_to(&mobile_b);
+  mobile_b = gs;
   mobile_b.apply_mask(mobile_pieces(gs, B));
 }

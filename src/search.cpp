@@ -52,18 +52,19 @@ float alphabeta(const GameState& gs, float alpha, float beta, int depthleft)
   std::vector<Delta> deltas;
   generate_deltas(gs, depthleft, &deltas);
 
-  for (delta_it it=deltas.begin(); it != deltas.end(); ++it) {
+  // for (auto it=deltas.begin(); it != deltas.end(); ++it) {
+  for (auto& delta : deltas) {
     // apply delta
     GameState new_gs = gs;
-    apply_delta_and_capture(*it, &new_gs);
+    apply_delta_and_capture(delta, &new_gs);
     float score = 0.0;
-    assert(depthleft >= it->size());
+    assert(depthleft >= delta.size());
     if (new_gs.get_stepsleft()) {
-      score = alphabeta(new_gs, alpha, beta, depthleft - it->size());
+      score = alphabeta(new_gs, alpha, beta, depthleft - delta.size());
     }
     else {
       new_gs.flip_color();
-      score = -alphabeta(new_gs, -beta, -alpha, depthleft - it->size());
+      score = -alphabeta(new_gs, -beta, -alpha, depthleft - delta.size());
     }
     if(score >= beta) {
       return beta;   //  fail hard beta-cutoff
