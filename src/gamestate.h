@@ -159,7 +159,7 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
  */
 bool gamestate_from_input(const std::string& ss, GameState *gs);
 bool gamestate_from_oneline(const std::string& ss, GameState *gs);
-GameState gamestate_from_goal_position(const std::string& ss);
+GameState gamestate_from_goal_position(const std::string& ss, int*);
 
 
 Board adj_enemy_gt(const GameState& gs, const uint8_t for_color, const unsigned int direction);

@@ -2,6 +2,7 @@
 #include "util.h"
 #include <vector>
 #include <cstdio>
+#include <iostream>
 
 uint8_t flip_row(uint8_t psn)
 {
@@ -66,11 +67,36 @@ bool gamestate_from_oneline(const std::string& ss, GameState *gs)
   return true;
 }
 
-GameState gamestate_from_goal_position(const std::string& ss)
+GameState gamestate_from_goal_position(const std::string& ss, int* num_goal)
 {
   GameState gs;
   if (!gamestate_from_input(ss, &gs)) {
     throw std::runtime_error("unable to parse input string");
+  }
+  std::vector<std::string> tokens;
+  split(tokens, ss, "cangoal", false);
+  assert(tokens.size() == 2);
+  std::string cangoal = trim_copy(tokens[1]);
+  if (cangoal == "false") {
+    *num_goal = -1;
+  }
+  else if (cangoal == "true") {
+    *num_goal = 5;
+  }
+  else if (cangoal == "1") {
+    *num_goal = 1;
+  }
+  else if (cangoal == "2") {
+    *num_goal = 2;
+  }
+  else if (cangoal == "3") {
+    *num_goal = 3;
+  }
+  else if (cangoal == "4") {
+    *num_goal = 4;
+  }
+  else {
+    assert(0);
   }
   return gs;
 }

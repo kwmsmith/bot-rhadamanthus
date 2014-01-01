@@ -21,6 +21,8 @@ TEST(test_goal, initialize)
       "   a b c d e f g h \n"
       "\n"
       "::: cangoal 2\n");
-  auto gs = gamestate_from_goal_position(ss);
+  int num_goal = -1;
+  auto gs = gamestate_from_goal_position(ss, &num_goal);
+  EXPECT_EQ(num_goal, 2);
   gs.clear();
 }

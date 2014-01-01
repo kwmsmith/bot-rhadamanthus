@@ -23,7 +23,8 @@ GTEST_FLAGS = -DGTEST_USE_OWN_TR1_TUPLE=0 -DGTEST_HAS_TR1_TUPLE=0 \
 			  -DGTEST_LANG_CXX11=1 -Wno-narrowing $(GTEST_INC)
 
 MAKEDEPEND = $(CXX) $(CXX11_FLAGS) $(GTEST_FLAGS) $(SPARSEHASH_FLAGS) \
-			 -E -MM $(SRCFILES) $(TEST_SRCFILES) > $(BUILD)/depend.mk
+			 -E -MM $(SRCFILES) $(TEST_SRCFILES) > $(BUILD)/depend.mk \
+			 && sed -i -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
 #-----------------------------------------------------------------------------
 # Source files.
 #-----------------------------------------------------------------------------
@@ -89,20 +90,20 @@ $(BUILD)/libgtest.a: $(GTEST_OBJS)
 $(BUILD)/zobrist_array.include : transposition.cpp
 	python zobrist_include.py 768 > $@
 
+.PHONY : clean
 clean:
 	-rm $(BUILD)/*.o $(BUILD)/*.x
 
+.PHONY : cleanall
 cleanall: clean
-	-rm $(BUILD)/*
+	-rm -r $(BUILD)
 
 .PHONY : depend
 depend:
 	$(MAKEDEPEND)
-	sed -i -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
 
 $(BUILD)/depend.mk: $(SRCFILES) $(TEST_SRCFILES)
 	$(MAKEDEPEND)
-	sed -i -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
 
 $(BUILD)/depend.mk $(OBJS) $(TEST_OBJS) : | $(BUILD)
 

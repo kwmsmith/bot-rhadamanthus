@@ -26,8 +26,8 @@ std::string trim_copy(const std::string& s)
 {
   auto ch = s.cbegin();
   auto rch = s.crbegin();
-  for(; *ch == ' '; ++ch);
-  for(; *rch == ' '; ++rch);
+  for(; *ch == ' ' || *ch == '\n' || *ch == '\t'; ++ch);
+  for(; *rch == ' ' || *rch == '\n' || *rch == '\t'; ++rch);
   return std::string(ch, rch.base());
 }
 
