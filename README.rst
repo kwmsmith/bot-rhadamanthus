@@ -7,8 +7,8 @@ It is significantly `more complex than chess`_, yet is easy for people to
 learn and play (and very hard for computers).  You can play people or bots
 (like this one) online_.
 
-About the name "Rhadamanthus"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+About the name
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Wikipedia tells us that Rhadamanthus was a "wise king, the son of Zeus and
 Europa...According to one account, Rhadamanthus ruled Crete before Minos, and
@@ -23,7 +23,7 @@ man-made intelligence, I thought naming an Arimaa bot after him was
 appropriate.
 
 Licensing
-~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 See LICENSE.rst for licensing details and restrictions that apply under the
 Arimaa Public License.
