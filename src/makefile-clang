@@ -12,7 +12,7 @@ CXX11_FLAGS := -std=c++11
 
 CXXFLAGS := $(CXX11_FLAGS) $(CLANG_FLAGS) -Wno-narrowing -O3 -Wall \
 		   -pedantic -Wno-format -Wno-long-long 
-LDFLAGS :=  $(CXX11_FLAGS) -L/Users/ksmith/Devel/llvm-libcxx-svn/lib
+LDFLAGS :=  $(CXX11_FLAGS) -L/Users/ksmith/Devel/llvm-libcxx-svn/lib -lpthread
 
 SPARSEHASH_INCL := sparsehash/include
 SPARSEHASH_FLAGS := -I$(SPARSEHASH_INCL)

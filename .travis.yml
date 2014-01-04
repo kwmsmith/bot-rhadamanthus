@@ -1,5 +1,5 @@
 language: cpp
 compiler:
-  - gcc
+  - clang
 # Change this to your needs
 script: cd src && make -f makefile-clang CXX=clang++ test
