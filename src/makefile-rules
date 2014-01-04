@@ -1,3 +1,15 @@
+SPARSEHASH_INCL := sparsehash/include
+SPARSEHASH_FLAGS := -I$(SPARSEHASH_INCL)
+
+GTEST_DIR := googletest
+GTEST_INC := -I$(GTEST_DIR)/include -I$(GTEST_DIR)
+GTEST_FLAGS := -DGTEST_USE_OWN_TR1_TUPLE=0 -DGTEST_HAS_TR1_TUPLE=0 \
+			  -DGTEST_LANG_CXX11=1 -Wno-narrowing $(GTEST_INC)
+
+MAKEDEPEND = $(CXX) $(CXX11_FLAGS) $(GTEST_FLAGS) $(SPARSEHASH_FLAGS) \
+			 -E -MM $(SRCFILES) $(TEST_SRCFILES) > $(BUILD)/depend.mk \
+			 && sed -i.bak -e 's/\(^[^ ]*\.o:\)/$(BUILD)\/\1/' $(BUILD)/depend.mk
+
 #-----------------------------------------------------------------------------
 # Source files.
 #-----------------------------------------------------------------------------
