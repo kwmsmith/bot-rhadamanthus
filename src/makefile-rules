@@ -1,0 +1,86 @@
+#-----------------------------------------------------------------------------
+# Source files.
+#-----------------------------------------------------------------------------
+
+GTEST_SRC_DIR = $(GTEST_DIR)/src
+
+GTEST_SRC = gtest-all.cc gtest_main.cc 
+GTEST_OBJS = ${patsubst %.cc,$(BUILD)/%.o,$(GTEST_SRC)}
+
+SRCFILES =\
+		  util.cpp\
+		  board.cpp\
+		  step.cpp\
+		  gamestate.cpp\
+		  arimaa_archive.cpp\
+		  zobrist.cpp\
+		  transposition.cpp\
+		  move.cpp\
+		  evaluate.cpp\
+		  search.cpp\
+
+OBJS = ${patsubst %.cpp,$(BUILD)/%.o,$(SRCFILES)}
+HEADERS = ${SRCFILES:.cpp=.h}
+
+TEST_SRCFILES =\
+			   test_board.cpp\
+			   test_step.cpp\
+			   test_gamestate.cpp\
+			   test_arimaa_archive.cpp\
+			   test_transposition.cpp\
+			   test_move.cpp\
+			   test_evaluate.cpp\
+			   test_search.cpp\
+			   test_util.cpp \
+			   test_goal.cpp
+
+TEST_OBJS = ${patsubst %.cpp,$(BUILD)/%.o,$(TEST_SRCFILES)}
+
+#-----------------------------------------------------------------------------
+# Rules
+#-----------------------------------------------------------------------------
+
+test: $(BUILD)/test_all.x
+	./$(BUILD)/test_all.x
+
+$(BUILD)/test_all.x : $(OBJS) $(TEST_OBJS) $(BUILD)/libgtest.a
+	$(CXX) $(LDFLAGS) $(GTEST_FLAGS) $^ -o $@
+
+$(TEST_OBJS) : $(BUILD)/test_%.o : test_%.cpp
+	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c test_$*.cpp -o $@
+
+$(OBJS) : $(BUILD)/%.o : %.cpp %.h
+	$(CXX) $(CXXFLAGS) -c $*.cpp -o $@
+
+$(BUILD)/move.o : CXXFLAGS += $(SPARSEHASH_FLAGS)
+
+$(GTEST_OBJS) : $(BUILD)/%.o : $(GTEST_SRC_DIR)/%.cc
+	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c $< -o $@
+
+$(BUILD)/libgtest.a: $(GTEST_OBJS)
+	$(AR) -rv $@ $^
+
+$(BUILD)/zobrist_array.include : transposition.cpp
+	python zobrist_include.py 768 > $@
+
+.PHONY : clean
+clean:
+	-rm $(BUILD)/*.o $(BUILD)/*.x
+
+.PHONY : cleanall
+cleanall: clean
+	-rm -r $(BUILD)
+
+.PHONY : depend
+depend:
+	$(MAKEDEPEND)
+
+$(BUILD)/depend.mk: $(SRCFILES) $(TEST_SRCFILES)
+	$(MAKEDEPEND)
+
+$(BUILD)/depend.mk $(OBJS) $(TEST_OBJS) : | $(BUILD)
+
+$(BUILD):
+	@mkdir -p $@
+
+-include $(BUILD)/depend.mk

@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdio>
 #include <iostream>
+#include <stdexcept>
 
 uint8_t flip_row(uint8_t psn)
 {

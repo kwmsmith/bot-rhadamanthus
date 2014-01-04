@@ -106,13 +106,10 @@ static bool get_line(FILE *fp, string &line)
   if (fp == NULL)
     return false;
   line.clear();
-  size_t olen=0, delta=0;
   while(1) {
     if(fgets(buf, 256, fp) == NULL || feof(fp) || ferror(fp))
       return false;
-    olen = line.length();
     line += buf;
-    delta = line.length() - olen;
     if(line[line.length()-1] == '\n')
       break;
   }

@@ -1,6 +1,7 @@
 #ifndef TRANSPOSITION_H__
 #define TRANSPOSITION_H__
 
+#include <memory>
 #include <inttypes.h>
 #include "zobrist.h"
 
@@ -56,7 +57,7 @@ class TranspositionTable
     // }
 
   private:
-    const std::auto_ptr<std::vector<TTNode> > _store;
+    const std::unique_ptr<std::vector<TTNode> > _store;
     uint64_t _nelt;
     // uint64_t _size_MB;
     // uint64_t _hits, _miss, _collisions, _nelt;

@@ -1,6 +1,5 @@
 language: cpp
 compiler:
   - gcc
-  - clang
 # Change this to your needs
-script: make test
+script: make -f makefile-gcc CXX=g++ test
