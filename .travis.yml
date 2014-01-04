@@ -1,5 +1,6 @@
 language: cpp
 compiler:
   - clang
-# Change this to your needs
+before_install:
+    - sudo apt-get install -qq gcc-4.8
 script: cd src && make -f makefile-clang CXX=clang++ test
