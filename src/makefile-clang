@@ -5,9 +5,10 @@ CXX := clang++
 
 BUILD := BUILD
 
-CXX11_FLAGS := -std=c++11 -stdlib=libc++ 
-CLANG_FLAGS := -Werror -nostdinc++ \
-			  -I/Users/ksmith/Devel/llvm-libcxx-svn/include
+CXX11_FLAGS := -std=c++11
+# CXX11_FLAGS := -std=c++11 -stdlib=libc++ 
+# CLANG_FLAGS := -Werror -nostdinc++ \
+			  # -I/Users/ksmith/Devel/llvm-libcxx-svn/include
 
 CXXFLAGS := $(CXX11_FLAGS) $(CLANG_FLAGS) -Wno-narrowing -O3 -Wall \
 		   -pedantic -Wno-format -Wno-long-long 
