@@ -1,4 +1,4 @@
 language: cpp
 compiler:
   - clang
-script: cd src && make -f makefile-clang CXX=clang++ test
+script: cd src && make -f makefile-clang-travis test

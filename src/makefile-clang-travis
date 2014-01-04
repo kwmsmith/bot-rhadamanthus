@@ -1,15 +1,13 @@
 #-----------------------------------------------------------------------------
 # Compiler and flags.
 #-----------------------------------------------------------------------------
-CXX := /opt/local/bin/g++-mp-4.7
-
 BUILD := BUILD
 
 CXX11_FLAGS := -std=c++11
 
-CXXFLAGS := $(CXX11_FLAGS) -Wno-narrowing -O3 -Wall \
-		   -pedantic -Wno-format -Wno-long-long 
-LDFLAGS := $(CXX11_FLAGS) -L/Users/ksmith/Devel/llvm-libcxx-svn/lib
+CXXFLAGS := $(CXX11_FLAGS) -Wno-narrowing -O3 -Wall -pedantic \
+	-Werror -Wno-format -Wno-long-long 
+LDFLAGS := $(CXX11_FLAGS) -lpthread
 
 SPARSEHASH_INCL := sparsehash/include
 SPARSEHASH_FLAGS := -I$(SPARSEHASH_INCL)
