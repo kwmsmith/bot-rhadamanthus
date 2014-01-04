@@ -2,6 +2,8 @@
 Rhadamanthus: An Arimaa Bot
 ==============================================================================
 
+.. image:: https://travis-ci.org/kwmsmith/bot-rhadamanthus.png?branch=master   :target: https://travis-ci.org/kwmsmith/bot-rhadamanthus
+
 Arimaa_ is a two player, turn-based game with simple rules and deep strategy.
 It is significantly `more complex than chess`_, yet is easy for people to
 learn and play (and very hard for computers).  You can play people or bots
