@@ -1,7 +1,7 @@
 
 
 test:
-	$(MAKE) test -C src
+	$(MAKE) test -C src -f makefile-gcc
 
 clean:
-	$(MAKE) clean -C src
+	$(MAKE) clean -C src -f makefile-gcc
