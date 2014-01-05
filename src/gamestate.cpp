@@ -157,8 +157,9 @@ bool gamestate_from_input(const std::string& ss, GameState *gs)
 
 std::string GameState::to_std_string(const char empty) const
 {
-  const std::string &oneline = to_oneline_string(empty);
-  std::string s(" +-----------------+\n");
+  const std::string &oneline = std::string(to_oneline_string(empty), 1, 64);
+  std::string s(get_color() == W ? "w\n" : "b\n");
+  s += " +-----------------+\n";
   int rev_row = 0;
   char buf[10];
   for(int row=0; row < 8; row++) {
@@ -194,7 +195,7 @@ std::string GameState::to_oneline_string(const char empty) const
       Board b = _color[colors[i]] & _pieces[p];
       while(!b.is_empty()) {
         uint8_t psn = b.idx_and_reset();
-        s[flip_row(psn)] = i==W ? piece_char[p] : (piece_char[p]+lower_offset);
+        s[psn] = i==W ? piece_char[p] : (piece_char[p]+lower_offset);
       }
     }
   }

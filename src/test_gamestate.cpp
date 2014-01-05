@@ -37,6 +37,25 @@ TEST(GameState, Instantiation) {
   GameState gb;
 }
 
+TEST(GameState, to_std_string) {
+  GameState gs;
+  std::string ss(
+      "w\n"
+      " +-----------------+\n"
+      "8| r r r     r r   |\n"
+      "7| r   m c c h r r |\n"
+      "6|   d x     x d   |\n"
+      "5|         E       |\n"
+      "4|                 |\n"
+      "3|   H x   e x D   |\n"
+      "2| R   C     C   R |\n"
+      "1| R R R D M R R R |\n"
+      " +-----------------+\n"
+      "   a b c d e f g h\n");
+  EXPECT_TRUE(gamestate_from_input(ss, &gs));
+  EXPECT_EQ(gs.to_std_string(' '), ss);
+}
+
 TEST(GameState, gamestate_from_oneline) {
   GameState gs;
   std::string ss(
