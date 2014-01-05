@@ -148,6 +148,7 @@ void generate_steps(const GameState& gs, std::vector<Delta> *steps);
 void take_step_and_capture(const Step& step, GameState *gs);
 void apply_delta_and_capture(const Delta& dd, GameState *gs);
 
+void capture(const uint8_t color, GameState *gs);
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture);
 bool possible_capture_from_motion(const GameState &gs, const Step& step_taken);
 void capture_from_motion(const Step& step_taken, GameState *gs);
@@ -160,6 +161,8 @@ Step step_from_gs(const GameState& gs, const uint8_t idx, const unsigned int dir
 bool gamestate_from_input(const std::string& ss, GameState *gs);
 bool gamestate_from_oneline(const std::string& ss, GameState *gs);
 GameState gamestate_from_goal_position(const std::string& ss, int*);
+
+bool check_goal(const GameState& gs, const uint8_t for_color);
 
 
 Board adj_enemy_gt(const GameState& gs, const uint8_t for_color, const unsigned int direction);

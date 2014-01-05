@@ -5,6 +5,16 @@
 #include <iostream>
 #include <stdexcept>
 
+bool check_goal(const GameState& gs, const uint8_t for_color)
+{
+  const static Board goal_white = Board::rank_n(8);
+  const static Board goal_black = Board::rank_n(1);
+
+  const Board& goal_mask = (for_color == W) ? goal_white : goal_black;
+  const Board& color_board = gs.get_color_board(for_color);
+  return (gs.get_piece_board(R) & color_board & goal_mask).any();
+}
+
 uint8_t flip_row(uint8_t psn)
 {
   uint8_t row = psn / 8;
@@ -74,6 +84,9 @@ GameState gamestate_from_goal_position(const std::string& ss, int* num_goal)
   if (!gamestate_from_input(ss, &gs)) {
     throw std::runtime_error("unable to parse input string");
   }
+  // Capture any dead pieces.
+  capture(W, &gs);
+  capture(B, &gs);
   std::vector<std::string> tokens;
   split(tokens, ss, "cangoal", false);
   assert(tokens.size() == 2);
@@ -377,18 +390,29 @@ bool possible_capture_from_motion(const GameState &gs, const Step& step_taken)
   return false;
 }
 
-void capture_from_motion(const Step& step_taken, GameState *gs)
+void capture(const uint8_t color, GameState *gs)
 {
-  const uint8_t color = step_taken.get_color();
   Board capturable = 
     gs->get_color_board(color) & ~adj_friendly(*gs, color) & Board::capture_squares();
   if (capturable.is_empty())
     return;
+  // std::cout << capturable.to_string() << std::endl;
+  Board orig(capturable);
   uint8_t capture_idx = capturable.idx_and_reset();
+  if (capturable.any()) {
+    std::cout << "original: " << orig.to_string() << std::endl
+              << "after   : " << capturable.to_string() << std::endl
+              << gs->to_std_string() << std::endl;
+  }
   assert(capturable.is_empty());
   int8_t c, p;
   gs->color_and_piece_at(capture_idx, &c, &p);
   gs->remove_piece_at(c, p, capture_idx);
+}
+
+void capture_from_motion(const Step& step_taken, GameState *gs)
+{
+  capture(step_taken.get_color(), gs);
 }
 
 bool detect_capture_from_motion(const GameState& gs, const Step& step_taken, Step *capture)
