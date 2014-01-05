@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+std::vector<std::string> split(const std::string& ss, const std::string& delim, const bool keep_empty=true);
+
 void split(std::vector<std::string>&, 
     const std::string& ss, const std::string& delim, const bool keep_empty=true);
 

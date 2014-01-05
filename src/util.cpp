@@ -2,6 +2,13 @@
 #include <algorithm>
 #include <iterator>
 
+std::vector<std::string> split(const std::string& ss, const std::string& delim, const bool keep_empty)
+{
+  std::vector<std::string> result;
+  split(result, ss, delim, keep_empty);
+  return result;
+}
+
 void split(std::vector<std::string>& result, 
     const std::string& s, const std::string& delim, const bool keep_empty)
 {
