@@ -46,17 +46,31 @@ TEST_SRCFILES =\
 			   test_util.cpp \
 			   test_goal.cpp
 
+
 TEST_OBJS = ${patsubst %.cpp,$(BUILD)/%.o,$(TEST_SRCFILES)}
+
+TEST_DATA = empty_archive.txt \
+			fake_archive.txt \
+			endgame_positions.txt \
+
+
+TEST_DATA_OUT = ${patsubst %,$(BUILD)/%,$(TEST_DATA)}
 
 #-----------------------------------------------------------------------------
 # Rules
 #-----------------------------------------------------------------------------
 
+testall: $(BUILD)/test_all.x $(TEST_DATA_OUT) 
+	cd $(BUILD) && ./test_all.x
+
 test: $(BUILD)/test_all.x
-	./$(BUILD)/test_all.x
+	cd $(BUILD) && ./test_all.x --gtest_filter=-'*LONGRUN*'
 
 $(BUILD)/test_all.x : $(OBJS) $(TEST_OBJS) $(BUILD)/libgtest.a
 	$(CXX) $(LDFLAGS) $(GTEST_FLAGS) $^ -o $@
+
+$(TEST_DATA_OUT) : $(BUILD)/% : %
+	cp $* $(BUILD)/$*
 
 $(TEST_OBJS) : $(BUILD)/test_%.o : test_%.cpp
 	$(CXX) $(CXXFLAGS) $(GTEST_FLAGS) -c test_$*.cpp -o $@

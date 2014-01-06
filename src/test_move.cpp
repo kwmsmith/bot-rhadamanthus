@@ -254,7 +254,7 @@ TEST(Move, generate_moves) {
   }
 }
 
-TEST(Move, clueless_benchmark) {
+TEST(Move, clueless_benchmark_LONGRUN) {
 
   // sum() of counts: 2987987
   unsigned int counts[] = {20229, 20203, 18569, 25293, 17386, 23695, 22409,

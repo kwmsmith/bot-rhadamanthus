@@ -19,9 +19,9 @@ const vector<string> load_goal_tests(const std::string& fname)
   return split(ss.str(), "end\n", false);
 }
 
-TEST(test_goal, goaltests)
+TEST(test_goal, goaltests_LONGRUN)
 {
-  const vector<string> tests(load_goal_tests("./endgame-positions.txt"));
+  const vector<string> tests(load_goal_tests("./endgame_positions.txt"));
   for (auto& test : tests) {
     int num_goal = -2;
     auto gs = gamestate_from_goal_position(test, &num_goal);
