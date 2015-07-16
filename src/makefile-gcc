@@ -8,8 +8,8 @@ BUILD := BUILD
 CXX11_FLAGS := -std=c++11
 
 CXXFLAGS := $(CXX11_FLAGS) -Wno-narrowing -O3 -Wall \
-		   -pedantic -Wno-format -Wno-long-long 
-LDFLAGS := $(CXX11_FLAGS)
+		   -pedantic -Wno-format -Wno-long-long --coverage
+LDFLAGS := $(CXX11_FLAGS) --coverage
 #-----------------------------------------------------------------------------
 # Include the rules
 #-----------------------------------------------------------------------------

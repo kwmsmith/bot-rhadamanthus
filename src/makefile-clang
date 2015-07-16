@@ -10,8 +10,8 @@ CLANG_FLAGS := -Werror -nostdinc++ \
 			  -I/Users/ksmith/Devel/llvm-libcxx-svn/include
 
 CXXFLAGS := $(CXX11_FLAGS) $(CLANG_FLAGS) -Wno-narrowing -O3 -Wall \
-		   -pedantic -Wno-format -Wno-long-long 
-LDFLAGS :=  $(CXX11_FLAGS) -L/Users/ksmith/Devel/llvm-libcxx-svn/lib -lpthread
+		   -pedantic -Wno-format -Wno-long-long --coverage
+LDFLAGS :=  $(CXX11_FLAGS) -L/Users/ksmith/Devel/llvm-libcxx-svn/lib -lpthread --coverage
 
 #-----------------------------------------------------------------------------
 # Include the rules
